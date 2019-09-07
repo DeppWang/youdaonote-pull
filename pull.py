@@ -36,13 +36,9 @@ class YoudaoNotePull:
                             os.mkdir(dir)
                         self.getFileRecursively(ids[1], dir)
                     else:
-                        # if name.find('.md') < 0:
-                        #     print('已过滤不是 md 格式的：' + name)
-                        #     continue
-
                         localPath = os.path.join(localDir, name)
                         if not os.path.exists(localPath):
-                            self.getNote(dirId, localPath)
+                            self.getNote(ids[2], localPath)
                             print('新增 %s' % (localPath))
                         else:
                             if os.path.getsize(localPath) == fileEntry['sz']:
@@ -50,9 +46,9 @@ class YoudaoNotePull:
                             self.getNote(ids[2], localPath)
                             print('更新 %s' % (localPath))
 
-    def getNote(self, dirId, localPath):
+    def getNote(self, fileId, localPath):
         url = 'https://note.youdao.com/yws/api/personal/file/%s?method=download&read=true&shareKey=%s&cstk=null' % (
-            dirId, self.shareKey)
+            fileId, self.shareKey)
         response = requests.get(url)
         with open(localPath, 'wb') as fp:
             fp.write(response.content)
