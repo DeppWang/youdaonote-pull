@@ -33,7 +33,7 @@ python3 pull.py <shareKey> <dirId> [localDir] # MacOS
 python pull.py <shareKey> <dirId> [localDir] # Windows
 ```
 
-![image](http://note.youdao.com/yws/public/resource/f2400df719fa3e0492bfa8cdda723446/WEB6bb8fd02a371ef8058729d580b72d155/7366450501694EB09038FB591D03CDCF)
+![](https://i.loli.net/2019/09/16/PNTuvEr5MAdDXIh.png)
 
 * shareKey：必填，当前文件夹的 shareKey（分享链接的 id 也是 shareKey）
 * dirId：必填，分享文件夹的 id
@@ -47,12 +47,12 @@ python pull.py # Windows
 ## 效果
 **1. 模拟登陆方式同步笔记到本地**
 
-![](http://note.youdao.com/yws/public/resource/f2400df719fa3e0492bfa8cdda723446/WEB6bb8fd02a371ef8058729d580b72d155/5EB1F34062DA4C6082EC8ECEB53EB7C7)
+![](https://i.loli.net/2019/09/16/297LTtxEdeb1yro.png)
 
-![](http://note.youdao.com/yws/public/resource/f2400df719fa3e0492bfa8cdda723446/WEB6bb8fd02a371ef8058729d580b72d155/458B3386F5AF4F7984B09683F3DA02BB)
+![](https://i.loli.net/2019/09/16/JeuP8BLpIo9Vaxb.png)
 
 **2. 同步分享文件夹下的笔记到本地**
 
-![](http://note.youdao.com/yws/public/resource/f2400df719fa3e0492bfa8cdda723446/WEB6bb8fd02a371ef8058729d580b72d155/7AFC5841756141EA911C5B6EAD02FFC5)
+![](https://i.loli.net/2019/09/16/64B71WR9AhsmELD.png)
 
-![](http://note.youdao.com/yws/public/resource/f2400df719fa3e0492bfa8cdda723446/WEB6bb8fd02a371ef8058729d580b72d155/00C16137F3B54F7AAD9D8D981789307A)
+![](https://i.loli.net/2019/09/16/S5eAr8lWYLsGJuU.png)
