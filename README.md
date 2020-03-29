@@ -37,6 +37,7 @@ python pull.py <shareKey> <dirId> [localDir] # Windows
 
 ![image](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150245.png)
 
+
 * shareKey：必填，当前文件夹的 shareKey（分享链接的 id 也是 shareKey）
 * dirId：必填，分享文件夹的 id
 * localDir：选填，本地文件夹名，不填则默认为当前文件夹
