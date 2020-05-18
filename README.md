@@ -107,9 +107,9 @@ python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
 
 5、一个问题
 
-因为这个脚本我原来只导出 Markdown 格式笔记，经测试，导出的文件的 note 文件不能正常打开，如果你有这方法的需求，请提 issue。
+因为这个脚本我原来只导出 Markdown 格式笔记，经测试，导出的文件的 .note 文件不能正常打开，如果你有这方面的需求，请提 issue。
 
-、config
+6、config
 
 跟上面一样，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
 
