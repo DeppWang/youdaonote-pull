@@ -31,10 +31,15 @@ python pullAll.py <username> <password> [localDir] # Windows
 3、示例：
 
 ```shell
-python3 pullAll.py deppwang@163.com 1234567 ~/Dropbox/youdao
+python3 pullAll.py deppwang@163.com 1234567 ~/Dropbox/youdaonote
 ```
 
-4、pullAll-config
+4、**两个问题**
+
+1. 如果你笔记的类型是「笔记」，那么导出的文件后缀是 .note，你使用 [sublime](https://www.sublimetext.com/3) 打开后会发现它是一个 xml 文件。此时只能在有道云笔记手动复制粘贴，如果你有大量这种类型文档，可以提个 issue，我尝试用代码看是否能解决。ps：强烈建议使用 Markdown。
+2. 你上传的图片不能显示。因为 md 文件的图片地址没有使用绝对地址，而是使用相对地址，导致图片不能正确显示。
+
+5、pullAll-config
 
 上一次输入的相关参数会保存到 `pullAll-config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
 
@@ -44,11 +49,6 @@ python pullAll.py # Windows
 ```
 
 ps：脚本单纯本地运行，不用担心你的账号密码泄露
-
-5、**两个问题**
-
-1. 如果你笔记的类型是「笔记」，那么导出的文件后缀是 .note，你使用 [sublime](https://www.sublimetext.com/3) 打开后会发现它是一个 xml 文件，此时只能在有道云笔记手动复制粘贴，如果你有大量这种类型文档，可以提个 issue，我尝试用代码看是否能解决。ps：强烈建议使用 Markdown。
-2. 你上传的图片不能显示。因为 md 文件的图片地址没有使用绝对地址，而是使用相对地址，导致图片不能正确显示。
 
 ## 二、导出指定文件夹
 
@@ -105,11 +105,15 @@ python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
 
 ![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150314.png)
 
-5、config
+5、一个问题
 
-同理，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
+因为这个脚本我原来只导出 Markdown 格式笔记，经测试，导出的文件的 note 文件不能正常打开，如果你有这方法的需求，请提 issue。
 
-```Python
+、config
+
+跟上面一样，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
+
+```shell
 python3 pull.py # macOS
 python pull.py # Windows
 ```
