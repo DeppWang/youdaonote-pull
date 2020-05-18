@@ -1,5 +1,7 @@
 ## 一、导出所有笔记
 
+> 导出格式为原来默认的格式，如：Markdown 文件就是以 .md 结尾，笔记文件以 .note 结尾
+
 1、导出前的准备工作
 
 - clone 项目，里面包含脚本
@@ -79,7 +81,7 @@ pullAll.py 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可
 
 1、先在有道云笔记上分享文件夹
 
-![image](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150245.png)
+![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150245.png)
 
 
 * shareKey：必填，当前文件夹的 shareKey（分享链接（url）的 id 也是 shareKey）
@@ -118,7 +120,7 @@ python3 pull.py # macOS
 python pull.py # Windows
 ```
 
-![image-20200517201250649](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-05-17-121251.png)
+![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-05-17-121251.png)
 
 ## 三、感谢（参考）
 
