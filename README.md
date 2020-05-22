@@ -11,10 +11,10 @@ git clone git@github.com:DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-- macOS 使用 Homebrew 安装 Python3 环境，其他可参考 [廖大 Python 安装教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624)
+- macOS 使用 [Homebrew](https://brew.sh/) 安装 [Python3](https://www.python.org/downloads/) 环境，其他可参考 [廖大 Python 安装教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624)
 
 ```shell
-brew install python3 # Homebrew 安装 python3
+brew install python3 # Homebrew 安装 Python3
 sudo easy_install pip3 # 安装 Python3 Package Installer
 pip3 install requests # 安装 requests 包，脚本依赖 requests
 ```
@@ -22,7 +22,7 @@ pip3 install requests # 安装 requests 包，脚本依赖 requests
 2、运行导出脚本
 
 ```shell
-python3 pullAll.py <username> <password> [localDir] # macOS
+python3 pullAll.py <username> <password> [localDir] # macOS/Linux
 python pullAll.py <username> <password> [localDir] # Windows
 ```
 
@@ -43,12 +43,14 @@ python3 pullAll.py deppwang@163.com 1234567 ~/Dropbox/youdaonote
 
 5、pullAll-config
 
-上一次输入的相关参数会保存到 `pullAll-config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
+上一次输入的相关参数会保存到 `pullAll-config` 中，如果参数不变，再次导出时，可以直接输入以下命令：
 
 ```shell
-python3 pullAll.py # macOS
+python3 pullAll.py # macOS/Linux
 python pullAll.py # Windows
 ```
+
+再次同步时，只会导出上次导出后的新增、修改的文章。
 
 ps：脚本单纯本地运行，不用担心你的账号密码泄露
 
@@ -59,7 +61,7 @@ ps：脚本单纯本地运行，不用担心你的账号密码泄露
 1、运行脚本
 
 ```python
-python3 pullAll.py <username> <password> [[localDir] [ydnoteDir]] # MacOS
+python3 pullAll.py <username> <password> [[localDir] [ydnoteDir]] # macOS/Linux
 python pullAll.py <username> <password> [[localDir] [ydnoteDir]] # Windows
 ```
 
@@ -91,7 +93,7 @@ pullAll.py 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可
 2、运行脚本
 
 ```shell
-python3 pull.py <shareKey> <dirId> [localDir] # macOS
+python3 pull.py <shareKey> <dirId> [localDir] # macOS/Linux
 python pull.py <shareKey> <dirId> [localDir] # Windows
 ```
 
@@ -116,7 +118,7 @@ python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
 跟上面一样，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
 
 ```shell
-python3 pull.py # macOS
+python3 pull.py # macOS/Linux
 python pull.py # Windows
 ```
 
@@ -138,5 +140,3 @@ python pull.py # Windows
 <!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150319.png)-->
 
 <!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150303.png)-->
-
-
