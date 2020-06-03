@@ -26,28 +26,35 @@ class YoudaoNoteSession(requests.Session):
         }
 
     def login(self, username, password):
-        self.get('https://note.youdao.com/web/')
-
+        self.get('https://note.youdao.com/web/')  # 模拟打开首页
         self.headers['Referer'] = 'https://note.youdao.com/web/'
-        self.get('https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web')
 
+        self.get(
+            'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web')  # 模拟跳转到登录页
         self.headers[
             'Referer'] = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'
+
         self.get('https://note.youdao.com/login/acc/pe/getsess?product=YNOTE&_=' + timestamp())
         self.get('https://note.youdao.com/auth/cq.json?app=web&_=' + timestamp())
         self.get('https://note.youdao.com/auth/urs/login.json?app=web&_=' + timestamp())
+
         data = {
             "username": username,
             "password": hashlib.md5(password.encode('utf-8')).hexdigest()
         }
+        # print(hashlib.md5(password.encode('utf-8')).hexdigest())
         self.post(
             'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp=' + timestamp(),
-            data=data, allow_redirects=True)
+            data=data, allow_redirects=True)  # 模拟登陆
         self.get('https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=' + timestamp())
         self.cstk = self.cookies.get('YNOTE_CSTK')
 
     def getAll(self, localDir, ydnoteDir):
         rootId = self.getRootId()
+        try:
+            os.lstat(localDir)
+        except OSError:
+            os.mkdir(localDir)
         if ydnoteDir is not None:
             dirId = self.getDirId(rootId, ydnoteDir)
             self.getFileRecursively(dirId, localDir)
