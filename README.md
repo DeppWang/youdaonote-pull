@@ -20,7 +20,7 @@ git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-- 安装后 Python3 后安装依赖模块（包）
+- 安装 Python3 后安装依赖模块（包）
 
 ```shell
 # macOS/Linux
