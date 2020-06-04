@@ -100,13 +100,16 @@ class YoudaoNoteSession(requests.Session):
             if lastId is None:
                 response = self.get(url)
             else:
-                response = self.get(url + '&lastId=%s' % lastId)
+                url = url + '&lastId=%s' % lastId
+                # print(url)
+                response = self.get(url)
             jsonObj = json.loads(response.content)
             total = jsonObj['count']
             for entry in jsonObj['entries']:
                 fileEntry = entry['fileEntry']
                 id = fileEntry['id']
                 name = fileEntry['name']
+                # 如果是目录，遍历目录下文件
                 if fileEntry['dir']:
                     subDir = os.path.join(localDir, name)
                     try:
@@ -115,13 +118,23 @@ class YoudaoNoteSession(requests.Session):
                         os.mkdir(subDir)
                     self.getFileRecursively(id, subDir)
                 else:
+                    ## 如果文件名是网址，避免 open() 函数失败（因为目录名错误），替换 /
+                    if name.startswith('https'):
+                        name = name.replace('/', '_')
+                        # print(name)
                     filePath = os.path.join(localDir, name)
                     if not os.path.exists(filePath):
                         self.getNote(id, filePath)
                         print('新增 %s' % (filePath))
                     else:
-                        if os.path.getsize(filePath) == fileEntry['fileSize']:
+                        # 如果有道云笔记文件更新时间大于本地文件时间，则更新
+                        if fileEntry['modifyTimeForSort'] < os.path.getmtime(filePath):
                             continue
+
+                        print("-----------------------------")
+                        print("local file modifyTime: " + str(os.path.getmtime(filePath)))
+                        print("youdao file modifyTime: " + str(fileEntry['modifyTimeForSort']))
+
                         self.getNote(id, filePath)
                         print('更新 %s' % (filePath))
             count = count + 1
