@@ -11,12 +11,25 @@ git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-- macOS 使用 [Homebrew](https://brew.sh/) 安装 [Python3](https://www.python.org/downloads/) 环境，其他可参考 [廖大 Python 安装教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624)
+- macOS 可使用 [Homebrew](https://brew.sh/) 安装 [Python3](https://www.python.org/downloads/) 环境，Windows 可参考 [廖学峰 Python 安装教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624)
 
 ```shell
 brew install python3 # Homebrew 安装 Python3
+```
+
+- 安装后 Python3 后安装 requests 模块（包）
+
+```shell
+# macOS/Linux
 sudo easy_install pip3 # 安装 Python3 Package Installer
 pip3 install requests # 安装 requests 包，脚本依赖 requests
+```
+
+```shell
+# Windows
+pip install requests # 安装 requests 包，脚本依赖 requests
+
+# 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
 
 2、运行导出脚本
