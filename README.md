@@ -4,10 +4,10 @@
 
 1、导出前的准备工作
 
-- clone 项目，里面包含脚本
+- 安装 [Git](https://git-scm.com/downloads)，clone 项目，里面包含脚本
 
 ```shell
-git clone git@github.com:DeppWang/youdaonote-pull.git
+git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
@@ -50,7 +50,7 @@ python3 pullAll.py # macOS/Linux
 python pullAll.py # Windows
 ```
 
-再次同步时，只会导出上次导出后的新增、修改的文章。
+再次同步时，只会导出有道云笔记上次导出后的新增、修改的笔记。
 
 ps：脚本单纯本地运行，不用担心你的账号密码泄露
 
