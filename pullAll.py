@@ -7,6 +7,7 @@ import time
 import hashlib
 import os
 import json
+import xml.etree.ElementTree as ET
 
 __author__ = "DeppWang (deppwxq@gmail.com)"
 
@@ -137,6 +138,16 @@ class YoudaoNoteSession(requests.Session):
 
                         self.getNote(id, filePath)
                         print('更新 %s' % (filePath))
+                    # 如果文件是 note 类型，将其转换为 MarkDown 类型
+                    base = os.path.splitext(filePath)[0]
+                    sufix = os.path.splitext(filePath)[1]
+                    if sufix == ".note":
+                        try:
+                            self.convertXmlToMarkDown(filePath)
+                            print("成功将" + filePath + "「转换为」" + base + ".md")
+                        except FileNotFoundError and ET.ParseError:
+                            print("转换失败！请查看文件是否为 xml 格式或是否空！")
+
             count = count + 1
             lastId = id
 
@@ -153,6 +164,62 @@ class YoudaoNoteSession(requests.Session):
         with open(filePath, 'wb') as fp:
             fp.write(response.content)
 
+    def convertXmlToMarkDown(self, filePath):
+        if os.path.getsize(filePath) == 0:
+            base = os.path.splitext(filePath)[0]
+            os.rename(filePath, base + '.md')
+            return
+        # 使用 xml.etree.ElementTree 将 xml 文件转换为数组
+        tree = ET.parse(filePath)
+        root = tree.getroot()
+        nl = '\n'
+        newContent = f""
+        for child in root[1]:
+            if "para" in child.tag:
+                for child2 in child:
+                    if "text" in child2.tag:
+                        if child2.text != None:
+                            newContent += child2.text + f"{nl}{nl}"
+                        else:
+                            newContent += f"{nl}{nl}"
+                        break
+
+            elif "image" in child.tag:
+                for child2 in child:
+                    if "source" in child2.tag:
+                        imageUrl = ""
+                        if child2.text != None:
+                            imageUrl = f"![%s](" + child2.text + f"){nl}{nl}"
+                    elif "text" in child2.tag:
+                        imageName = ""
+                        if child2.text != None:
+                            imageName = child2.text
+                        newContent += imageUrl % (imageName)
+                        break
+
+
+            elif "code" in child.tag:
+                for child2 in child:
+                    # code = ""
+                    if "text" in child2.tag:
+                        code = f"```%s{nl}" + child2.text + f"{nl}```{nl}{nl}"
+                    elif "language" in child2.tag:
+                        language = ""
+                        if language != None:
+                            language = child2.text
+                        newContent += code % (language)
+                        break
+
+            if "table" in child.tag:
+                for child2 in child:
+                    if "content" in child2.tag:
+                        newContent += f"```{nl}原来为 table 需要自己转换一下{nl}" + child2.text + f"{nl}```{nl}{nl}"
+
+        base = os.path.splitext(filePath)[0]
+        newFilePath = base + '.md'
+        os.rename(filePath, newFilePath)
+        with open(newFilePath, 'w') as fp:
+            fp.write(newContent)
 
 if __name__ == '__main__':
     startTime = int(time.time())
