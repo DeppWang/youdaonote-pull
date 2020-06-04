@@ -54,7 +54,7 @@ python pullAll.py <username> <password> [localDir] # Windows
 python3 pullAll.py deppwang@163.com 12345678 ~/Dropbox/youdaonote
 ```
 
-5、pullAll-config
+4、pullAll-config
 
 上一次输入的相关参数会保存到 `pullAll-config` 中，如果参数不变，再次导出时，可以直接输入以下命令：
 
@@ -70,7 +70,7 @@ python pullAll.py # Windows
 - [x] 将 Note 文件转换为 MarkDown 文件
 - [ ] 解决图片不能显示问题，实现方式为上传到指定图床，再替换图片链接<!--针对普通用户，提供服务器一键下载压缩包-->
 - [ ] 首次使用密码登录，再次登录时使用 cookie 登录，避免频繁操作时 ip 被封
-- [ ] 并发加快速度执行
+- [ ] 并发执行加快速度
 
 ## 原理
 
