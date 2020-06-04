@@ -4,7 +4,7 @@
 2. 默认将 note 格式笔记转换为 Markdown 格式，table 未转换，需要手动转换
 3. pullAll.py 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可等待几分钟或切换网络后重试
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍，后续我会更加完善此文档，并根据需求看是否应该提供直接下载压缩包的方式
-5. 目前此脚本还没有实现有道云图床图片迁移
+5. 目前此脚本还没有实现有道云图床图片迁移功能
 6. 有问题请提交 issue
 
 ## 使用步骤
@@ -26,13 +26,13 @@ cd youdaonote-pull
 # macOS/Linux
 sudo easy_install pip3 # 安装 Python3 Package Installer
 pip3 install requests # 安装 requests 包，脚本依赖 requests
-pip3 insatll xml.etree.ElementTree # 依赖此包转换 xml
+pip3 install xml.etree.ElementTree # 依赖此包转换 xml
 ```
 
 ```shell
 # Windows
 pip install requests # 安装 requests 包，脚本依赖 requests
-pip insatll xml.etree.ElementTree # 依赖此包转换 xml
+pip install xml.etree.ElementTree # 依赖此包转换 xml
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
