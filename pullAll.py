@@ -8,6 +8,7 @@ import hashlib
 import os
 import json
 import xml.etree.ElementTree as ET
+from termcolor import colored, cprint
 
 __author__ = "DeppWang (deppwxq@gmail.com)"
 
@@ -110,7 +111,7 @@ class YoudaoNoteSession(requests.Session):
                 fileEntry = entry['fileEntry']
                 id = fileEntry['id']
                 name = fileEntry['name']
-                # 如果是目录，遍历目录下文件
+                # 如果是目录，继续遍历目录下文件
                 if fileEntry['dir']:
                     subDir = os.path.join(localDir, name)
                     try:
@@ -123,35 +124,32 @@ class YoudaoNoteSession(requests.Session):
                     if name.startswith('https'):
                         name = name.replace('/', '_')
                         # print(name)
-                    filePath = os.path.join(localDir, name)
-                    if not os.path.exists(filePath):
-                        self.getNote(id, filePath)
-                        print('新增 %s' % (filePath))
+                    nameText = os.path.splitext(name)[0]
+                    youdaoFileSuffix = os.path.splitext(name)[1]
+                    # 本地均为 Markdown 文件
+                    localFilePath = os.path.join(localDir, nameText + ".md")
+                    tip = ""
+                    if youdaoFileSuffix == ".note":
+                        tip = "，「云笔记原格式为 .note」"
+                    if not os.path.exists(localFilePath):
+                        self.getNote(id, localFilePath, youdaoFileSuffix)
+                        print('新增 %s%s' % (localFilePath, tip))
                     else:
-                        # 如果有道云笔记文件更新时间大于本地文件时间，则更新
-                        if fileEntry['modifyTimeForSort'] < os.path.getmtime(filePath):
+                        # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新。跳过本地更新步骤
+                        if fileEntry['modifyTimeForSort'] < os.path.getmtime(localFilePath):
+                            # print("正在遍历，请稍后 ...")
                             continue
 
                         print("-----------------------------")
-                        print("local file modifyTime: " + str(os.path.getmtime(filePath)))
+                        print("local file modifyTime: " + str(int(os.path.getmtime(localFilePath))))
                         print("youdao file modifyTime: " + str(fileEntry['modifyTimeForSort']))
-
-                        self.getNote(id, filePath)
-                        print('更新 %s' % (filePath))
-                    # 如果文件是 note 类型，将其转换为 MarkDown 类型
-                    base = os.path.splitext(filePath)[0]
-                    sufix = os.path.splitext(filePath)[1]
-                    if sufix == ".note":
-                        try:
-                            self.convertXmlToMarkDown(filePath)
-                            print("成功将" + filePath + "「转换为」" + base + ".md")
-                        except FileNotFoundError and ET.ParseError:
-                            print("转换失败！请查看文件是否为 xml 格式或是否空！")
+                        self.getNote(id, localFilePath, youdaoFileSuffix)
+                        print('更新 %s%s' % (localFilePath, tip))
 
             count = count + 1
             lastId = id
 
-    def getNote(self, fileId, filePath):
+    def getNote(self, fileId, filePath, youdaoFileSuffix):
         data = {
             'fileId': fileId,
             'version': -1,
@@ -164,7 +162,15 @@ class YoudaoNoteSession(requests.Session):
         with open(filePath, 'wb') as fp:
             fp.write(response.content)
 
+        # 如果文件是 .note 类型，将其转换为 MarkDown 类型
+        if youdaoFileSuffix == ".note":
+            try:
+                self.convertXmlToMarkDown(filePath)
+            except FileNotFoundError and ET.ParseError:
+                print(filePath + " 转换失败！请查看文件是否为 xml 格式或是否空！")
+
     def convertXmlToMarkDown(self, filePath):
+        # 如果文件为 null，结束
         if os.path.getsize(filePath) == 0:
             base = os.path.splitext(filePath)[0]
             os.rename(filePath, base + '.md')
@@ -220,6 +226,7 @@ class YoudaoNoteSession(requests.Session):
         os.rename(filePath, newFilePath)
         with open(newFilePath, 'w') as fp:
             fp.write(newContent)
+
 
 if __name__ == '__main__':
     startTime = int(time.time())

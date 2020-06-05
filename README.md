@@ -1,8 +1,8 @@
 ## 使用提示
 
 1. 脚本单纯本地运行，不用担心你的账号密码泄露
-2. 默认将 note 格式笔记转换为 Markdown 格式，table 未转换，需要手动转换
-3. pullAll.py 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可等待几分钟或切换网络后重试
+2. **默认将 note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动转换
+3. 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可等待几分钟或切换网络后重试
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍，后续我会更加完善此文档，并根据需求看是否应该提供直接下载压缩包的方式
 5. 目前此脚本还没有实现有道云图床图片迁移功能
 6. 有问题请提交 issue
@@ -26,13 +26,11 @@ cd youdaonote-pull
 # macOS/Linux
 sudo easy_install pip3 # 安装 Python3 Package Installer
 pip3 install requests # 安装 requests 包，脚本依赖 requests
-pip3 install xml.etree.ElementTree # 依赖此包转换 xml
 ```
 
 ```shell
 # Windows
 pip install requests # 安装 requests 包，脚本依赖 requests
-pip install xml.etree.ElementTree # 依赖此包转换 xml
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
@@ -53,6 +51,8 @@ python pullAll.py <username> <password> [localDir] # Windows
 ```shell
 python3 pullAll.py deppwang@163.com 12345678 ~/Dropbox/youdaonote
 ```
+
+![image-20200605224751937](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-05-144752.png)
 
 4、pullAll-config
 
@@ -75,11 +75,10 @@ python pullAll.py # Windows
 ## 原理
 
 - 使用模拟登陆有道云笔记
-- 使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html) 得到 xml 元素
+- 使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html) 得到 .note(xml) 文件的各个元素
 
 ## 感谢（参考）
 
-- [youdaonote-github](https://github.com/junzixiehui/youdaonote-github)
 - [YoudaoNoteExport](https://github.com/wesley2012/YoudaoNoteExport)
 
 ## 出发点
@@ -88,7 +87,7 @@ python pullAll.py # Windows
 
 现在我使用 Typora + [Dropbox](https://www.dropbox.com/) + [MWeb](https://www.mweb.im/) 实现同步笔记和手机查看编辑的功能，很香。
 
-最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。不怕，正好我原来写了导出所有笔记的脚本。
+最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。在原来脚本的基础上修改得到此脚本。
 
 <!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150319.png)-->
 
@@ -149,11 +148,11 @@ python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
 
 <!--!(https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150314.png)-->
 
-5、一个问题
+4、一个问题
 
 因为这个脚本我原来只导出 Markdown 格式笔记，经测试，导出的文件的 .note 文件不能正常打开，如果你有这方面的需求，请提 issue。
 
-6、config
+5、config
 
 跟上面一样，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
 
@@ -161,6 +160,10 @@ python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
 python3 pull.py # macOS/Linux
 python pull.py # Windows
 ```
+
+6、参考
+
+- [youdaonote-github](https://github.com/junzixiehui/youdaonote-github)
 
 <!--!(https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-05-17-121251.png)-->
 
