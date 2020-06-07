@@ -96,7 +96,7 @@ python pull.py  # Windows
 
 效果：
 
-![image-20200605224751937](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-05-144752.png)
+![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-07-140101.jpg)
 
 ### 三、多次导出
 
