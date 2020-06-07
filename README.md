@@ -18,8 +18,7 @@
 - 打开命令行软件，如 Terminal (macOS)，clone 项目，里面包含脚本
 
 ```shell
-mkdir GitHub
-cd GitHub
+pwd
 git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
@@ -60,7 +59,7 @@ config.json
 * password：**必填**，你的有道云笔记密码
 * localDir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnoteDir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
-* smmsSecretToken：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），上传笔记中有道云图床图片到 [SM.MS](https://sm.ms) 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
+* smmsSecretToken：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 [SM.MS](https://sm.ms) 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
 
 示例：
 
@@ -108,12 +107,12 @@ python3 pull.py # macOS/Linux
 python pull.py # Windows
 ```
 
-再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**。
+再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
 
 ## 后续开发计划
 
-- [x] 将 Note 文件转换为 MarkDown 文件
-- [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也上传到指定 SM.MS 图床
+- [x] 将 .note 文件转换为 MarkDown 文件
+- [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
 - [x] 首次导出使用账号密码登录，再次导出时使用 Cookies 登录（Cookies 保存在 cookies.json 中），避免频繁操作时 ip 被封
 - [ ] 并发执行以加快速度
 - [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
