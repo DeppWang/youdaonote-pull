@@ -1,26 +1,34 @@
 ## 使用提示
 
 1. 脚本单纯本地运行，不用担心你的账号密码泄露
-2. **默认将 note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动转换
-3. 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可等待几分钟或切换网络后重试
-4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍，后续我会更加完善此文档，并根据需求看是否应该提供直接下载压缩包的方式
-5. 目前此脚本还没有实现有道云图床图片迁移功能
+2. .note 格式笔记下载后为 xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动转换
+3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
+4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
+5. 注意，如果你自己修改脚本，在 push 时，不要将 config.json、cookies.json 文件 push 到 GitHub
 6. 有问题请提交 issue
 
 ## 使用步骤
 
 <!--针对普通用户-->
 
-1、导出前的准备工作
+### 一、导出前的准备工作
 
-- 安装 [Git](https://git-scm.com/downloads)，打开命令行软件，如 Terminal (macOS)，clone 项目，里面包含脚本
+#### 1、安装  [Git](https://git-scm.com/downloads)、clone 项目
+
+- 可根据 [廖雪峰 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600/896067074338496) 安装 Git
+- 打开命令行软件，如 Terminal (macOS)，clone 项目，里面包含脚本
 
 ```shell
+mkdir GitHub
+cd GitHub
 git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-- 安装 Python3 后安装依赖模块（包）
+#### 2、安装 Python3、安装依赖模块（包）
+
+- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3
+- 安装依赖包
 
 ```shell
 # macOS/Linux
@@ -35,47 +43,86 @@ pip install requests # 安装 requests 包，脚本依赖 requests
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
 
-2、运行导出脚本
+#### 3、设置脚本参数配置文件
 
-```shell
-python3 pullAll.py <username> <password> [localDir] # macOS/Linux
-python pullAll.py <username> <password> [localDir] # Windows
+config.json
+
+```json
+{
+   "username": "",
+   "password": "",
+   "localDir": "",
+   "ydnoteDir": "",
+   "smmsSecretToken": ""
+}
 ```
 
 * username：**必填**，你的有道云笔记用户名
 * password：**必填**，你的有道云笔记密码
 * localDir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
+* ydnoteDir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
+* smmsSecretToken：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），上传笔记中有道云图床图片到 [SM.MS](https://sm.ms) 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
 
-3、示例：
+示例：
+
+- macOS
+
+```json
+{
+   "username": "deppwang@163.com",
+   "password": "12345678",
+   "localDir": "/Users/yanjie/Dropbox/youdaonote/deppwang3",
+   "ydnoteDir": "",
+   "smmsSecretToken": ""
+}
+```
+
+- Windows
+
+```json
+{
+   "username": "deppwang@163.com",
+   "password": "12345678",
+   "localDir": "D:/Dropbox/youdaonote/deppwang3",
+   "ydnoteDir": "",
+   "smmsSecretToken": ""
+}
+```
+
+###  二、运行导出脚本
 
 ```shell
-python3 pullAll.py deppwang@163.com 12345678 ~/Dropbox/youdaonote
+python3 pull.py # macOS/Linux
+python pull.py  # Windows
 ```
+
+效果：
 
 ![image-20200605224751937](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-05-144752.png)
 
-4、pullAll-config
+### 三、多次导出
 
-上一次输入的相关参数会保存到 `pullAll-config` 中，如果参数不变，再次导出时，可以直接输入以下命令：
+多次导出时，同样使用以下命令：
 
 ```shell
-python3 pullAll.py # macOS/Linux
-python pullAll.py # Windows
+python3 pull.py # macOS/Linux
+python pull.py # Windows
 ```
 
-再次同步时，只会导出有道云笔记上次导出后新增、修改的笔记。
+再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**。
 
 ## 后续开发计划
 
 - [x] 将 Note 文件转换为 MarkDown 文件
-- [ ] 解决图片不能显示问题，实现方式为上传到指定图床，再替换图片链接<!--针对普通用户，提供服务器一键下载压缩包-->
-- [ ] 首次使用密码登录，再次登录时使用 cookie 登录，避免频繁操作时 ip 被封
-- [ ] 并发执行加快速度
+- [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也上传到指定 SM.MS 图床
+- [x] 首次导出使用账号密码登录，再次导出时使用 Cookies 登录（Cookies 保存在 cookies.json 中），避免频繁操作时 ip 被封
+- [ ] 并发执行以加快速度
+- [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
 
 ## 原理
 
-- 使用模拟登陆有道云笔记
-- 使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html) 得到 .note(xml) 文件的各个元素
+- 脚本模拟登陆有道云笔记后，具有文件下载权限
+- Xml 转换为 Markdown：使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
 
@@ -87,84 +134,4 @@ python pullAll.py # Windows
 
 现在我使用 Typora + [Dropbox](https://www.dropbox.com/) + [MWeb](https://www.mweb.im/) 实现同步笔记和手机查看编辑的功能，很香。
 
-最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。在原来脚本的基础上修改得到此脚本。
-
-<!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150319.png)-->
-
-<!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150303.png)-->
-
-## 导出指定文件夹
-
-如果你可不想导出所有文件夹，你可以导出指定文件夹
-
-1、运行脚本
-
-```python
-python3 pullAll.py <username> <password> [[localDir] [ydnoteDir]] # macOS/Linux
-python pullAll.py <username> <password> [[localDir] [ydnoteDir]] # Windows
-```
-
-- ydnoteDir：有道云笔记指定导出文件夹名
-
-2、示例
-
-```shell
-python3 pullAll.py deppwang@163.com 1234567 ~/GitHub GitHub
-```
-
-<!--3、效果-->
-
-<!--![(https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150254.png)-->
-
-pullAll.py 脚本采用模拟登陆方式，频繁操作会被封 ip，此时可等待几分钟后重试，若一直被封。也可使用下面这种方式
-
-### 分享文件夹方式
-
-1、先在有道云笔记上分享文件夹
-
-![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150245.png)
-
-
-* shareKey：必填，当前文件夹的 shareKey（分享链接（url）的 id 也是 shareKey）
-* dirId：必填，分享文件夹的 id
-* localDir：选填，本地文件夹名，不填则默认为当前文件夹
-
-2、运行脚本
-
-```shell
-python3 pull.py <shareKey> <dirId> [localDir] # macOS/Linux
-python pull.py <shareKey> <dirId> [localDir] # Windows
-```
-
-- localDir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
-
-3、示例
-
-```shell
-python3 pull.py <shareKey> WEB0868de6ab385d5f607b29e8cb13ffecc ~/GitHub # macOS
-```
-
-<!--4、效果-->
-
-<!--!(https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-03-29-150314.png)-->
-
-4、一个问题
-
-因为这个脚本我原来只导出 Markdown 格式笔记，经测试，导出的文件的 .note 文件不能正常打开，如果你有这方面的需求，请提 issue。
-
-5、config
-
-跟上面一样，上一次输入的相关参数会保存到 `config` 中，如果参数不变，再次同步时，可以直接输入以下命令：
-
-```shell
-python3 pull.py # macOS/Linux
-python pull.py # Windows
-```
-
-6、参考
-
-- [youdaonote-github](https://github.com/junzixiehui/youdaonote-github)
-
-<!--!(https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-05-17-121251.png)-->
-
-## 
+最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
