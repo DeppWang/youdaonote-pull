@@ -1,6 +1,6 @@
 ## 使用提示
 
-1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，在 push 时，注意不要将 config.json 和 cookies.json 文件 push 到 GitHub
+1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，注意不要将 config.json 和 cookies.json 文件 push 到 GitHub
 2. .note 格式笔记下载后为 xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动复制
 3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
@@ -14,8 +14,13 @@
 
 #### 1、安装  [Git](https://git-scm.com/downloads)、clone 项目
 
-- 可根据 [廖雪峰 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600/896067074338496) 安装 Git
-- 打开命令行软件，如 Terminal (macOS)，clone 项目，里面包含脚本
+- 可根据 [廖雪峰 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600/896067074338496) 安装 Git，测试是否成功
+
+```sh
+git --version
+```
+
+- 打开命令行软件，如 Terminal (macOS)、PowerShell(Windows)，clone 项目，里面包含脚本
 
 ```shell
 pwd
@@ -25,7 +30,13 @@ cd youdaonote-pull
 
 #### 2、安装 Python3、安装依赖模块（包）
 
-- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3
+- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否成功
+
+```shell
+python3 --version  # macOS/Linux
+python --version  # Windows
+```
+
 - 安装依赖包
 
 ```shell
@@ -60,6 +71,7 @@ config.json
 * localDir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnoteDir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * smmsSecretToken：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 [SM.MS](https://sm.ms) 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
+* 建议使用 [sublime](https://www.sublimetext.com/3) 编辑 config.json
 
 示例：
 
@@ -81,7 +93,7 @@ config.json
 {
    "username": "deppwang@163.com",
    "password": "12345678",
-   "localDir": "D:/Dropbox/youdaonote/deppwang3",
+   "localDir": "D:\Dropbox\youdaonote\deppwang3",
    "ydnoteDir": "",
    "smmsSecretToken": ""
 }
@@ -107,7 +119,9 @@ python3 pull.py # macOS/Linux
 python pull.py # Windows
 ```
 
-再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
+再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的最后修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
+
+导出是根据最后修改时间来判断，所以被更新文件和新导出一样，会重复下载图片
 
 ## 后续开发计划
 
@@ -119,7 +133,7 @@ python pull.py # Windows
 
 ## 原理
 
-- 脚本模拟登陆有道云笔记后，具有文件下载权限
+- 脚本模拟用户操作，登陆有道云笔记后，具有文件下载权限
 - Xml 转换为 Markdown：使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）

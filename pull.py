@@ -14,7 +14,7 @@ import re
 # from termcolor import colored, cprint
 
 __author__ = 'DeppWang (deppwxq@gmail.com)'
-__github__ = 'https//github.com/deppwang'
+__github__ = 'https//github.com/deppwang/youdaonote-pull'
 
 
 def timestamp():
@@ -46,6 +46,8 @@ class YoudaoNoteSession(requests.Session):
         self.smmsSecretToken = smmsSecretToken
 
     def login(self, username, password) -> str:
+        """模拟用户操作，使用账号密码登录，并保存 Cookie"""
+
         # 模拟打开首页
         self.get('https://note.youdao.com/web/')
         self.headers['Referer'] = 'https://note.youdao.com/web/'
@@ -79,7 +81,7 @@ class YoudaoNoteSession(requests.Session):
         return self.getRootId()
 
     def saveCookies(self) -> None:
-        """将 cookies 保存到 cookies.json"""
+        """将 Cookies 保存到 cookies.json"""
 
         cookiesDict = {}
         cookies = []
@@ -99,15 +101,18 @@ class YoudaoNoteSession(requests.Session):
         with open('cookies.json', 'w') as f:
             f.write(str(json.dumps(cookiesDict, indent=4, sort_keys=True)))
 
-    def cookiesLogin(self, cookiesDict) -> str:
-        """使用 cookies 登录"""
+        print('本次使用账号密码登录，已将 Cookies 保存到 cookies.json 中，下次使用 Cookies 登录')
 
-        # cookie
+    def cookiesLogin(self, cookiesDict) -> str:
+        """使用 Cookies 登录"""
+
         RequestsCookieJar = self.cookies
         for cookie in cookiesDict:
             RequestsCookieJar.set(cookie[0], cookie[1], domain=cookie[2], path=cookie[3])
 
         self.cstk = cookiesDict[0][1]
+
+        print('本次使用 Cookies 登录')
 
         return self.getRootId()
 
@@ -126,7 +131,7 @@ class YoudaoNoteSession(requests.Session):
         try:
             return jsonObj['fileEntry']['id']
         except:
-            return response.content.decode()
+            return response.content.decode('utf-8')
 
     def getAll(self, ydnoteDir, rootId) -> None:
         """下载所有文件"""
@@ -145,7 +150,7 @@ class YoudaoNoteSession(requests.Session):
         # 有道云笔记指定导出文件夹名不为 '' 时，获取文件夹 id
         if ydnoteDir != '':
             rootId = self.getDirId(rootId, ydnoteDir)
-            if rootId == '' or rootId == None:
+            if rootId == None:
                 print('此文件夹 ' + ydnoteDir + ' 不是顶层文件夹，暂不能下载！')
                 print('已退出')
                 sys.exit(1)
@@ -204,21 +209,22 @@ class YoudaoNoteSession(requests.Session):
         if name.startswith('https'):
             name = name.replace('/', '_')
             # print(name)
-        nameText = os.path.splitext(name)[0]
-        youdaoFileSuffix = os.path.splitext(name)[1]
-        localFilePath = os.path.join(localDir, name)
-        originalFilePath = os.path.join(localDir, name)
-        localFileName = os.path.join(localDir, nameText)
+
+        nameText = os.path.splitext(name)[0]  # 有道云笔记名称
+        youdaoFileSuffix = os.path.splitext(name)[1]  # 笔记后缀
+        localFilePath = os.path.join(localDir, name)  # 用于将后缀 .note 转换为 .md
+        originalFilePath = os.path.join(localDir, name)  # 保留本身后缀
+        localFileName = os.path.join(localDir, nameText)  # 没有后缀的本地文件
         tip = youdaoFileSuffix
-        # 本地 .note 文件均为 .md
+        # 本地 .note 文件均为 .md，使用 .md 后缀判断是否在本地存在
         if youdaoFileSuffix == '.note':
             tip = '.md ，「云笔记原格式为 .note」'
             localFilePath = localFileName + '.md'
-        # 先只考虑新增，不考虑更新。
+        # 如果不存在，则更新
         if not os.path.exists(localFilePath):
             self.getFile(id, originalFilePath, youdaoFileSuffix)
             print('新增 %s%s' % (localFileName, tip))
-        # 当原来存在 .note 时，
+        # 如果已经存在，判断是否需要更新
         else:
             # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新。跳过本地更新步骤
             if fileEntry['modifyTimeForSort'] < os.path.getmtime(localFilePath):
@@ -248,8 +254,11 @@ class YoudaoNoteSession(requests.Session):
             content = response.content.decode('utf-8')
 
             content = self.convertMarkdownFileImageUrl(content, filePath)
-            with open(filePath, 'w') as fp:
-                fp.write(content)
+            try:
+                with open(filePath, 'wb') as fp:
+                    fp.write(content.encode())
+            except UnicodeEncodeError as err:
+                print(format(err))
             return
 
         with open(filePath, 'wb') as fp:
@@ -258,7 +267,6 @@ class YoudaoNoteSession(requests.Session):
         # 权限问题，导致下载内容为接口错误提醒值。contentStr = response.content.decode('utf-8')
 
         # 如果文件是 .note 类型，将其转换为 MarkDown 类型
-        # 本地没有 note 文件
         if youdaoFileSuffix == '.note':
             try:
                 self.convertXmlToMarkDown(filePath)
@@ -277,13 +285,14 @@ class YoudaoNoteSession(requests.Session):
         tree = ET.parse(filePath)
         root = tree.getroot()
         flag = 0  # 用于输出转换提示
-        nl = '\n'
+        nl = '\r\n'  # Windows 系统换行符为 \r\n
         newContent = f''  # f-string 多行字符串
+        # 得到多维数组中的文本，因为是数组，不是对象，所以只能遍历
         for child in root[1]:
             if 'para' in child.tag:
                 for child2 in child:
                     if 'text' in child2.tag:
-                        # 等于 None，字符串加 None 将报错
+                        # 如果等于 None，字符串加 None 将报错
                         if child2.text == None:
                             child2.text = ''
                         newContent += child2.text + f'{nl}{nl}'
@@ -338,11 +347,9 @@ class YoudaoNoteSession(requests.Session):
         if len(urls) > 0:
             self.getYdnoteDirName(filePath)
         for url in urls:
-            # imageReg = r'^http\:\/\/note\.youdao\.com/'
             newUrl = self.getNewDownOrUploadUrl(url)
             content = content.replace(url, newUrl)
         return content
-        # reg = "![](http://note.youdao.com/yws/res/66507/WEBRESOURCE581c45761e1f2b653a11a778f31fb92b)"
 
     def getYdnoteDirName(self, filePath):
 
@@ -385,13 +392,14 @@ class YoudaoNoteSession(requests.Session):
     def uploadToSmms(self, oldUrl, smmsSecretToken) -> str:
         smmsUploadApi = 'https://sm.ms/api/v2/upload'
         headers = {'Authorization': smmsSecretToken}
+        url = oldUrl
         try:
             smfile = self.get(oldUrl).content
         except:
             print('下载 ' + oldUrl + ' 失败！请登录网页版有道云笔记，查看图片是否能正常显示')
-            return oldUrl
+            return url
         files = {'smfile': smfile}
-        url = oldUrl
+
         try:
             res = requests.post(smmsUploadApi, headers=headers, files=files)
         except requests.exceptions.ProxyError as err:
@@ -436,6 +444,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     print('正在 pull，请稍后 ...')
+
     session = YoudaoNoteSession(configDict['localDir'], configDict['smmsSecretToken'])
 
     with open('cookies.json', 'r') as fp:
