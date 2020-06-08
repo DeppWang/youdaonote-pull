@@ -4,7 +4,7 @@
 2. .note 格式笔记下载后为 xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动复制
 3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
-6. 有问题请提交 issue
+6. 请确认代码是否为最新，有问题请提交 issue
 
 ## 使用步骤
 
@@ -14,7 +14,7 @@
 
 #### 1、安装  [Git](https://git-scm.com/downloads)、clone 项目
 
-- 可根据 [廖雪峰 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600/896067074338496) 安装 Git，测试是否成功
+- 可根据 [廖雪峰 Git 教程](https://www.liaoxuefeng.com/wiki/896043488029600/896067074338496) 安装 Git，测试是否安装成功
 
 ```sh
 git --version
@@ -30,7 +30,7 @@ cd youdaonote-pull
 
 #### 2、安装 Python3、安装依赖模块（包）
 
-- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否成功
+- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
 
 ```shell
 python3 --version  # macOS/Linux
@@ -83,7 +83,7 @@ config.json
    "password": "12345678",
    "localDir": "/Users/yanjie/Dropbox/youdaonote/deppwang3",
    "ydnoteDir": "",
-   "smmsSecretToken": ""
+   "smmsSecretToken": "SGSLk9yWdTe4RenXYqEPWkqVrx0Y8qI0"
 }
 ```
 
@@ -93,9 +93,9 @@ config.json
 {
    "username": "deppwang@163.com",
    "password": "12345678",
-   "localDir": "D:\Dropbox\youdaonote\deppwang3",
+   "localDir": "D:/Dropbox/youdaonote/deppwang3",
    "ydnoteDir": "",
-   "smmsSecretToken": ""
+   "smmsSecretToken": "SGSLk9yWdTe4RenXYqEPWkqVrx0Y8qI0"
 }
 ```
 
