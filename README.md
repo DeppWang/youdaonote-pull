@@ -1,6 +1,6 @@
 ## 使用提示
 
-1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，注意不要将 config.json 和 cookies.json 文件 push 到 GitHub
+1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
 2. .note 格式笔记下载后为 xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动复制
 3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
@@ -60,18 +60,18 @@ config.json
 {
    "username": "",
    "password": "",
-   "localDir": "",
-   "ydnoteDir": "",
-   "smmsSecretToken": ""
+   "local_dir": "",
+   "ydnote_dir": "",
+   "smms_secret_token": ""
 }
 ```
 
 * username：**必填**，你的有道云笔记用户名
 * password：**必填**，你的有道云笔记密码
-* localDir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
-* ydnoteDir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
-* smmsSecretToken：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 [SM.MS](https://sm.ms) 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
-* 建议使用 [sublime](https://www.sublimetext.com/3) 编辑 config.json
+* local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
+* ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
+* smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 使用本地链接
+* 建议使用 [Sublime](https://www.sublimetext.com/3) 编辑 config.json
 
 示例：
 
@@ -81,9 +81,9 @@ config.json
 {
    "username": "deppwang@163.com",
    "password": "12345678",
-   "localDir": "/Users/yanjie/Dropbox/youdaonote/deppwang3",
-   "ydnoteDir": "",
-   "smmsSecretToken": "SGSLk9yWdTe4RenXYqEPWkqVrx0Y8qI0"
+   "local_dir": "/Users/yanjie/Dropbox/youdaonote/test",
+   "ydnote_dir": "",
+   "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
 ```
 
@@ -93,9 +93,9 @@ config.json
 {
    "username": "deppwang@163.com",
    "password": "12345678",
-   "localDir": "D:/Dropbox/youdaonote/deppwang3",
-   "ydnoteDir": "",
-   "smmsSecretToken": "SGSLk9yWdTe4RenXYqEPWkqVrx0Y8qI0"
+   "local_dir": "D:/Dropbox/youdaonote/test",
+   "ydnote_dir": "",
+   "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
 ```
 
@@ -108,7 +108,9 @@ python pull.py  # Windows
 
 效果：
 
-![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-07-140101.jpg)
+![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)
+
+<!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-07-140101.jpg)-->
 
 ### 三、多次导出
 
@@ -119,7 +121,7 @@ python3 pull.py # macOS/Linux
 python pull.py # Windows
 ```
 
-再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记。根据有道云笔记的最后修改时间是否大于本地文件修改时间来判断是否更新，所以不会覆盖本地已经修改的文件，**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
+根据有道云笔记的最后修改时间是否大于本地文件最后修改时间来判断是否更新。再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记，不会覆盖本地已经修改的文件。**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
 
 导出是根据最后修改时间来判断，所以被更新文件和新导出一样，会重复下载图片
 
@@ -128,6 +130,7 @@ python pull.py # Windows
 - [x] 将 .note 文件转换为 MarkDown 文件
 - [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
 - [x] 首次导出使用账号密码登录，再次导出时使用 Cookies 登录（Cookies 保存在 cookies.json 中），避免频繁操作时 ip 被封
+- [ ] 优化如果同一目录存在同名的 .md 和 .note 文件，.md 文件将被覆盖的情况
 - [ ] 并发执行以加快速度
 - [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
 
