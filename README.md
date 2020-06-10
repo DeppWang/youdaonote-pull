@@ -136,7 +136,7 @@ python pull.py # Windows
 
 ## 原理
 
-- 脚本模拟用户操作，登陆有道云笔记后，具有文件下载权限
+- 脚本模拟浏览器用户操作，登陆有道云笔记后，具有文件下载权限
 - Xml 转换为 Markdown：使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
