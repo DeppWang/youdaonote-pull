@@ -152,7 +152,7 @@ class YoudaoNoteSession(requests.Session):
         self.headers['Referer'] = 'https://note.youdao.com/web/'
 
         # 模拟设置上一步链接为首页
-        # self.headers['Referer'] = 'https://note.youdao.com/'
+        self.headers['Referer'] = 'https://note.youdao.com/'
         # 模拟重定向跳转到登录页。浏览器在传输链接的过程中是否都将符号转换为 Unicode
         self.get('https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web')
         # 模拟设置上一步链接为登录页
@@ -332,6 +332,7 @@ class YoudaoNoteSession(requests.Session):
         original_file_path = os.path.join(local_dir, name)  # 保留本身后缀
         local_file_name = os.path.join(local_dir, os.path.splitext(name)[0])  # 没有后缀的本地文件
         tip = youdao_file_suffix
+
         # 本地 .note 文件均为 .md，使用 .md 后缀判断是否在本地存在
         if youdao_file_suffix == '.note':
             tip = '.md ，「云笔记原格式为 .note」'
@@ -402,7 +403,7 @@ class YoudaoNoteSession(requests.Session):
         tree = ET.parse(file_path)
         root = tree.getroot()
         flag = 0  # 用于输出转换提示
-        nl = '\r\n'  # Windows 系统换行符为 \r\n
+        nl = '\r\n'  # 考虑 Windows 系统，换行符设为 \r\n
         new_content = f''  # f-string 多行字符串
 
         # 得到多维数组中的文本，因为是数组，不是对象，所以只能遍历
@@ -465,8 +466,8 @@ class YoudaoNoteSession(requests.Session):
         if len(urls) > 0:
             self.print_ydnote_file_name(file_path)
         for url in urls:
-            newUrl = self.get_new_down_or_upload_url(url)
-            content = content.replace(url, newUrl)
+            new_url = self.get_new_down_or_upload_url(url)
+            content = content.replace(url, new_url)
         return content
 
     def print_ydnote_file_name(self, file_path) -> None:
@@ -481,9 +482,9 @@ class YoudaoNoteSession(requests.Session):
             return url
         if self.smms_secret_token == '':
             return self.download_image(url)
-        newUrl = self.upload_to_smms(url, self.smms_secret_token)
-        if newUrl != url:
-            return newUrl
+        new_url = self.upload_to_smms(url, self.smms_secret_token)
+        if new_url != url:
+            return new_url
         return self.download_image(url)
 
     def download_image(self, url) -> str:
