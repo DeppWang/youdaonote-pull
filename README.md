@@ -37,7 +37,7 @@ python3 --version  # macOS/Linux
 python --version  # Windows
 ```
 
-- 安装依赖包
+- 安装 requests 依赖包
 
 ```shell
 # macOS/Linux
@@ -129,15 +129,16 @@ python pull.py # Windows
 
 - [x] 将 .note 文件转换为 MarkDown 文件
 - [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
-- [x] 首次导出使用账号密码登录，再次导出时使用 Cookies 登录（Cookies 保存在 cookies.json 中），避免频繁操作时 ip 被封
+- [x] 首次导出使用账号密码登录，再次导出时使用 Cookie 登录（Cookie 保存在 cookies.json 中），避免频繁操作时因为需要输入验证码导致登录不上的情况
 - [ ] 优化如果同一目录存在同名的 .md 和 .note 文件，.md 文件将被覆盖的情况
 - [ ] 并发执行以加快速度
 - [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
 
 ## 原理
 
-- 脚本模拟浏览器用户操作，登陆有道云笔记后，具有文件下载权限
-- Xml 转换为 Markdown：使用 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
+- 正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。
+- 主要原理是利用有道云笔记本身的接口，再模拟操作接口。可以看看[如何找到有道云笔记的接口]()
+- Xml 转换为 Markdown：使用了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
 
