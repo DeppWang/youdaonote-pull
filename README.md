@@ -137,7 +137,7 @@ python pull.py # Windows
 ## 原理
 
 - 正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。
-- 主要原理是利用有道云笔记本身的接口，再模拟操作接口。可以看看[如何找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)
+- 原理是利用有道云笔记本身的接口，模拟操作接口，将前端显示改为存放到本地。可以看看[如何找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)
 - Xml 转换为 Markdown：使用了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
