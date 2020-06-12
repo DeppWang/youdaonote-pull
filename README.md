@@ -1,7 +1,7 @@
 ## 使用提示
 
 1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
-2. .note 格式笔记下载后为 xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，table 等未转换，需要手动复制
+2. .note 格式笔记下载后为 Xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，表格等未转换，需要手动复制
 3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
 6. 请确认代码是否为最新，有问题请提交 issue
@@ -58,11 +58,11 @@ config.json
 
 ```json
 {
-   "username": "",
-   "password": "",
-   "local_dir": "",
-   "ydnote_dir": "",
-   "smms_secret_token": ""
+    "username": "",
+    "password": "",
+    "local_dir": "",
+    "ydnote_dir": "",
+    "smms_secret_token": ""
 }
 ```
 
@@ -79,11 +79,11 @@ config.json
 
 ```json
 {
-   "username": "deppwang@163.com",
-   "password": "12345678",
-   "local_dir": "/Users/yanjie/Dropbox/youdaonote/test",
-   "ydnote_dir": "",
-   "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
+    "username": "deppwang@163.com",
+    "password": "12345678",
+    "local_dir": "/Users/yanjie/Dropbox/youdaonote/test",
+    "ydnote_dir": "",
+    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
 ```
 
@@ -91,11 +91,11 @@ config.json
 
 ```json
 {
-   "username": "deppwang@163.com",
-   "password": "12345678",
-   "local_dir": "D:/Dropbox/youdaonote/test",
-   "ydnote_dir": "",
-   "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
+    "username": "deppwang@163.com",
+    "password": "12345678",
+    "local_dir": "D:/Dropbox/youdaonote/test",
+    "ydnote_dir": "",
+    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
 ```
 
@@ -137,7 +137,7 @@ python pull.py # Windows
 ## 原理
 
 - 正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。
-- 原理是利用有道云笔记本身的接口，模拟操作接口，将前端显示改为存放到本地。可以看看[如何找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)
+- [找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地。
 - Xml 转换为 Markdown：使用了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
