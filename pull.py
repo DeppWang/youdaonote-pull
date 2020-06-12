@@ -37,7 +37,7 @@ def check_config(config_name) -> dict:
 
     with open(config_name, 'rb') as f:
         config_str = f.read().decode('utf-8')
-        logging.info('config_str 格式 ' + config_str)
+        logging.info('config_str 格式：\n' + config_str)
 
     try:
         # 将字符串转换为字典
@@ -76,8 +76,8 @@ def covert_cookies(file_name) -> list:
         # 将字符串转换为字典
         cookies_dict = eval(json_str)
         cookies = cookies_dict['cookies']
-    except SyntaxError:
-        raise SyntaxError('转换「' + file_name + '」为字典时出现错误')
+    except Exception:
+        raise Exception('转换「' + file_name + '」为字典时出现错误')
     return cookies
 
 
@@ -89,13 +89,13 @@ class YoudaoNoteSession(requests.Session):
     """ 继承于 requests.Session，能像浏览器一样，完成一个完整的 Session 操作"""
 
     # 类变量，不随着对象改变
-    DOMAIN_URL = 'https://note.youdao.com/'
-    HOME_URL = DOMAIN_URL + 'web/'
-    SIGN_IN_URL = DOMAIN_URL + '/signIn'
-    AUTH_URL = DOMAIN_URL + '/auth'
-    LOGIN_URL = DOMAIN_URL + '/login'
-    API_URL = DOMAIN_URL + '/api'
-    FILE_URL = API_URL + '/api/personal/file'
+    WEB_URL = 'https://note.youdao.com/web/'
+    SIGN_IN_URL = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'
+    LOGIN_URL = 'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp='
+    COOKIE_URL = 'https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=%s'
+    ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
+    DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=30&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
+    FILE_URL = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=%s'
 
     # 莫有类方法
 
@@ -117,12 +117,12 @@ class YoudaoNoteSession(requests.Session):
         self.cstk = None
         self.local_dir = None
         self.smms_secret_token = None
-        # self.FILE_URL =
 
     def check_and_login(self, username, password) -> str:
         try:
             cookies = covert_cookies('cookies.json')
-        except OSError or SyntaxError:
+        except Exception as err:
+            logging.info(format(err))
             cookies = None
 
         # 如果有正常的 8 个 cookie，使用 cookie 登录
@@ -152,18 +152,17 @@ class YoudaoNoteSession(requests.Session):
         """ 模拟浏览器用户操作，使用账号密码登录，并保存 Cookies """
 
         # 模拟打开首页
-        self.get('https://note.youdao.com/web/')
+        self.get(self.WEB_URL)
         # 模拟设置上一步链接为首页
-        self.headers['Referer'] = 'https://note.youdao.com/web/'
+        self.headers['Referer'] = self.WEB_URL
         # 模拟重定向跳转到登录页。浏览器在传输链接的过程中是否都将符号转换为 Unicode
-        self.get('https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web')
+        self.get(self.SIGN_IN_URL)
         # 模拟设置上一步链接为登录页
-        self.headers[
-            'Referer'] = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'
+        self.headers['Referer'] = self.SIGN_IN_URL
         # 模拟跳转到登录页后的请求连接
-        self.get('https://note.youdao.com/login/acc/pe/getsess?product=YNOTE&_=' + timestamp())
-        self.get('https://note.youdao.com/auth/cq.json?app=web&_=' + timestamp())
-        self.get('https://note.youdao.com/auth/urs/login.json?app=web&_=' + timestamp())
+        self.get('https://note.youdao.com/login/acc/pe/getsess?product=YNOTE&_=%s' % timestamp())
+        self.get('https://note.youdao.com/auth/cq.json?app=web&_=%s' % timestamp())
+        self.get('https://note.youdao.com/auth/urs/login.json?app=web&_=%s' % timestamp())
 
         data = {
             'username': username,
@@ -175,12 +174,11 @@ class YoudaoNoteSession(requests.Session):
         logging.info(self.cookies)
 
         # 模拟登陆
-        self.post(
-            'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp=' + timestamp(),
-            data=data, allow_redirects=True)
+        self.post(self.LOGIN_URL,
+                  data=data, allow_redirects=True)
 
         # 登录成功后的链接，里面包含最新 Cookie: YNOTE_CSTK，Sesssion 对象将获取到可用于登录的 Cookie
-        self.get('https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=' + timestamp())
+        self.get(self.COOKIE_URL % timestamp())
 
         logging.info('new cookies')
         logging.info(self.cookies)
@@ -189,6 +187,7 @@ class YoudaoNoteSession(requests.Session):
 
         logging.info(cstk)
         # if cstk is None:
+        #     不再此处返回，获取 root_id 返回时有错误接口提示
         #     raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！', 'cstk 为 None')
 
         self.cstk = cstk
@@ -236,8 +235,7 @@ class YoudaoNoteSession(requests.Session):
             'purge': 'false',
             'cstk': self.cstk
         }
-        response = self.post(
-            'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s' % self.cstk, data=data)
+        response = self.post(self.ROOT_ID_URL % self.cstk, data=data)
         json_obj = json.loads(response.content)
         logging.info(json_obj)
         try:
@@ -248,6 +246,7 @@ class YoudaoNoteSession(requests.Session):
     def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
         """ 下载所有文件 """
 
+        # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中
         if local_dir == '':
             local_dir = os.path.join(os.getcwd(), 'youdaonote')
 
@@ -261,7 +260,6 @@ class YoudaoNoteSession(requests.Session):
         # 有道云笔记指定导出文件夹名不为 '' 时，获取文件夹 id
         if ydnote_dir != '':
             root_id = self.get_dir_id(root_id, ydnote_dir)
-            logging.info('----')
             logging.info(root_id)
             if root_id is None:
                 raise ValueError('此文件夹 %s 不是顶层文件夹，暂不能下载！' % (ydnote_dir))
@@ -273,26 +271,24 @@ class YoudaoNoteSession(requests.Session):
     def get_dir_id(self, root_id, ydnote_dir) -> str:
         """ 获取有道云笔记指定文件夹 id，目前指定文件夹只能为顶层文件夹，如果要指定文件夹下面的文件夹，请自己改用递归实现 """
 
-        url = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=30&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s' % (
-            root_id, self.cstk)
+        url = self.DIR_MES_URL % (root_id, self.cstk)
         response = self.get(url)
         json_obj = json.loads(response.content)
         try:
-            entrys = json_obj['entries']
+            entries = json_obj['entries']
         except KeyError:
             raise KeyError('有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue')
 
-        for entry in entrys:
+        for entry in entries:
             file_entry = entry['fileEntry']
             name = file_entry['name']
             if name == ydnote_dir:
                 return file_entry['id']
 
     def get_file_recursively(self, id, local_dir) -> None:
-        """ 递归遍历，根据 root_id 找到根目录下的所有文件 """
+        """ 递归遍历，根据 id 找到目录下的所有文件 """
 
-        url = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=30&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s' % (
-            id, self.cstk)
+        url = self.DIR_MES_URL % (id, self.cstk)
         lastId = None
         count = 0
         total = 1
@@ -350,8 +346,8 @@ class YoudaoNoteSession(requests.Session):
         else:
             # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新。跳过本地更新步骤
             if file_entry['modifyTimeForSort'] < os.path.getmtime(local_file_path):
-                # print('正在遍历，请稍后 ...，最好一行动态变化')
-                logging.info('此文件不更新' + local_file_path)
+                # print('此文件不更新，跳过 ...，最好一行动态变化')
+                logging.info('此文件不更新，跳过 ' + local_file_path)
                 return
 
             print('-----------------------------')
@@ -370,7 +366,7 @@ class YoudaoNoteSession(requests.Session):
             'editorType': 1,
             'cstk': self.cstk
         }
-        url = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=%s' % self.cstk
+        url = self.FILE_URL % self.cstk
         response = self.post(url, data=data)
 
         if youdao_file_suffix == '.md':
@@ -416,10 +412,11 @@ class YoudaoNoteSession(requests.Session):
             if 'para' in child.tag:
                 for child2 in child:
                     if 'text' in child2.tag:
-                        # 如果等于 None，字符串加 None 将报错
+                        # 将 None 转为 "
                         if child2.text is None:
                             child2.text = ''
                         new_content += child2.text + f'{nl}{nl}'
+
                         break
 
             elif 'image' in child.tag:
@@ -494,8 +491,13 @@ class YoudaoNoteSession(requests.Session):
 
     def download_image(self, url) -> str:
         """ 如果 smms_secret_token 为 null，将其下载到本地，返回相对 url """
+        try:
+            response = self.get(url)
+        except requests.exceptions.ProxyError as err:
+            print('网络错误，%s 下载失败' % url)
+            print(format(err))
+            return url
 
-        response = self.get(url)
         if response.status_code != 200:
             self.print_download_yd_image_error(url)
             return url
@@ -509,7 +511,7 @@ class YoudaoNoteSession(requests.Session):
         try:
             with open(image_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print('已将图片 ' + url + ' 转换为 ' + image_path)
+            print('已将图片 %s 转换为 %s' % (url, image_path))
         except:
             print(url + ' 图片有误！')
             return url
@@ -531,8 +533,8 @@ class YoudaoNoteSession(requests.Session):
         try:
             res = requests.post(smms_upload_api, headers=headers, files=files)
         except requests.exceptions.ProxyError as err:
-            logging.info('网络错误？')
-            print('上传 ' + old_url + '到 SM.MS 失败！将下载图片到本地')
+            logging.info('网络错误，请重试')
+            print('网络错误，上传 %s 到 SM.MS 失败！将下载图片到本地' % old_url)
             print(format(err))
             return old_url
 
@@ -543,7 +545,7 @@ class YoudaoNoteSession(requests.Session):
             if res_json['code'] == 'image_repeated':
                 url = res_json['images']
             elif res_json['code'] == 'flood':
-                print('每小时只能上传 100 张图片，' + old_url + ' 未转换')
+                print('每小时只能上传 100 张图片，%s 未转换' % old_url)
                 return old_url
             else:
                 print(
@@ -555,7 +557,7 @@ class YoudaoNoteSession(requests.Session):
         return url
 
     def print_download_yd_image_error(self, url) -> None:
-        print('下载 ' + url + ' 失败！浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）')
+        print('下载 %s 失败！浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
 
 
 def run():
