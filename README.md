@@ -8,9 +8,9 @@
 2. 由于「笔记」类型文件下载后默认为 Xml 格式，不是正常笔记内容，**默认将其转换为 Markdown 格式**
 3. 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
 
-效果：
+<!--效果：-->
 
-![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)
+<!--![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)-->
 
 ## 使用提示
 
