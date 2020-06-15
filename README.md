@@ -1,10 +1,26 @@
+# 一个一键导出 / 备份「有道云笔记」所有笔记的 Python 脚本
+
+现在有道云笔记不能导出笔记，如果想迁移笔记很麻烦。
+
+此 Python 脚本的主要实现以下功能：
+
+1. 可将所有笔记（文件）按原格式下载到本地
+2. 由于「笔记」类型文件下载后默认为 Xml 格式，不是正常笔记内容，**默认将其转换为 Markdown 格式**
+3. 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
+
+效果：
+
+![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)
+
 ## 使用提示
 
 1. 脚本单纯本地运行，不用担心你的账号密码泄露。但注意，如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
-2. .note 格式笔记下载后为 Xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，表格等未转换，需要手动复制
-3. 有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**
 4. 如果你不是开发者，可能对下面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会更加完善此文档，并根据需求看是否应该提供网页下载
 6. 请确认代码是否为最新，有问题请提交 issue
+
+<!--.note 格式笔记下载后为 Xml 格式，**默认将 .note 格式笔记转换为 Markdown 格式**，表格等未转换，需要手动复制-->
+
+<!--有道云笔记图床图片在有道云笔记外不显示，**默认下载到本地，使用本地图片链接，可设置上传到免费的 [SM.MS](https://sm.ms) 上**-->
 
 ## 使用步骤
 
@@ -20,7 +36,7 @@
 git --version
 ```
 
-- 打开命令行软件，如 Terminal (macOS)、PowerShell(Windows)，clone 项目，里面包含脚本
+- 打开命令行软件，如 Terminal (macOS)、PowerShell (Windows)，clone 项目，里面包含脚本
 
 ```shell
 pwd
@@ -28,7 +44,7 @@ git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-#### 2、安装 Python3、安装依赖模块（包）
+#### 2、安装 Python3、安装 requests 依赖模块（包）
 
 - 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
 
@@ -37,17 +53,17 @@ python3 --version  # macOS/Linux
 python --version  # Windows
 ```
 
-- 安装 requests 依赖包
+- 安装 requests 依赖包，脚本依赖 requests
 
 ```shell
 # macOS/Linux
 sudo easy_install pip3 # 安装 Python3 Package Installer
-pip3 install requests # 安装 requests 包，脚本依赖 requests
+pip3 install requests
 ```
 
 ```shell
 # Windows
-pip install requests # 安装 requests 包，脚本依赖 requests
+pip install requests
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
@@ -109,8 +125,6 @@ python pull.py  # Windows
 效果：
 
 ![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)
-
-<!--[](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-07-140101.jpg)-->
 
 ### 三、多次导出
 
