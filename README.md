@@ -54,7 +54,7 @@ sudo pip3 install requests  # macOS/Linux
 ```
 ```shell
 # Windows
-python pull.py  
+pip install requests  
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
