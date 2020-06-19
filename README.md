@@ -1,6 +1,6 @@
 # youdaonote-pull
 
-<!--> Becauce may be just chinese user use "Youdao Cloud Note", so this project just provide the chinese README.md-->
+<!--Becauce may be just chinese user use "Youdao Cloud Note", so this project just provide the chinese README.md-->
 
 现在有道云笔记不能导出笔记，如果想迁移笔记很麻烦。此脚本可以将有道云笔记所有笔记导出。
 
