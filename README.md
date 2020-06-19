@@ -1,8 +1,8 @@
 # youdaonote-pull
 
-<!--Becauce may be just chinese user use "Youdao Cloud Note", so this project just provide the chinese README.md-->
+<!--Becauce basically only Chinese users use "Youdao Note", so this project only provides Chinese README.md-->
 
-现在有道云笔记不能导出笔记，如果想迁移笔记很麻烦。此脚本可以将有道云笔记所有笔记导出。
+现在有道云笔记不能导出笔记，迁移笔记很麻烦。此脚本可将所有笔记下载到本地。
 
 ## 功能
 
@@ -48,18 +48,16 @@ python --version   # Windows
 - 安装 requests 依赖包，脚本依赖 requests
 
 ```shell
-# macOS/Linux
-sudo easy_install pip3  # 安装 Python3 Package Installer
-pip3 install requests
+# macOS
+sudo easy_install pip3      # 安装 Python3 Package Installer
+sudo pip3 install requests  # macOS/Linux
 ```
-
 ```shell
 # Windows
-pip install requests
+python pull.py  
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
-
 #### 3、设置脚本参数配置文件 config.json
 
 ```json
@@ -77,7 +75,7 @@ pip install requests
 * local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 中使用本地链接
-* 提示：脚本单纯本地运行，不用担心你的账号密码泄露；建议使用 [Sublime](https://www.sublimetext.com/3) 编辑 config.json
+* 提示：脚本单纯本地运行，不用担心你的账号密码泄露；建议使用 [Sublime](https://www.sublimetext.com/3) 编辑 config.json（避免编码格式错误）
 
 示例：
 
@@ -108,8 +106,8 @@ pip install requests
 ###  二、运行导出脚本
 
 ```shell
-python3 pull.py # macOS/Linux
-python pull.py  # Windows
+python3 pull.py  # macOS/Linux
+python pull.py   # Windows
 ```
 
 效果：
@@ -121,13 +119,15 @@ python pull.py  # Windows
 多次导出时，同样使用以下命令：
 
 ```shell
-python3 pull.py # macOS/Linux
-python pull.py  # Windows
+python3 pull.py  # macOS/Linux
+python pull.py   # Windows
 ```
 
 根据有道云笔记的最后修改时间是否大于本地文件最后修改时间来判断是否更新。再次导出时，只会导出有道云笔记上次导出后新增、修改的笔记，不会覆盖本地已经修改的文件。**但有道云笔记和本地不要同时修改同一个文件，这样会导致本地修改丢失**！
 
-导出是根据最后修改时间来判断，所以被更新文件和新导出一样，会重复下载图片
+更新时，会重新下载文件并覆盖原文件，图片也会重新下载
+
+<!--导出是根据最后修改时间来判断，所以被更新文件和新导出一样，会重复下载图片-->
 
 ## 注意事项
 
@@ -136,6 +136,8 @@ python pull.py  # Windows
 1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
 3. 请确认代码是否为最新，有问题请提交 issue
+
+<!--在 CentOS 环境下，由于命令行环境不能直接显示中文，所以会出现 UnicodeEncodeError-->
 
 ## 后续开发计划
 
