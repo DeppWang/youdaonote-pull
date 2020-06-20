@@ -50,7 +50,7 @@ python --version   # Windows
 ```shell
 # macOS
 sudo easy_install pip3      # 安装 Python3 Package Installer
-sudo pip3 install requests  # macOS/Linux
+sudo pip3 install requests 
 ```
 ```shell
 # Windows
