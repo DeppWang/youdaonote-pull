@@ -12,9 +12,7 @@ from urllib.parse import urlparse
 import re
 import logging
 
-# logging.basicConfig(level=logging.WARN)
-
-# from termcolor import colored, cprint
+# logging.basicConfig(level=logging.INFO)
 
 __author__ = 'DeppWang (deppwxq@gmail.com)'
 __github__ = 'https//github.com/DeppWang/youdaonote-pull'
@@ -22,14 +20,6 @@ __github__ = 'https//github.com/DeppWang/youdaonote-pull'
 
 def timestamp() -> str:
     return str(int(time.time() * 1000))
-
-
-def is_json(my_json) -> bool:
-    try:
-        json.loads(my_json)
-    except ValueError as e:
-        return False
-    return True
 
 
 def check_config(config_name) -> dict:
@@ -64,10 +54,7 @@ def check_config(config_name) -> dict:
 def covert_cookies(file_name) -> list:
     if not os.path.exists(file_name):
         logging.info('%s is null', file_name)
-        raise OSError(file_name + '不存在')
-
-    # if not os.lstat(file_name):
-    #     raise OSError
+        raise OSError(file_name + ' 不存在')
 
     with open(file_name, 'r', encoding='utf-8') as f:
         json_str = f.read()
@@ -90,7 +77,7 @@ class YoudaoNoteSession(requests.Session):
 
     # 类变量，不随着对象改变
     WEB_URL = 'https://note.youdao.com/web/'
-    SIGN_IN_URL = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'
+    SIGN_IN_URL = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'  # 浏览器在传输链接的过程中是否都将符号转换为 Unicode？
     LOGIN_URL = 'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp='
     COOKIE_URL = 'https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=%s'
     ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
@@ -116,6 +103,7 @@ class YoudaoNoteSession(requests.Session):
         self.local_dir = None
         self.smms_secret_token = None
 
+    # 直接抛异常，不返回异常内容
     def check_and_login(self, username, password) -> str:
         try:
             cookies = covert_cookies('cookies.json')
@@ -123,25 +111,18 @@ class YoudaoNoteSession(requests.Session):
             logging.info('covert_cookies error: %s', format(err))
             cookies = None
 
-        # 如果有正常的 8 个 cookie，使用 cookie 登录
-        if cookies is not None and (len(cookies) == 8):
-            root_id = self.cookies_login(cookies)
-
-            # 如果 Cookies 过期等原因导致 Cookies 登录失败，改用使用账号密码登录
-            if is_json(root_id):
-                root_id = self.login(username, password)
-
-            else:
+        # 如果 cookie 不为 null，使用 cookie 登录
+        if cookies is not None:
+            # 如果 Cookies 被修改或过期等原因导致 Cookies 登录失败，改用使用账号密码登录
+            try:
+                root_id = self.cookies_login(cookies)
                 print('本次使用 Cookies 登录')
-                return root_id
+            except KeyError as err:
+                logging.info('cookie 登录出错：%s', format(err))
+                root_id = self.login(username, password)
+                print('本次使用账号密码登录，已将 Cookies 保存到 cookies.json 中，下次使用 Cookies 登录')
         else:
             root_id = self.login(username, password)
-
-        if is_json(root_id):
-            parsed = json.loads(root_id)
-            raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！接口返回内容：',
-                             json.dumps(parsed, indent=4, sort_keys=True))
-        else:
             print('本次使用账号密码登录，已将 Cookies 保存到 cookies.json 中，下次使用 Cookies 登录')
 
         return root_id
@@ -149,13 +130,13 @@ class YoudaoNoteSession(requests.Session):
     def login(self, username, password) -> str:
         """ 模拟浏览器用户操作，使用账号密码登录，并保存 Cookies """
 
-        # 模拟打开首页
+        # 模拟打开网页版
         self.get(self.WEB_URL)
-        # 模拟设置上一步链接为首页
+        # 模拟设置上一步链接
         self.headers['Referer'] = self.WEB_URL
-        # 模拟重定向跳转到登录页。浏览器在传输链接的过程中是否都将符号转换为 Unicode
+        # 模拟重定向跳转到登录页
         self.get(self.SIGN_IN_URL)
-        # 模拟设置上一步链接为登录页
+        # 模拟设置上一步链接
         self.headers['Referer'] = self.SIGN_IN_URL
         # 模拟跳转到登录页后的请求连接
         self.get('https://note.youdao.com/login/acc/pe/getsess?product=YNOTE&_=%s' % timestamp())
@@ -166,7 +147,6 @@ class YoudaoNoteSession(requests.Session):
             'username': username,
             'password': hashlib.md5(password.encode('utf-8')).hexdigest()
         }
-        # print(hashlib.md5(password.encode('utf-8')).hexdigest())
 
         logging.info('cookies: %s', self.cookies)
 
@@ -174,17 +154,16 @@ class YoudaoNoteSession(requests.Session):
         self.post(self.LOGIN_URL,
                   data=data, allow_redirects=True)
 
-        # 登录成功后的链接，里面包含最新 Cookie: YNOTE_CSTK，Sesssion 对象将获取到可用于登录的 Cookie
+        # 登录成功后的链接，里面包含可用于登录的最新 Cookie: YNOTE_CSTK
         self.get(self.COOKIE_URL % timestamp())
 
         logging.info('new cookies: %s', self.cookies)
         # 设置 cookies
         cstk = self.cookies.get('YNOTE_CSTK')
 
-        logging.info('cstk: %s', cstk)
-        # if cstk is None:
-        #     不再此处返回，获取 root_id 返回时有错误接口提示
-        #     raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！', 'cstk 为 None')
+        if cstk is None:
+            logging.info('cstk: %s', cstk)
+            raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！')
 
         self.cstk = cstk
 
@@ -235,9 +214,12 @@ class YoudaoNoteSession(requests.Session):
         json_obj = json.loads(response.content)
         try:
             return json_obj['fileEntry']['id']
-        # 返回还是抛出异常？
-        except:
-            return response.content.decode('utf-8')
+        # Cookie 登录时可能错误
+        except KeyError:
+            raise KeyError('Cookie 中没有 cstk')
+            # parsed = json.loads(response.content.decode('utf-8'))
+            # raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！接口返回内容：',
+            #                  json.dumps(parsed, indent=4, sort_keys=True))
 
     def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
         """ 下载所有文件 """
@@ -251,14 +233,14 @@ class YoudaoNoteSession(requests.Session):
             try:
                 os.mkdir(local_dir)
             except FileNotFoundError:
-                raise FileNotFoundError('请检查「%s」上层文件夹是否存在，并使用绝对路径！' % (local_dir))
+                raise FileNotFoundError('请检查「%s」上层文件夹是否存在，并使用绝对路径！' % local_dir)
 
         # 有道云笔记指定导出文件夹名不为 '' 时，获取文件夹 id
         if ydnote_dir != '':
             root_id = self.get_dir_id(root_id, ydnote_dir)
             logging.info('root_id %s', root_id)
             if root_id is None:
-                raise ValueError('此文件夹 %s 不是顶层文件夹，暂不能下载！' % (ydnote_dir))
+                raise ValueError('此文件夹 %s 不是顶层文件夹，暂不能下载！' % ydnote_dir)
 
         self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
@@ -430,14 +412,14 @@ class YoudaoNoteSession(requests.Session):
                     if 'source' in child2.tag:
                         image_url = ''
                         if child2.text is not None:
-                            image_url = f'![%s](' + self.get_new_down_or_upload_url(child2.text) + f'){nl}{nl}'
+                            image_url = self.get_new_down_or_upload_url(child2.text) + f'){nl}{nl}'
                             flag += 1
 
                     elif 'text' in child2.tag:
                         image_name = ''
                         if child2.text is not None:
                             image_name = child2.text
-                        new_content += image_url % image_name
+                        new_content += f'![%s](%s' % (image_name, image_url)
                         break
 
             elif 'code' in child.tag:
@@ -558,7 +540,7 @@ class YoudaoNoteSession(requests.Session):
                 return old_url
             else:
                 print(
-                    '上传 %s 到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载到图片本地' % (old_url, smms_secret_token))
+                    '上传 %s 到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载图片到本地' % (old_url, smms_secret_token))
                 return old_url
         else:
             url = res_json['data']['url']
@@ -574,14 +556,11 @@ def main():
 
     try:
         config_dict = check_config('config.json')
-    except Exception as err:
-        print(format(err))
-        sys.exit(1)
-
-    session = YoudaoNoteSession()
-
-    try:
+        session = YoudaoNoteSession()
         root_id = session.check_and_login(config_dict['username'], config_dict['password'])
+        print('正在 pull，请稍后 ...')
+        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
+
     except requests.exceptions.ProxyError as proxyErr:
         print('网络代理错误，请检查代理是否正常设置')
         print(format(proxyErr))
@@ -590,36 +569,18 @@ def main():
         print('网络错误，请检查网络是否正常连接')
         print(format(connectionErr))
         sys.exit(1)
-    except LoginError as err:
-        print(format(err.args[0]))
-        print(format(err.args[1]))
+    except LoginError as loginErr:
+        print(format(loginErr))
         print('已终止执行')
         sys.exit(1)
     # 链接错误等异常
-    except Exception as err2:
-        print(format(err2))
-        print('已终止执行')
-        sys.exit(1)
-
-    print('正在 pull，请稍后 ...')
-
-    try:
-        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
-    except requests.exceptions.ProxyError as proxyErr:
-        print('网络代理错误，请检查代理是否正常设置')
-        print(format(proxyErr))
-        sys.exit(1)
-    except requests.exceptions.ConnectionError as connectionErr:
-        print('网络错误，请检查网络是否正常连接')
-        print(format(connectionErr))
-        sys.exit(1)
     except Exception as err:
         print(format(err))
         print('已终止执行')
         sys.exit(1)
 
     end_time = int(time.time())
-    print('运行完成！耗时 ' + str(end_time - start_time) + ' 秒')
+    print('运行完成！耗时 %s 秒' % str(end_time - start_time))
 
 
 if __name__ == '__main__':
