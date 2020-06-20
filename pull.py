@@ -1,5 +1,5 @@
-#!/usr/bin/python3
-# coding=utf-8
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import requests
 import sys
@@ -47,13 +47,13 @@ def check_config(config_name) -> dict:
 
     # 如果某个 key 不存在，抛出异常
     try:
-        var = config_dict['username']
+        username = config_dict['username']
         config_dict['password']
         config_dict['local_dir']
         config_dict['ydnote_dir']
         config_dict['smms_secret_token']
     except KeyError:
-        raise KeyError("请检查 config.json 的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token")
+        raise KeyError('请检查 config.json 的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
     if config_dict['username'] == '' or config_dict['password'] == '':
         raise ValueError('账号密码不能为空，请检查 config.json！')
@@ -63,7 +63,7 @@ def check_config(config_name) -> dict:
 
 def covert_cookies(file_name) -> list:
     if not os.path.exists(file_name):
-        logging.info("%s is null", file_name)
+        logging.info('%s is null', file_name)
         raise OSError(file_name + '不存在')
 
     # if not os.lstat(file_name):
@@ -120,7 +120,7 @@ class YoudaoNoteSession(requests.Session):
         try:
             cookies = covert_cookies('cookies.json')
         except Exception as err:
-            logging.info("covert_cookies error: %s", format(err))
+            logging.info('covert_cookies error: %s', format(err))
             cookies = None
 
         # 如果有正常的 8 个 cookie，使用 cookie 登录
@@ -168,7 +168,7 @@ class YoudaoNoteSession(requests.Session):
         }
         # print(hashlib.md5(password.encode('utf-8')).hexdigest())
 
-        logging.info("cookies: %s", self.cookies)
+        logging.info('cookies: %s', self.cookies)
 
         # 模拟登陆
         self.post(self.LOGIN_URL,
@@ -392,7 +392,7 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except FileNotFoundError and ET.ParseError:
-                print(file_path + ' 转换失败！请检查文件是否为 xml 格式或是否空！')
+                print(file_path + ' 转换为 Markdown 失败！请检查文件是否为 xml 格式或是否空！')
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -543,18 +543,22 @@ class YoudaoNoteSession(requests.Session):
             print(format(err))
             return old_url
 
-        res_json = res.json()
+        try:
+            res_json = res.json()
+        except ValueError:
+            print('SM.MS 每小时只能上传 100 张图片，%s 未转换，将下载到本地' % old_url)
+            return old_url
 
         url = old_url
         if res_json['success'] is False:
             if res_json['code'] == 'image_repeated':
                 url = res_json['images']
             elif res_json['code'] == 'flood':
-                print('每小时只能上传 100 张图片，%s 未转换' % old_url)
+                print('SM.MS 每小时只能上传 100 张图片，%s 未转换，将下载图片到本地' % old_url)
                 return old_url
             else:
                 print(
-                    '上传 ' + old_url + ' 到 SM.MS 失败，请检查图片 url 或 smms_secret_token（' + smms_secret_token + '）是否正确！将下载到本地。')
+                    '上传 %s 到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载到图片本地' % (old_url, smms_secret_token))
                 return old_url
         else:
             url = res_json['data']['url']
@@ -578,6 +582,14 @@ def main():
 
     try:
         root_id = session.check_and_login(config_dict['username'], config_dict['password'])
+    except requests.exceptions.ProxyError as proxyErr:
+        print('网络代理错误，请检查代理是否正常设置')
+        print(format(proxyErr))
+        sys.exit(1)
+    except requests.exceptions.ConnectionError as connectionErr:
+        print('网络错误，请检查网络是否正常连接')
+        print(format(connectionErr))
+        sys.exit(1)
     except LoginError as err:
         print(format(err.args[0]))
         print(format(err.args[1]))
@@ -593,6 +605,14 @@ def main():
 
     try:
         session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
+    except requests.exceptions.ProxyError as proxyErr:
+        print('网络代理错误，请检查代理是否正常设置')
+        print(format(proxyErr))
+        sys.exit(1)
+    except requests.exceptions.ConnectionError as connectionErr:
+        print('网络错误，请检查网络是否正常连接')
+        print(format(connectionErr))
+        sys.exit(1)
     except Exception as err:
         print(format(err))
         print('已终止执行')
