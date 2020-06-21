@@ -493,16 +493,19 @@ class YoudaoNoteSession(requests.Session):
         local_image_dir = os.path.join(self.local_dir, 'youdaonote-images')
         if not os.path.exists(local_image_dir):
             os.mkdir(local_image_dir)
-        image_name = os.path.basename(urlparse(url).path)
-        image_path = os.path.join(local_image_dir, image_name + '.' + response.headers['Content-Type'].split('/')[1])
+        image_basename = os.path.basename(urlparse(url).path)
+        image_name = image_basename + '.' + response.headers['Content-Type'].split('/')[1]
+        local_image_path = os.path.join(local_image_dir, image_name)
         try:
-            with open(image_path, 'wb') as f:
+            with open(local_image_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print('已将图片 %s 转换为 %s' % (url, image_path))
+            print('已将图片 %s 转换为 %s' % (url, local_image_path))
         except:
             print(url + ' 图片有误！')
             return url
-        return image_path
+
+        # 使用相对路径
+        return os.path.join('./youdaonote-images/', image_name)
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
         """ 上传图片到 sm.ms """
@@ -564,10 +567,12 @@ def main():
     except requests.exceptions.ProxyError as proxyErr:
         print('网络代理错误，请检查代理是否正常设置')
         print(format(proxyErr))
+        print('已终止执行')
         sys.exit(1)
     except requests.exceptions.ConnectionError as connectionErr:
         print('网络错误，请检查网络是否正常连接')
         print(format(connectionErr))
+        print('已终止执行')
         sys.exit(1)
     except LoginError as loginErr:
         print(format(loginErr))
