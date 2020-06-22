@@ -303,10 +303,13 @@ class YoudaoNoteSession(requests.Session):
     def judge_add_or_update(self, id, name, local_dir, file_entry) -> None:
         """ 判断是新增还是更新 """
 
-        # 如果文件名是网址，避免 open() 函数失败（因为目录名错误），替换 / 为 _
-        if name.startswith('https'):
-            name = name.replace('/', '_')
-            logging.info('%s 是网址，避免 open() 函数失败（因为目录名错误），替换 / 为 _', name)
+        # 如果文件名是网址，避免 open() 函数失败（因为目录名错误），修改文件名
+        if name.startswith('https') or name.startswith('http'):
+            name = name.replace('/', '_')  # 替换 / 为 _
+            # 只保留字符、下划线、小数点和减号
+            regex = re.compile('[^a-zA-Z_.\-]')
+            name = regex.sub('', name)
+            logging.info('%s 是网址，避免 open() 函数失败（因为目录名错误），修改文件名', name)
 
         youdao_file_suffix = os.path.splitext(name)[1]  # 笔记后缀
         local_file_path = os.path.join(local_dir, name)  # 用于将后缀 .note 转换为 .md
@@ -504,7 +507,7 @@ class YoudaoNoteSession(requests.Session):
             print(url + ' 图片有误！')
             return url
 
-        # 使用相对路径
+        # Markdown 中图片使用相对路径
         return os.path.join('./youdaonote-images/', image_name)
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
