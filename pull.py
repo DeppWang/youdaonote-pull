@@ -33,7 +33,7 @@ def check_config(config_name) -> dict:
         # 将字符串转换为字典
         config_dict = eval(config_str)
     except SyntaxError:
-        raise SyntaxError('请检查 config.json 格式是否为 utf-8 的 json！建议使用 Sublime 编辑 config.json')
+        raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑 config.json')
 
     # 如果某个 key 不存在，抛出异常
     try:
@@ -43,10 +43,10 @@ def check_config(config_name) -> dict:
         config_dict['ydnote_dir']
         config_dict['smms_secret_token']
     except KeyError:
-        raise KeyError('请检查 config.json 的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
+        raise KeyError('请检查「config.json」的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
     if config_dict['username'] == '' or config_dict['password'] == '':
-        raise ValueError('账号密码不能为空，请检查 config.json！')
+        raise ValueError('账号密码不能为空，请检查「config.json」！')
 
     return config_dict
 
@@ -103,7 +103,6 @@ class YoudaoNoteSession(requests.Session):
         self.local_dir = None
         self.smms_secret_token = None
 
-    # 直接抛异常，不返回异常内容
     def check_and_login(self, username, password) -> str:
         try:
             cookies = covert_cookies('cookies.json')
@@ -128,7 +127,7 @@ class YoudaoNoteSession(requests.Session):
         return root_id
 
     def login(self, username, password) -> str:
-        """ 模拟浏览器用户操作，使用账号密码登录，并保存 Cookies """
+        """ 模拟浏览器用户操作，使用账号密码登录，并保存 Cookie """
 
         # 模拟打开网页版
         self.get(self.WEB_URL)
@@ -158,6 +157,7 @@ class YoudaoNoteSession(requests.Session):
         self.get(self.COOKIE_URL % timestamp())
 
         logging.info('new cookies: %s', self.cookies)
+
         # 设置 cookies
         cstk = self.cookies.get('YNOTE_CSTK')
 
@@ -200,7 +200,8 @@ class YoudaoNoteSession(requests.Session):
         return self.get_root_id()
 
     def get_root_id(self) -> str:
-        """ 获取有道云笔记 root_id
+        """
+        获取有道云笔记 root_id
         root_id 始终不会改变？可保存？可能会改变，几率很小。可以保存，保存又会带来新的复杂度。只要登录后，获取一下也没有影响
         """
 
@@ -238,11 +239,11 @@ class YoudaoNoteSession(requests.Session):
         # 有道云笔记指定导出文件夹名不为 '' 时，获取文件夹 id
         if ydnote_dir != '':
             root_id = self.get_dir_id(root_id, ydnote_dir)
-            logging.info('root_id %s', root_id)
+            logging.info('root_id: %s', root_id)
             if root_id is None:
-                raise ValueError('此文件夹 %s 不是顶层文件夹，暂不能下载！' % ydnote_dir)
+                raise ValueError('此文件夹「%s」不是顶层文件夹，暂不能下载！' % ydnote_dir)
 
-        self.local_dir = local_dir  # 此处设置，后面会用，避免传参
+        self.local_dir = local_dir                  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
         self.get_file_recursively(root_id, local_dir)
 
@@ -281,13 +282,14 @@ class YoudaoNoteSession(requests.Session):
                 total = json_obj['count']
             # 如果 json_obj 不是 json，退出
             except KeyError:
-                logging.info('json_obj', json_obj)
+                logging.info('json_obj: %s', json_obj)
                 raise KeyError('有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue')
 
             for entry in json_obj['entries']:
                 file_entry = entry['fileEntry']
                 id = file_entry['id']
                 name = file_entry['name']
+                logging.info('name: %s', name)
                 # 如果是目录，继续遍历目录下文件
                 if file_entry['dir']:
                     sub_dir = os.path.join(local_dir, name)
@@ -297,7 +299,7 @@ class YoudaoNoteSession(requests.Session):
                 else:
                     self.judge_add_or_update(id, name, local_dir, file_entry)
 
-            count = count + 1
+            count += 1
             lastId = id
 
     def judge_add_or_update(self, id, name, local_dir, file_entry) -> None:
@@ -311,38 +313,38 @@ class YoudaoNoteSession(requests.Session):
             name = regex.sub('', name)
             logging.info('%s 是网址，避免 open() 函数失败（因为目录名错误），修改文件名', name)
 
-        youdao_file_suffix = os.path.splitext(name)[1]  # 笔记后缀
-        local_file_path = os.path.join(local_dir, name)  # 用于将后缀 .note 转换为 .md
+        youdao_file_suffix = os.path.splitext(name)[1]      # 笔记后缀
+        local_file_path = os.path.join(local_dir, name)     # 用于将后缀 .note 转换为 .md
         original_file_path = os.path.join(local_dir, name)  # 保留本身后缀
-        local_file_name = os.path.join(local_dir, os.path.splitext(name)[0])  # 没有后缀的本地文件
-        tip = youdao_file_suffix
+
+        tip = ''
 
         # 本地 .note 文件均为 .md，使用 .md 后缀判断是否在本地存在
         if youdao_file_suffix == '.note':
-            tip = '.md ，「云笔记原格式为 .note」'
-            local_file_path = local_file_name + '.md'
+            tip = '，云笔记原格式为 .note'
+            local_file_basename = os.path.join(local_dir, os.path.splitext(name)[0])  # 没有后缀的本地文件
+            local_file_path = local_file_basename + '.md'
 
         # 如果不存在，则更新
         if not os.path.exists(local_file_path):
             self.get_file(id, original_file_path, youdao_file_suffix)
-            print('新增 %s%s' % (local_file_name, tip))
+            print('新增「%s」%s' % (local_file_path, tip))
         # 如果已经存在，判断是否需要更新
         else:
             # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新。跳过本地更新步骤
             if file_entry['modifyTimeForSort'] < os.path.getmtime(local_file_path):
                 # print('此文件不更新，跳过 ...，最好一行动态变化')
-                logging.info('此文件 %s 不更新，跳过', local_file_path)
+                logging.info('此文件「%s」不更新，跳过', local_file_path)
                 return
 
             print('-----------------------------')
             print('local file modifyTime: ' + str(int(os.path.getmtime(local_file_path))))
             print('youdao file modifyTime: ' + str(file_entry['modifyTimeForSort']))
             self.get_file(id, original_file_path, youdao_file_suffix)
-            print('更新 %s%s' % (local_file_name, tip))
+            print('更新「%s」%s' % (local_file_path, tip))
 
     def get_file(self, file_id, file_path, youdao_file_suffix) -> None:
         """ 下载文件。先不管什么类型文件，均下载。如果是 .note 类型，转换为 Markdown """
-
         data = {
             'fileId': file_id,
             'version': -1,
@@ -377,7 +379,7 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except FileNotFoundError and ET.ParseError:
-                print(file_path + ' 转换为 Markdown 失败！请检查文件是否为 xml 格式或是否空！')
+                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否空！' % file_path)
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -412,34 +414,36 @@ class YoudaoNoteSession(requests.Session):
                     self.print_ydnote_file_name(file_path)
 
                 for child2 in child:
+                    # source 在 text 前
                     if 'source' in child2.tag:
                         image_url = ''
                         if child2.text is not None:
-                            image_url = self.get_new_down_or_upload_url(child2.text) + f'){nl}{nl}'
+                            image_url = self.get_new_down_or_upload_url(child2.text)
                             flag += 1
 
                     elif 'text' in child2.tag:
                         image_name = ''
                         if child2.text is not None:
                             image_name = child2.text
-                        new_content += f'![%s](%s' % (image_name, image_url)
+                        new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
                         break
 
             elif 'code' in child.tag:
                 for child2 in child:
+                    # text 在 language 前
                     if 'text' in child2.tag:
-                        code = f'```%s{nl}' + child2.text + f'{nl}```{nl}{nl}'
+                        code = child2.text
                     elif 'language' in child2.tag:
                         language = ''
                         if language is not None:
                             language = child2.text
-                        new_content += code % language
+                        new_content += f'```%s{nl}%s{nl}```{nl}{nl}' % (language, code)
                         break
 
             elif 'table' in child.tag:
                 for child2 in child:
                     if 'content' in child2.tag:
-                        new_content += f'```{nl}原来为 table，需要复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
+                        new_content += f'```{nl}原来格式为表格（table），转换较复杂，未转换，需要手动复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
 
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
@@ -484,7 +488,7 @@ class YoudaoNoteSession(requests.Session):
             response = self.get(url)
         # 如果此处不抓异常，将退出运行
         except requests.exceptions.ProxyError as err:
-            print('网络错误，%s 下载失败' % url)
+            print('网络错误，「%s」下载失败' % url)
             print(format(err))
             return url
 
@@ -502,13 +506,12 @@ class YoudaoNoteSession(requests.Session):
         try:
             with open(local_image_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print('已将图片 %s 转换为 %s' % (url, local_image_path))
+            print('已将图片「%s」转换为「%s」' % (url, local_image_path))
         except:
             print(url + ' 图片有误！')
             return url
 
-        # Markdown 中图片使用相对路径
-        return os.path.join('./youdaonote-images/', image_name)
+        return os.path.join(local_image_path)
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
         """ 上传图片到 sm.ms """
@@ -527,14 +530,14 @@ class YoudaoNoteSession(requests.Session):
             res = requests.post(smms_upload_api, headers=headers, files=files)
         except requests.exceptions.ProxyError as err:
             logging.info('网络错误，请重试')
-            print('网络错误，上传 %s 到 SM.MS 失败！将下载图片到本地' % old_url)
+            print('网络错误，上传「%s」到 SM.MS 失败！将下载图片到本地' % old_url)
             print(format(err))
             return old_url
 
         try:
             res_json = res.json()
         except ValueError:
-            print('SM.MS 每小时只能上传 100 张图片，%s 未转换，将下载到本地' % old_url)
+            print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载到本地' % old_url)
             return old_url
 
         url = old_url
@@ -542,11 +545,11 @@ class YoudaoNoteSession(requests.Session):
             if res_json['code'] == 'image_repeated':
                 url = res_json['images']
             elif res_json['code'] == 'flood':
-                print('SM.MS 每小时只能上传 100 张图片，%s 未转换，将下载图片到本地' % old_url)
+                print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载图片到本地' % old_url)
                 return old_url
             else:
                 print(
-                    '上传 %s 到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载图片到本地' % (old_url, smms_secret_token))
+                    '上传「%s」到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载图片到本地' % (old_url, smms_secret_token))
                 return old_url
         else:
             url = res_json['data']['url']
@@ -554,7 +557,7 @@ class YoudaoNoteSession(requests.Session):
         return url
 
     def print_download_yd_image_error(self, url) -> None:
-        print('下载 %s 失败！浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
+        print('下载「%s」失败！浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
 
 
 def main():
