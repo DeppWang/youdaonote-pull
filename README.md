@@ -112,7 +112,7 @@ python pull.py   # Windows
 
 效果：
 
-![](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-09-130325.jpg)
+![image-20200623225838668](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-23-145839.png)
 
 ### 三、多次导出
 
@@ -136,6 +136,9 @@ python pull.py   # Windows
 1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
 3. 请确认代码是否为最新，有问题请提交 issue
+   ```bash
+   git pull origin master  # 更新代码
+   ```
 
 <!--在 CentOS 环境下，由于命令行环境不能直接显示中文，所以会出现 UnicodeEncodeError-->
 
