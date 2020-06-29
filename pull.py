@@ -33,7 +33,7 @@ def check_config(config_name) -> dict:
         # 将字符串转换为字典
         config_dict = eval(config_str)
     except SyntaxError:
-        raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑 config.json')
+        raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑「config.json」')
 
     # 如果某个 key 不存在，抛出异常
     try:
@@ -400,15 +400,23 @@ class YoudaoNoteSession(requests.Session):
         nl = '\r\n'  # 考虑 Windows 系统，换行符设为 \r\n
         new_content = f''  # f-string 多行字符串
 
-        # 得到多维数组中的文本，因为是数组，不是对象，所以只能遍历
+        # list id 与 type 的对应
+        list_item = {}
+        for child in root[0]:
+            if 'list' in child.tag:
+                list_item[child.attrib['id']] = child.attrib['type']
+
+        # 得到多维数组中的文本，因为是数组，不是对象（json），所以只能遍历
+        # root[1] 为 body
         for child in root[1]:
+            # 正常文本
             if 'para' in child.tag:
                 for child2 in child:
                     if 'text' in child2.tag:
                         # 将 None 转为 "
                         if child2.text is None:
                             child2.text = ''
-                        new_content += child2.text + f'{nl}{nl}'
+                        new_content += f'%s{nl}{nl}' % child2.text
                         break
 
             elif 'image' in child.tag:
@@ -424,9 +432,9 @@ class YoudaoNoteSession(requests.Session):
                             flag += 1
 
                     elif 'text' in child2.tag:
-                        image_name = ''
-                        if child2.text is not None:
-                            image_name = child2.text
+                        image_name = child2.text
+                        if child2.text is None:
+                            image_name = ''
                         new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
                         break
 
@@ -436,16 +444,63 @@ class YoudaoNoteSession(requests.Session):
                     if 'text' in child2.tag:
                         code = child2.text
                     elif 'language' in child2.tag:
-                        language = ''
-                        if language is not None:
-                            language = child2.text
+                        language = child2.text
+                        if language is None:
+                            language = ''
                         new_content += f'```%s{nl}%s{nl}```{nl}{nl}' % (language, code)
                         break
+            
+            elif 'list-item' in child.tag:
+                # logging.info('list-item child: %s' % child)
+
+                # 无序列表
+                if list_item.get(child.attrib['list-id']) == 'unordered':
+
+                    for child2 in child:
+                        if 'text' in child2.tag:
+                            text = child2.text
+                            if text is None:
+                                text = ''
+                            new_content += f'- %s{nl}{nl}' % text
+                # 有序列表
+                elif list_item.get(child.attrib['list-id']) == 'ordered':
+                    for child2 in child:
+                        if 'text' in child2.tag:
+                            count = 1
+                            text = child2.text
+                            if text is None:
+                                text = ''
+                            new_content += f'%s. %s{nl}{nl}' % (count, text)
+                            # count += 1
+            # 复选框
+            elif 'todo' in child.tag:
+                for child2 in child:
+                    if 'text' in child2.tag:
+                        text = child2.text
+                        if text is None:
+                            text = ''
+                        new_content += f'- [ ] %s{nl}{nl}' % text
+            # 引用
+            elif 'quote' in child.tag:
+                for child2 in child:
+                    if 'text' in child2.tag:
+                        text = child2.text
+                        if text is None:
+                            text = ''
+                        new_content += f'> %s{nl}{nl}' % text
 
             elif 'table' in child.tag:
                 for child2 in child:
                     if 'content' in child2.tag:
                         new_content += f'```{nl}原来格式为表格（table），转换较复杂，未转换，需要手动复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
+
+            else:
+                for child2 in child:
+                    if 'text' in child2.tag:
+                        text = child2.text
+                        if text is None:
+                            text = ''
+                        new_content += f'%s{nl}{nl}' % text
 
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
@@ -491,7 +546,7 @@ class YoudaoNoteSession(requests.Session):
         # 如果此处不抓异常，将退出运行
         except requests.exceptions.ProxyError as err:
             print('网络错误，「%s」下载失败' % url)
-            print(format(err))
+            print('错误提示：%s' % format(err))
             return url
 
         if response.status_code != 200:
@@ -575,7 +630,7 @@ class YoudaoNoteSession(requests.Session):
                 return old_url
         else:
             url = res_json['data']['url']
-        print('已将图片 ' + old_url + ' 转换为 ' + url)
+        print('已将图片「%s」转换为「%s」' % (old_url, url))
         return url
 
     def print_download_yd_image_error(self, url) -> None:
