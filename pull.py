@@ -400,7 +400,7 @@ class YoudaoNoteSession(requests.Session):
         nl = '\r\n'  # 考虑 Windows 系统，换行符设为 \r\n
         new_content = f''  # f-string 多行字符串
 
-        # list id 与 type 的对应
+        # list_item 的 id 与 type 的对应
         list_item = {}
         for child in root[0]:
             if 'list' in child.tag:
@@ -438,6 +438,7 @@ class YoudaoNoteSession(requests.Session):
                         new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
                         break
 
+            # 代码块
             elif 'code' in child.tag:
                 for child2 in child:
                     # text 在 language 前
@@ -489,6 +490,7 @@ class YoudaoNoteSession(requests.Session):
                             text = ''
                         new_content += f'> %s{nl}{nl}' % text
 
+            # 表格
             elif 'table' in child.tag:
                 for child2 in child:
                     if 'content' in child2.tag:
@@ -549,7 +551,8 @@ class YoudaoNoteSession(requests.Session):
             print('错误提示：%s' % format(err))
             return url
 
-        if response.status_code != 200:
+        content_type = response.headers.get('Content-Type')
+        if response.status_code != 200 or content_type is None or ('image' not in content_type):
             self.print_download_yd_image_error(url)
             return url
 
@@ -559,7 +562,7 @@ class YoudaoNoteSession(requests.Session):
         if not os.path.exists(local_image_dir):
             os.mkdir(local_image_dir)
         image_basename = os.path.basename(urlparse(url).path)
-        image_name = image_basename + '.' + response.headers['Content-Type'].split('/')[1]
+        image_name = image_basename + '.' + content_type.split('/')[1]
         local_image_path = os.path.join(local_image_dir, image_name)
 
         try:
