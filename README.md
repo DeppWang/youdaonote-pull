@@ -112,7 +112,7 @@ python pull.py   # Windows
 
 效果：
 
-![image-20200623225838668](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-06-23-145839.png)
+![2020-06-23-145839](https://deppwang.oss-cn-beijing.aliyuncs.com/test/2020-08-04-072948.png)
 
 ### 三、多次导出
 
