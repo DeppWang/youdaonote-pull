@@ -304,16 +304,21 @@ class YoudaoNoteSession(requests.Session):
 
         tip = ''
 
-        # 本地 .note 文件均为 .md，使用 .md 后缀判断是否在本地存在
+        # 如果有有道云笔记是「笔记」类型，则设置提示类型
         if youdao_file_suffix == '.note':
             tip = '，云笔记原格式为 .note'
             local_file_basename = os.path.join(local_dir, os.path.splitext(name)[0])  # 没有后缀的本地文件
+            # 使用 .md 后缀判断是否在本地存在
             local_file_path = local_file_basename + '.md'
 
         # 如果不存在，则更新
         if not os.path.exists(local_file_path):
-            self.get_file(id, original_file_path, youdao_file_suffix)
-            print('新增「%s」%s' % (local_file_path, tip))
+            try:
+                self.get_file(id, original_file_path, youdao_file_suffix)
+                print('新增「%s」%s' % (local_file_path, tip))
+            except FileNotFoundError and ET.ParseError:
+                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % original_file_path)
+
         # 如果已经存在，判断是否需要更新
         else:
             # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新。跳过本地更新步骤
@@ -325,8 +330,11 @@ class YoudaoNoteSession(requests.Session):
             print('-----------------------------')
             print('local file modifyTime: ' + str(int(os.path.getmtime(local_file_path))))
             print('youdao file modifyTime: ' + str(file_entry['modifyTimeForSort']))
-            self.get_file(id, original_file_path, youdao_file_suffix)
-            print('更新「%s」%s' % (local_file_path, tip))
+            try:
+                self.get_file(id, original_file_path, youdao_file_suffix)
+                print('更新「%s」%s' % (local_file_path, tip))
+            except FileNotFoundError and ET.ParseError:
+                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % original_file_path)
 
     def optimize_name(self, name):
         """ 避免 open() 函数失败（因为目录名错误），修改文件名 """
@@ -372,7 +380,7 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except FileNotFoundError and ET.ParseError:
-                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % file_path)
+                raise
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -628,7 +636,7 @@ class YoudaoNoteSession(requests.Session):
         return url
 
     def print_download_yd_image_error(self, url) -> None:
-        print('下载「%s」失败！浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
+        print('下载「%s」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
 
 
 def main():
