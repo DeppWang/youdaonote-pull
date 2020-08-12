@@ -14,7 +14,7 @@ import logging
 
 # logging.basicConfig(level=logging.INFO)
 
-__author__ = 'DeppWang (deppwxq@gmail.com)'
+__author__ = 'Depp Wang (deppwxq@gmail.com)'
 __github__ = 'https//github.com/DeppWang/youdaonote-pull'
 
 
@@ -268,39 +268,30 @@ class YoudaoNoteSession(requests.Session):
         """ 递归遍历，根据 id 找到目录下的所有文件 """
 
         url = self.DIR_MES_URL % (id, self.cstk)
-        lastId = None
-        count = 0
-        total = 1
-        while count < total:
-            if lastId is not None:
-                url = url + '&lastId=%s' % lastId
 
-            response = self.get(url)
-            json_obj = json.loads(response.content)
+        response = self.get(url)
+        json_obj = json.loads(response.content)
 
-            try:
-                total = json_obj['count']
-            # 如果 json_obj 不是 json，退出
-            except KeyError:
-                logging.info('json_obj: %s', json_obj)
-                raise KeyError('有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue')
+        try:
+            json_obj['count']
+        # 如果 json_obj 不是 json，退出
+        except KeyError:
+            logging.info('json_obj: %s', json_obj)
+            raise KeyError('有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue')
 
-            for entry in json_obj['entries']:
-                file_entry = entry['fileEntry']
-                id = file_entry['id']
-                name = file_entry['name']
-                logging.info('name: %s', name)
-                # 如果是目录，继续遍历目录下文件
-                if file_entry['dir']:
-                    sub_dir = os.path.join(local_dir, name)
-                    if not os.path.exists(sub_dir):
-                        os.mkdir(sub_dir)
-                    self.get_file_recursively(id, sub_dir)
-                else:
-                    self.judge_add_or_update(id, name, local_dir, file_entry)
-
-            count += 1
-            lastId = id
+        for entry in json_obj['entries']:
+            file_entry = entry['fileEntry']
+            id = file_entry['id']
+            name = file_entry['name']
+            logging.info('name: %s', name)
+            # 如果是目录，继续遍历目录下文件
+            if file_entry['dir']:
+                sub_dir = os.path.join(local_dir, name)
+                if not os.path.exists(sub_dir):
+                    os.mkdir(sub_dir)
+                self.get_file_recursively(id, sub_dir)
+            else:
+                self.judge_add_or_update(id, name, local_dir, file_entry)
 
     def judge_add_or_update(self, id, name, local_dir, file_entry) -> None:
         """ 判断是新增还是更新 """
@@ -381,7 +372,7 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except FileNotFoundError and ET.ParseError:
-                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否空！' % file_path)
+                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % file_path)
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -450,7 +441,7 @@ class YoudaoNoteSession(requests.Session):
                             language = ''
                         new_content += f'```%s{nl}%s{nl}```{nl}{nl}' % (language, code)
                         break
-            
+
             elif 'list-item' in child.tag:
                 # logging.info('list-item child: %s' % child)
 
