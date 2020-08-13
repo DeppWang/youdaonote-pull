@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 import re
 import logging
+# import html2markdown
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -243,7 +244,7 @@ class YoudaoNoteSession(requests.Session):
             if root_id is None:
                 raise ValueError('此文件夹「%s」不是顶层文件夹，暂不能下载！' % ydnote_dir)
 
-        self.local_dir = local_dir                  # 此处设置，后面会用，避免传参
+        self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
         self.get_file_recursively(root_id, local_dir)
 
@@ -298,8 +299,8 @@ class YoudaoNoteSession(requests.Session):
 
         name = self.optimize_name(name)
 
-        youdao_file_suffix = os.path.splitext(name)[1]      # 笔记后缀
-        local_file_path = os.path.join(local_dir, name)     # 用于将后缀 .note 转换为 .md
+        youdao_file_suffix = os.path.splitext(name)[1]  # 笔记后缀
+        local_file_path = os.path.join(local_dir, name)  # 用于将后缀 .note 转换为 .md
         original_file_path = os.path.join(local_dir, name)  # 保留本身后缀
 
         tip = ''
@@ -316,8 +317,8 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('新增「%s」%s' % (local_file_path, tip))
-            except FileNotFoundError and ET.ParseError:
-                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % original_file_path)
+            except Exception:
+                print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
 
         # 如果已经存在，判断是否需要更新
         else:
@@ -333,13 +334,13 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('更新「%s」%s' % (local_file_path, tip))
-            except FileNotFoundError and ET.ParseError:
-                print('「%s」转换为 Markdown 失败！请检查文件是否为 xml 格式或是否为空！' % original_file_path)
+            except Exception:
+                print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
 
     def optimize_name(self, name):
         """ 避免 open() 函数失败（因为目录名错误），修改文件名 """
 
-        regex = re.compile(r'[\\/:\*\?"<>\|]')   #  替换 \ / : * ? " < > | 为 _
+        regex = re.compile(r'[\\/:\*\?"<>\|]')  # 替换 \ / : * ? " < > | 为 _
         name = regex.sub('_', name)
         return name
 
@@ -379,8 +380,12 @@ class YoudaoNoteSession(requests.Session):
         if youdao_file_suffix == '.note':
             try:
                 self.covert_xml_to_markdown(file_path)
-            except FileNotFoundError and ET.ParseError:
-                raise
+            except ET.ParseError:
+                logging.info('笔记为 17 年以前新建，格式为 html')
+                base = os.path.splitext(file_path)[0]
+                new_file_path = base + '.md'
+                os.rename(file_path, new_file_path)
+                # self.covert_html_to_markdown(file_path)
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -503,6 +508,15 @@ class YoudaoNoteSession(requests.Session):
                             text = ''
                         new_content += f'%s{nl}{nl}' % text
 
+        self.write_content(file_path, new_content)
+
+    def covert_html_to_markdown(self, file_path):
+        with open(file_path, 'rb') as f:
+            content_str = f.read().decode('utf-8')
+        new_content = html2markdown.convert(content_str)
+        self.write_content(file_path, new_content)
+
+    def write_content(self, file_path, new_content):
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
         os.rename(file_path, new_file_path)
@@ -588,7 +602,7 @@ class YoudaoNoteSession(requests.Session):
         if layer_count > 2:
             sub_count = layer_count - 2
             for i in range(sub_count):
-               relative = os.path.join(relative, '../')
+                relative = os.path.join(relative, '../')
         new_image_path = os.path.join(relative, image_dirname, image_name)
         return new_image_path
 
