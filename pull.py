@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 import re
 import logging
-# import html2markdown
+from markdownify import markdownify as md
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -312,7 +312,7 @@ class YoudaoNoteSession(requests.Session):
             # 使用 .md 后缀判断是否在本地存在
             local_file_path = local_file_basename + '.md'
 
-        # 如果不存在，则更新
+        # 如果不存在，则下载
         if not os.path.exists(local_file_path):
             try:
                 self.get_file(id, original_file_path, youdao_file_suffix)
@@ -381,11 +381,11 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except ET.ParseError:
-                logging.info('笔记为 17 年以前新建，格式为 html')
+                print('此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown')
                 base = os.path.splitext(file_path)[0]
                 new_file_path = base + '.md'
                 os.rename(file_path, new_file_path)
-                # self.covert_html_to_markdown(file_path)
+                self.covert_html_to_markdown(file_path)
 
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
@@ -513,7 +513,7 @@ class YoudaoNoteSession(requests.Session):
     def covert_html_to_markdown(self, file_path):
         with open(file_path, 'rb') as f:
             content_str = f.read().decode('utf-8')
-        new_content = html2markdown.convert(content_str)
+        new_content = md(content_str)
         self.write_content(file_path, new_content)
 
     def write_content(self, file_path, new_content):
@@ -638,12 +638,12 @@ class YoudaoNoteSession(requests.Session):
             if res_json['code'] == 'image_repeated':
                 url = res_json['images']
             elif res_json['code'] == 'flood':
-                print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载图片到本地' % old_url)
-                return old_url
+                print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载图片到本地' % url)
+                return url
             else:
                 print(
-                    '上传「%s」到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载图片到本地' % (old_url, smms_secret_token))
-                return old_url
+                    '上传「%s」到 SM.MS 失败，请检查图片 url 或 smms_secret_token（%s）是否正确！将下载图片到本地' % (url, smms_secret_token))
+                return url
         else:
             url = res_json['data']['url']
         print('已将图片「%s」转换为「%s」' % (old_url, url))
