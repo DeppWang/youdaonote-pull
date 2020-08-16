@@ -36,7 +36,7 @@ git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-#### 2、安装 Python3、安装 requests 依赖模块（包）
+#### 2、安装 Python3、安装依赖模块（包）
 
 - 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
 
@@ -45,16 +45,18 @@ python3 --version  # macOS/Linux
 python --version   # Windows
 ```
 
-- 安装 requests 依赖包，脚本依赖 requests
+- 安装依赖包
 
 ```shell
 # macOS
 sudo easy_install pip3      # 安装 Python3 Package Installer
-sudo pip3 install requests 
+sudo pip3 install requests     #  安装 requests
+sudo pip3 install markdownify  #  安装 markdownify，用于 html 转化为 md
 ```
 ```shell
 # Windows
 pip install requests  
+pip install markdownify
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
@@ -134,7 +136,9 @@ python pull.py   # Windows
 <!--Tips 使用提示-->
 
 1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
+
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
+
 3. 请确认代码是否为最新，有问题请提交 [issue](https://github.com/DeppWang/youdaonote-pull/issues?q=is%3Aissue+is%3Aclosed)
    ```bash
    git pull origin master  # 更新代码
@@ -149,10 +153,9 @@ python pull.py   # Windows
 - [x] 将 .note 文件转换为 Markdown 文件
 - [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
 - [x] 首次导出使用账号密码登录，再次导出时使用 Cookie 登录（Cookie 保存在 cookies.json 中），避免频繁操作时因为需要输入验证码导致登录不上的情况
-- [ ] 优化如果同一目录存在同名的 .md 和 .note 文件，.md 文件将被覆盖的情况
 - [ ] 并发执行以加快速度
 - [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
-
+<!--优化如果同一目录存在同名的 .md 和 .note 文件，只能保存一个的情况-->
 ## 原理
 
 <!--Principle-->
@@ -176,5 +179,26 @@ python pull.py   # Windows
 现在我使用 Typora + [Dropbox](https://www.dropbox.com/) + [MWeb](https://www.mweb.im/) 实现同步笔记和手机查看编辑的功能，很香。
 
 最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
+
+<!--捐赠-->
+
+<!--请作者吃包辣条？-->
+
+<!--支付宝-->   
+<!--微信--> 
+<!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
+<!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
+
+<!--重名-->
+
+<!--网页版有道云笔记本身将所有笔记显示，不存在-->
+
+<!--默认将 note 保存为 md，再次出现同名时，会判断是否需要更新，需要则更新，不需要则跳过-->
+
+<!--存在同名 note 和 md 时，note 先保存为 md，后面 md 如果修改时间晚，将覆盖 note，如果早，将跳过。-->
+
+<!--只能将原来的 note 做个标记，知道是 note，可以直接 **note.md，但不美观-->
+
+
 
 ![Profile views](https://gpvc.arturio.dev/youdaonote-pull)
