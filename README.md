@@ -36,7 +36,7 @@ git clone https://github.com/DeppWang/youdaonote-pull.git
 cd youdaonote-pull
 ```
 
-#### 2、安装 Python3、安装依赖模块（包）
+#### 2、安装 [Python3](https://www.python.org/downloads/)、安装依赖模块（包）
 
 - 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
 
