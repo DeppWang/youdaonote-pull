@@ -136,9 +136,7 @@ python pull.py   # Windows
 <!--Tips 使用提示-->
 
 1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
-
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
-
 3. 请确认代码是否为最新，有问题请提交 [issue](https://github.com/DeppWang/youdaonote-pull/issues?q=is%3Aissue+is%3Aclosed)
    ```bash
    git pull origin master  # 更新代码
