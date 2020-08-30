@@ -332,6 +332,10 @@ class YoudaoNoteSession(requests.Session):
             print('local file modifyTime: ' + str(int(os.path.getmtime(local_file_path))))
             print('youdao file modifyTime: ' + str(file_entry['modifyTimeForSort']))
             try:
+                # 考虑到使用 f.write() 直接覆盖原文件，在 Windows 下报错（WinError 183），先将其删除
+                if os.path.exists(local_file_path):
+                    os.remove(local_file_path)
+                # 同一目录，如果存在同名 note 和 markdown，只能保存其中一个，简单的解决办法是用笔记名区分，但不美观。
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('更新「%s」%s' % (local_file_path, tip))
             except Exception:
@@ -517,6 +521,8 @@ class YoudaoNoteSession(requests.Session):
         self.write_content(file_path, new_content)
 
     def write_content(self, file_path, new_content):
+        " File is **.note，new_content is markdown string "
+
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
         os.rename(file_path, new_file_path)
