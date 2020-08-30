@@ -4,6 +4,7 @@ import os
 import shutil
 import sys
 import logging
+from markdownify import markdownify as md
 
 # 级别由低到高 DEBUG、INFO，WARN、ERROR
 # 设置为
@@ -44,6 +45,13 @@ def remove_local_dir():
         shutil.rmtree(local_dir)
         
         
+class Test(unittest.TestCase):
+    def test_html_to_markdown(self):
+        new_content = md(f"""<div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><a href="http://bbs.pcbeta.com/viewthread-1095891-1-1.html">http://bbs.pcbeta.com/viewthread-1095891-1-1.html</a><br></span></div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><br></span></div>sudo perl -pi -e 's|\x75\x30\x89\xd8|\xeb\x30\x89\xd8|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC</span>
+""")
+        print(new_content)
+
+
 class TestAPI(unittest.TestCase):
 
     def test_get_dir_api(self):
