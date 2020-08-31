@@ -4,17 +4,13 @@
 
 现在有道云笔记不能导出笔记，迁移笔记很麻烦。此脚本可将所有笔记下载到本地。
 
-## 功能
-
-<!--Feature-->
+## 功能 <!--Feature-->
 
 - 可将所有笔记（文件）按原格式下载到本地
 - 由于「笔记」类型文件下载后默认为 Xml 格式，不是正常笔记内容，**默认将其转换为 Markdown 格式**
 - 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
 
-## 使用步骤
-
-<!--用法 Usage-->
+## 使用步骤 <!--用法 Usage-->
 
 <!--针对普通用户-->
 
@@ -87,7 +83,7 @@ pip install markdownify
 {
     "username": "deppwang@163.com",
     "password": "12345678",
-    "local_dir": "/Users/yanjie/Dropbox/youdaonote/test",
+    "local_dir": "/Users/yanjie/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
     "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
@@ -99,7 +95,7 @@ pip install markdownify
 {
     "username": "deppwang@163.com",
     "password": "12345678",
-    "local_dir": "D:/Dropbox/youdaonote/test",
+    "local_dir": "D:/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
     "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
@@ -131,9 +127,7 @@ python pull.py   # Windows
 
 <!--只会导出本地不存在，或更新时间大于本地的文件-->
 
-## 注意事项
-
-<!--Tips 使用提示-->
+## 注意事项  <!--Tips 使用提示-->
 
 1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
@@ -144,9 +138,14 @@ python pull.py   # Windows
 
 <!--在 CentOS 环境下，由于命令行环境不能直接显示中文，所以会出现 UnicodeEncodeError-->
 
-## 后续开发计划
+<!--Windows 常见问题-->
 
-<!--TODO-->
+<!--Git Bash、Windows Terminal Preview 无法执行 `git --version` / `python --version`-->
+<!--使用 PowerShell-->
+<!--PowerShell 命令行乱码，不显示中文-->
+<!--[设置语言](https://stackoverflow.com/a/57134096/6953079)，重启，使用 Windows Terminal Preview-->
+
+## 后续开发计划 <!--TODO-->
 
 - [x] 将 .note 文件转换为 Markdown 文件
 - [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
@@ -154,23 +153,17 @@ python pull.py   # Windows
 - [ ] 并发执行以加快速度
 - [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
 <!--优化如果同一目录存在同名的 .md 和 .note 文件，只能保存一个的情况-->
-## 原理
-
-<!--Principle-->
+## 原理 <!--Principle-->
 
 - 正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示
 - 原理是[找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地
 - Xml 转换为 Markdown，借助了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
-## 感谢（参考）
-
-<!--Thanks-->
+## 感谢（参考） <!--Thanks-->
 
 - [YoudaoNoteExport](https://github.com/wesley2012/YoudaoNoteExport)
 
-## 出发点
-
-<!--Starting Point-->
+## 出发点 <!--Starting Point-->
 
 原来一直是有道云笔记的忠实用户，后面接触到了所见即所得的 [Typora](https://typora.io/)，有点用不惯有道云笔记了，想着有什么法子能电脑本地文件和有道云笔记同步，这样电脑使用 Typora，手机使用有道云笔记。发现有道云笔记有 [Open API](http://note.youdao.com/open/developguide.html) ，打算利用提供的 API，写两个脚本，一个 pull 所有文件到本地，一个 push 本地文件到云笔记。但 API 太难用了，N 多年没更新了，问客服也没更新的意思，开发到最后发现竟然没有 Markdown 文件的接口，醉了。遂放弃。
 
@@ -182,12 +175,13 @@ python pull.py   # Windows
 
 <!--请作者吃包辣条？-->
 
-<!--支付宝-->   
+<!--支付宝-->  
+
 <!--微信--> 
 <!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
 <!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
 
-<!--重名-->
+<!--同一文件夹重名-->
 
 <!--网页版有道云笔记本身将所有笔记显示，不存在-->
 
@@ -196,6 +190,8 @@ python pull.py   # Windows
 <!--存在同名 note 和 md 时，note 先保存为 md，后面 md 如果修改时间晚，将覆盖 note，如果早，将跳过。-->
 
 <!--只能将原来的 note 做个标记，知道是 note，可以直接 **note.md，但不美观-->
+
+<!--设置一个 map，保存当前文件夹下的所有文件，判断 map 中是否重名，记录重名 key，遍历时判断，如果等于 key，笔记名称加上 flag 区分-->
 
 
 
