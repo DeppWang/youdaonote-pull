@@ -40,7 +40,7 @@ def set_right_config():
 
 
 def remove_local_dir():
-    local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+    local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
     if os.path.exists(local_dir):
         shutil.rmtree(local_dir)
         
@@ -138,7 +138,7 @@ class TestErrorExit(unittest.TestCase):
         #         {
         #             "username": "***",
         #             "password": "***",
-        #             "local_dir": "/Users/yanjie/Dropbox/youdaonote/deppwang2",
+        #             "local_dir": "/Users/yanjie/Documents/youdaonote-pull/deppwang2",
         #             "ydnote_dir": "",
         #             "smms_secret_token": ""
         #         }'
@@ -146,7 +146,7 @@ class TestErrorExit(unittest.TestCase):
         {
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/yanjie/Dropbox/youdaonote/deppwang2",
+            "local_dir": "/Users/yanjie/Documents/youdaonote-pull/deppwang2",
             "ydnote_dir": "",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -164,7 +164,7 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",  // 添加注释
-            "local_dir": "/Users/yanjie/Dropbox/youdaonote/deppwang2",
+            "local_dir": "/Users/yanjie/Documents/youdaonote-pull/deppwang2",
             "ydnote_dir": "",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -182,7 +182,7 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/yanjie/Dropbox/youdaonote/deppwang2",
+            "local_dir": "/Users/yanjie/Documents/youdaonote-pull/deppwang2",
             "ydaonote_dir": "",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -219,7 +219,7 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/yanjie/Dropbox/youdaonote/deppwang2",
+            "local_dir": "/Users/yanjie/Documents/youdaonote-pull/deppwang2",
             "ydnote_dir": "GitHub",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -239,7 +239,7 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "~/Dropbox/youdaonote",
+            "local_dir": "~/Documents/youdaonote",
             "ydnote_dir": "",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -259,7 +259,7 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/yanji/Dropbox/youdaonote",
+            "local_dir": "/Users/yanji/Documents/youdaonote-pull",
             "ydnote_dir": "",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password)
@@ -314,7 +314,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 为 null 时，是否能完整下载成功\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -341,7 +341,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 为 null 时，是否能完整下载成功\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -364,7 +364,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 不为 null 时，是否能完整下载\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -385,7 +385,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 错误时，是否能完整下载\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -406,7 +406,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证目录包含中文时，能否正常下载\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/测试"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/测试"
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -427,7 +427,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证更新\n')
 
-        local_dir = "/Users/yanjie/Dropbox/youdaonote/test1"
+        local_dir = "/Users/yanjie/Documents/youdaonote-pull/test1"
 
         config_str = """{
             "username": "%s",
@@ -496,7 +496,7 @@ class LoginTest(unittest.TestCase):
         config_str = """{
             "username": "error_username",
             "password": "error_password",
-            "local_dir": "/Users/yanjie/Dropbox/youdaonote/test1",
+            "local_dir": "/Users/yanjie/Documents/youdaonote-pull/test1",
             "ydnote_dir": "test",
             "smms_secret_token": ""
         }"""

@@ -317,8 +317,9 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('新增「%s」%s' % (local_file_path, tip))
-            except Exception:
+            except Exception as error:
                 print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
+                print('错误提示：%s' % format(error))
 
         # 如果已经存在，判断是否需要更新
         else:
@@ -335,11 +336,11 @@ class YoudaoNoteSession(requests.Session):
                 # 考虑到使用 f.write() 直接覆盖原文件，在 Windows 下报错（WinError 183），先将其删除
                 if os.path.exists(local_file_path):
                     os.remove(local_file_path)
-                # 同一目录，如果存在同名 note 和 markdown，只能保存其中一个，简单的解决办法是用笔记名区分，但不美观。
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('更新「%s」%s' % (local_file_path, tip))
-            except Exception:
+            except Exception as error:
                 print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
+                print('错误提示：%s' % format(error))
 
     def optimize_name(self, name):
         """ 避免 open() 函数失败（因为目录名错误），修改文件名 """
@@ -374,7 +375,7 @@ class YoudaoNoteSession(requests.Session):
                 with open(file_path, 'wb') as f:
                     f.write(content.encode())
             except UnicodeEncodeError as err:
-                print(format(err))
+                print('错误提示：%s' % format(err))
             return
 
         with open(file_path, 'wb') as f:
@@ -504,6 +505,7 @@ class YoudaoNoteSession(requests.Session):
                     if 'content' in child2.tag:
                         new_content += f'```{nl}原来格式为表格（table），转换较复杂，未转换，需要手动复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
 
+            # 其他
             else:
                 for child2 in child:
                     if 'text' in child2.tag:
@@ -630,7 +632,7 @@ class YoudaoNoteSession(requests.Session):
         except requests.exceptions.ProxyError as err:
             logging.info('网络错误，请重试')
             print('网络错误，上传「%s」到 SM.MS 失败！将下载图片到本地' % old_url)
-            print(format(err))
+            print('错误提示：%s' % format(err))
             return old_url
 
         try:
@@ -670,7 +672,7 @@ def main():
         session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
 
     except requests.exceptions.ProxyError as proxyErr:
-        print('调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')
+        print('请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')
         print('错误提示：' + format(proxyErr))
         print('已终止执行')
         sys.exit(1)
