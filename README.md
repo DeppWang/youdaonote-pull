@@ -60,8 +60,8 @@ pip install markdownify
 
 ```json
 {
-    "username": "",
-    "password": "",
+    "username": "your_youdaonote_username",
+    "password": "your_youdaonote_password",
     "local_dir": "",
     "ydnote_dir": "",
     "smms_secret_token": ""
@@ -150,8 +150,9 @@ python pull.py   # Windows
 - [x] 将 .note 文件转换为 Markdown 文件
 - [x] 解决有道云图床图片不能显示问题，实现方式为默认下载到本地，使用本地图片链接，也可上传到 SM.MS 图床
 - [x] 首次导出使用账号密码登录，再次导出时使用 Cookie 登录（Cookie 保存在 cookies.json 中），避免频繁操作时因为需要输入验证码导致登录不上的情况
-- [ ] 并发执行以加快速度
-- [ ] 针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式
+
+<!--并发执行以加快速度-->
+<!--针对非开发者用户，提供网页输入账号密码直接下载所有笔记压缩包的方式-->
 <!--优化如果同一目录存在同名的 .md 和 .note 文件，只能保存一个的情况-->
 ## 原理 <!--Principle-->
 
@@ -176,7 +177,6 @@ python pull.py   # Windows
 <!--请作者吃包辣条？-->
 
 <!--支付宝-->  
-
 <!--微信--> 
 <!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
 <!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
