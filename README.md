@@ -81,7 +81,7 @@ pip install markdownify
 
 ```json
 {
-    "username": "deppwang@163.com",
+    "username": "deppwangtest@163.com",
     "password": "12345678",
     "local_dir": "/Users/yanjie/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
@@ -93,7 +93,7 @@ pip install markdownify
 
 ```json
 {
-    "username": "deppwang@163.com",
+    "username": "deppwangtest@163.com",
     "password": "12345678",
     "local_dir": "D:/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
@@ -181,7 +181,7 @@ python pull.py   # Windows
 <!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
 <!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
 
-<!--同一文件夹重名-->
+<!--同一文件夹重名问题-->
 
 <!--网页版有道云笔记本身将所有笔记显示，不存在-->
 
