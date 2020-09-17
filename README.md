@@ -168,7 +168,7 @@ python pull.py   # Windows
 
 原来一直是有道云笔记的忠实用户，后面接触到了所见即所得的 [Typora](https://typora.io/)，有点用不惯有道云笔记了，想着有什么法子能电脑本地文件和有道云笔记同步，这样电脑使用 Typora，手机使用有道云笔记。发现有道云笔记有 [Open API](http://note.youdao.com/open/developguide.html) ，打算利用提供的 API，写两个脚本，一个 pull 所有文件到本地，一个 push 本地文件到云笔记。但 API 太难用了，N 多年没更新了，问客服也没更新的意思，开发到最后发现竟然没有 Markdown 文件的接口，醉了。遂放弃。
 
-现在我使用 Typora + [Dropbox](https://www.dropbox.com/) + [MWeb](https://www.mweb.im/) 实现同步笔记和手机查看编辑的功能，很香。
+现在我使用 Typora + [Dropbox](https://www.dropbox.com/)（有版本历史记录） + [MWeb](https://www.mweb.im/) 实现同步笔记和手机查看编辑的功能，很香。
 
 最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
 
