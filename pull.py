@@ -82,7 +82,7 @@ class YoudaoNoteSession(requests.Session):
     LOGIN_URL = 'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp='
     COOKIE_URL = 'https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=%s'
     ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
-    DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=30&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
+    DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=50&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
     FILE_URL = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=%s'
 
     # 莫有类方法
@@ -386,10 +386,7 @@ class YoudaoNoteSession(requests.Session):
             try:
                 self.covert_xml_to_markdown(file_path)
             except ET.ParseError:
-                print('此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown')
-                base = os.path.splitext(file_path)[0]
-                new_file_path = base + '.md'
-                os.rename(file_path, new_file_path)
+                print('此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown...')
                 self.covert_html_to_markdown(file_path)
 
     def covert_xml_to_markdown(self, file_path) -> None:
