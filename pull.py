@@ -226,9 +226,9 @@ class YoudaoNoteSession(requests.Session):
     def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
         """ 下载所有文件 """
 
-        # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中
+        # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，并将windows系统下路径分隔符替换为/
         if local_dir == '':
-            local_dir = os.path.join(os.getcwd(), 'youdaonote')
+            local_dir = os.path.join(os.getcwd(), 'youdaonote').replace('\\', '/')
 
         # 如果指定的本地文件夹不存在，创建文件夹
         if not os.path.exists(local_dir):
