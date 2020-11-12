@@ -300,8 +300,8 @@ class YoudaoNoteSession(requests.Session):
         name = self.optimize_name(name)
 
         youdao_file_suffix = os.path.splitext(name)[1]  # 笔记后缀
-        local_file_path = os.path.join(local_dir, name)  # 用于将后缀 .note 转换为 .md
-        original_file_path = os.path.join(local_dir, name)  # 保留本身后缀
+        local_file_path = os.path.join(local_dir, name).replace('\\', '/')  # 用于将后缀 .note 转换为 .md
+        original_file_path = os.path.join(local_dir, name).replace('\\', '/')  # 保留本身后缀
 
         tip = ''
 
@@ -601,14 +601,14 @@ class YoudaoNoteSession(requests.Session):
         logging.info('relative_path: %s', relative_path)
         layer_count = len(relative_path.split('/'))
         if layer_count == 2:
-            new_image_path = os.path.join('./', image_dirname, image_name)
+            new_image_path = os.path.join('./', image_dirname, image_name).replace('\\', '/')
             return new_image_path
         relative = ''
         if layer_count > 2:
             sub_count = layer_count - 2
             for i in range(sub_count):
                 relative = os.path.join(relative, '../')
-        new_image_path = os.path.join(relative, image_dirname, image_name)
+        new_image_path = os.path.join(relative, image_dirname, image_name).replace('\\', '/')
         return new_image_path
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
