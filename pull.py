@@ -444,6 +444,22 @@ class YoudaoNoteSession(requests.Session):
                         new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
                         break
 
+            elif 'attach' in child.tag:
+                # resource在filename前
+                for child2 in child:
+                    if 'resource' in child2.tag:
+                        attach_url = ''
+                        if child2.text is not None:
+                            attach_url = child2.text
+
+                    elif 'filename' in child2.tag:
+                        attach_name = child2.text
+                        if child2.text is None:
+                            attach_name = '未命名'
+                        attach_url = self.get_new_down_or_upload_url(attach_url, file_path, attach_name)
+                        new_content += f'[%s](%s){nl}{nl}' % (attach_name, attach_url)
+                        break
+
             # 代码块
             elif 'code' in child.tag:
                 for child2 in child:
@@ -544,21 +560,22 @@ class YoudaoNoteSession(requests.Session):
     def print_ydnote_file_name(self, file_path) -> None:
 
         ydnote_dirName = file_path.replace(self.local_dir, '')
-        print('正在转换有道云笔记「%s」中的有道云图床图片链接...' % ydnote_dirName)
+        print('正在转换有道云笔记「%s」中的有道云图片/附件链接...' % ydnote_dirName)
 
-    def get_new_down_or_upload_url(self, url, file_path) -> str:
+    def get_new_down_or_upload_url(self, url, file_path, attach_name='') -> str:
         """ 根据是否存在 smms_secret_token 判断是否需要上传到 sm.ms """
 
         if 'note.youdao.com' not in url:
             return url
-        if self.smms_secret_token == '':
-            return self.download_image(url, file_path)
+        # 附件不上传 SM.MS 图床，直接本地保存
+        if self.smms_secret_token == '' or attach_name != '':
+            return self.download_file(url, file_path, attach_name)
         new_url = self.upload_to_smms(url, self.smms_secret_token)
         if new_url != url:
             return new_url
-        return self.download_image(url, file_path)
+        return self.download_file(url, file_path, attach_name)
 
-    def download_image(self, url, file_path) -> str:
+    def download_file(self, url, file_path, attach_name) -> str:
         """ 如果 smms_secret_token 为 null，将其下载到本地，返回相对 url """
 
         try:
@@ -570,46 +587,53 @@ class YoudaoNoteSession(requests.Session):
             return url
 
         content_type = response.headers.get('Content-Type')
-        if response.status_code != 200 or content_type is None or ('image' not in content_type):
-            self.print_download_yd_image_error(url)
+        if response.status_code != 200 or content_type is None:
+            self.print_download_yd_file_error(url)
             return url
 
-        # 默认下载图片到 youdaonote-images 文件夹
-        image_dirname = 'youdaonote-images'
-        local_image_dir = os.path.join(self.local_dir, image_dirname)
-        if not os.path.exists(local_image_dir):
-            os.mkdir(local_image_dir)
-        image_basename = os.path.basename(urlparse(url).path)
-        image_name = image_basename + '.' + content_type.split('/')[1]
-        local_image_path = os.path.join(local_image_dir, image_name)
+        if attach_name != '':
+            # 默认下载附件到 youdaonote-attachments 文件夹
+            file_dirname = 'youdaonote-attachments'
+            file_suffix = attach_name
+        else:
+            # 默认下载图片到 youdaonote-images 文件夹
+            file_dirname = 'youdaonote-images'
+            file_suffix = '.' + content_type.split('/')[1]
+
+        local_file_dir = os.path.join(self.local_dir, file_dirname)
+        if not os.path.exists(local_file_dir):
+            os.mkdir(local_file_dir)
+        file_basename = os.path.basename(urlparse(url).path)
+        file_name = file_basename + file_suffix
+        local_file_path = os.path.join(local_file_dir, file_name)
 
         try:
-            with open(local_image_path, 'wb') as f:
+            with open(local_file_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print('已将图片「%s」转换为「%s」' % (url, local_image_path))
+            print('已将图片/附件「%s」转换为「%s」' % (url, local_file_path))
         except:
-            print(url + ' 图片有误！')
+            print(url + ' 图片/附件有误！')
             return url
 
-        relative_image_path = self.set_relative_image_path(file_path, image_name, image_dirname)
-        return relative_image_path
+        relative_file_path = self.set_relative_file_path(file_path, file_name, file_dirname)
+        return relative_file_path
 
-    def set_relative_image_path(self, file_path, image_name, image_dirname):
-        """ 图片设置为相对地址 """
+    def set_relative_file_path(self, file_path, file_name, file_dirname):
+        """ 图片/附件设置为相对地址 """
 
         relative_path = file_path.replace(self.local_dir, '')
         logging.info('relative_path: %s', relative_path)
         layer_count = len(relative_path.split('/'))
         if layer_count == 2:
-            new_image_path = os.path.join('./', image_dirname, image_name).replace('\\', '/')
-            return new_image_path
+            new_file_path = os.path.join('./', file_dirname, file_name).replace('\\', '/')
+            return new_file_path
         relative = ''
         if layer_count > 2:
             sub_count = layer_count - 2
             for i in range(sub_count):
                 relative = os.path.join(relative, '../')
-        new_image_path = os.path.join(relative, image_dirname, image_name).replace('\\', '/')
-        return new_image_path
+        new_file_path = os.path.join(relative, file_dirname, file_name).replace('\\', '/')
+        return new_file_path
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
         """ 上传图片到 sm.ms """
@@ -654,8 +678,8 @@ class YoudaoNoteSession(requests.Session):
         print('已将图片「%s」转换为「%s」' % (old_url, url))
         return url
 
-    def print_download_yd_image_error(self, url) -> None:
-        print('下载「%s」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常显示（验证登录才能显示）' % url)
+    def print_download_yd_file_error(self, url) -> None:
+        print('下载「%s」失败！图片或附件可能已失效，可浏览器登录有道云笔记后，查看图片或附件是否能正常加载（验证登录才能查看）' % url)
 
 
 def main():
