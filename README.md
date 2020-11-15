@@ -129,7 +129,7 @@ python pull.py   # Windows
 
 ## 注意事项  <!--Tips 使用提示-->
 
-1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub
+1. 如果你自己修改脚本，注意不要将 config.json 文件 push 到 GitHub（里面有账号密码）
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍。后续我会根据需求看是否应该提供网页下载
 3. 请确认代码是否为最新，有问题请提交 [issue](https://github.com/DeppWang/youdaonote-pull/issues?q=is%3Aissue+is%3Aclosed)
    ```bash
@@ -172,16 +172,16 @@ python pull.py   # Windows
 
 最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
 
-<!--捐赠-->
+<!--## 捐赠-->
 
 <!--请作者吃包辣条？-->
 
-<!--支付宝-->  
+<!--支付宝--> 
 <!--微信--> 
 <!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
 <!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
 
-<!--同一文件夹重名问题-->
+<!--## 同一文件夹重名问题-->
 
 <!--网页版有道云笔记本身将所有笔记显示，不存在-->
 
