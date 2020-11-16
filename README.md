@@ -172,7 +172,17 @@ python pull.py   # Windows
 
 最近给朋友推荐此方式，但发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
 
-<!--## 捐赠-->
+## 贡献
+
+欢迎贡献代码，但有几个注意事项：
+
+1. commit 请使用英文
+2. 文字描述需要有[中英文空格](https://github.com/ruanyf/document-style-guide/blob/master/docs/text.md)
+3. 请确保通过测试
+   - 在 macOS 和 Windows 环境中直接执行 `pull.py` 没有问题（你可以指定下载一个文件夹测试）
+   - `test.py` 配置中你的账号和密码和 `local_dir`，运行 `test.py` 测试脚本没有问题
+
+<!--## 打赏-->
 
 <!--请作者吃包辣条？-->
 
