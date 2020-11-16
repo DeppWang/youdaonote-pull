@@ -156,9 +156,7 @@ python pull.py   # Windows
 <!--优化如果同一目录存在同名的 .md 和 .note 文件，只能保存一个的情况-->
 ## 原理 <!--Principle-->
 
-- 正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示
-- 原理是[找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地
-- Xml 转换为 Markdown，借助了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
+正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。原理是[找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地。Xml 转换为 Markdown，借助了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考） <!--Thanks-->
 
@@ -180,7 +178,7 @@ python pull.py   # Windows
 2. 文字描述需要有[中英文空格](https://github.com/ruanyf/document-style-guide/blob/master/docs/text.md)
 3. 请确保通过测试
    - 在 macOS 和 Windows 环境中直接执行 `pull.py` 没有问题（你可以指定下载一个文件夹测试）
-   - `test.py` 配置中你的账号和密码和 `local_dir`，运行 `test.py` 测试脚本没有问题
+   - 在 `test.py` 配置中你的账号和密码和 `local_dir`，运行测试脚本  `test.py`  没有问题
 
 <!--## 打赏-->
 
