@@ -20,9 +20,11 @@ __description__ = """
                     """
 
 
-class Passport:
+class UserDefine:
     username = 'your_youdao_username'
     password = 'your_youdao_password'
+    local_dir = '/Users/deppwang/Documents/youdaonote-pull/test1'  # 你本地存放有道云笔记文件的位置
+    local_zh_Hans_dir = '/Users/deppwang/Documents/youdaonote-pull/测试'  # 用于验证目录包含中文时，能否正常下载
     smms_secret_token = 'your_smms_secret_token'
 
 
@@ -43,9 +45,8 @@ def set_right_config():
 
 
 def remove_local_dir():
-    local_dir = '/Users/deppwang/Documents/youdaonote-pull/test1'
-    if os.path.exists(local_dir):
-        shutil.rmtree(local_dir)
+    if os.path.exists(UserDefine.local_dir):
+        shutil.rmtree(UserDefine.local_dir)
 
 
 class Test(unittest.TestCase):
@@ -142,7 +143,7 @@ class TestErrorExit(unittest.TestCase):
         #         {
         #             "username": "***",
         #             "password": "***",
-        #             "local_dir": "/Users/deppwang/Documents/youdaonote-pull/deppwang2",
+        #             "local_dir": "***",
         #             "ydnote_dir": "",
         #             "smms_secret_token": ""
         #         }'
@@ -150,10 +151,10 @@ class TestErrorExit(unittest.TestCase):
         {
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/deppwang/Documents/youdaonote-pull/deppwang2",
+            "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -168,10 +169,10 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",  // 添加注释
-            "local_dir": "/Users/deppwang/Documents/youdaonote-pull/deppwang2",
+            "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -186,10 +187,10 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/deppwang/Documents/youdaonote-pull/deppwang2",
+            "local_dir": "%s",
             "ydaonote_dir": "",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -223,10 +224,10 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/deppwang/Documents/youdaonote-pull/deppwang2",
+            "local_dir": "%s",
             "ydnote_dir": "GitHub",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -246,7 +247,7 @@ class TestErrorExit(unittest.TestCase):
             "local_dir": "~/Documents/youdaonote",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -263,10 +264,10 @@ class TestErrorExit(unittest.TestCase):
         config_str = """{
             "username": "%s",
             "password": "%s",
-            "local_dir": "/Users/deppwang/Documents/youdaonote-pull",
+            "local_dir": "/Users/deppwang/Documents2/youdaonote-pull",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password)
+        }""" % (UserDefine.username, UserDefine.password)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -318,9 +319,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 为 null 时，是否能完整下载成功\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
-        if os.path.exists(local_dir):
-            shutil.rmtree(local_dir)
+        remove_local_dir()
 
         config_str = """{
             "username": "%s",
@@ -328,7 +327,7 @@ class TestDownLoad(unittest.TestCase):
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password, local_dir)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         set_right_cookies()
 
@@ -345,9 +344,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 为 null 时，是否能完整下载成功\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
-        if os.path.exists(local_dir):
-            shutil.rmtree(local_dir)
+        remove_local_dir()
 
         config_str = """{
             "username": "%s",
@@ -355,7 +352,7 @@ class TestDownLoad(unittest.TestCase):
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password, local_dir)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         set_right_cookies()
 
@@ -368,9 +365,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 不为 null 时，是否能完整下载\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
-        if os.path.exists(local_dir):
-            shutil.rmtree(local_dir)
+        remove_local_dir()
 
         config_str = """{
             "username": "%s",
@@ -378,7 +373,7 @@ class TestDownLoad(unittest.TestCase):
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": "%s"
-        }""" % (Passport.username, Passport.password, local_dir, Passport.smms_secret_token)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir, UserDefine.smms_secret_token)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -389,9 +384,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证 smms_secret_token 错误时，是否能完整下载\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
-        if os.path.exists(local_dir):
-            shutil.rmtree(local_dir)
+        remove_local_dir()
 
         config_str = """{
             "username": "%s",
@@ -399,7 +392,7 @@ class TestDownLoad(unittest.TestCase):
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": "SGSLk9yWcTe4RenXYqEPMkqVrx0Y8error"
-        }""" % (Passport.username, Passport.password, local_dir)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -410,7 +403,7 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证目录包含中文时，能否正常下载\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/测试"
+        local_dir = UserDefine.local_zh_Hans_dir
         if os.path.exists(local_dir):
             shutil.rmtree(local_dir)
 
@@ -420,7 +413,7 @@ class TestDownLoad(unittest.TestCase):
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password, local_dir)
+        }""" % (UserDefine.username, UserDefine.password, local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -431,15 +424,13 @@ class TestDownLoad(unittest.TestCase):
         print('----------------')
         print('验证更新\n')
 
-        local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
-
         config_str = """{
             "username": "%s",
             "password": "%s",
             "local_dir": "%s",
             "ydnote_dir": "test",
             "smms_secret_token": ""
-        }""" % (Passport.username, Passport.password, local_dir)
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
