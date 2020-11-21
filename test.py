@@ -19,9 +19,12 @@ __description__ = """
                     原来针对每个方法写测试用例，还是太麻烦。
                     """
 
+
 class Passport:
-    username = "your_youdao_username"
-    password = "your_youdao_password"
+    username = 'your_youdao_username'
+    password = 'your_youdao_password'
+    smms_secret_token = 'your_smms_secret_token'
+
 
 def set_right_cookies():
     with open('cookies-right.json', 'rb') as f:
@@ -40,14 +43,15 @@ def set_right_config():
 
 
 def remove_local_dir():
-    local_dir = "/Users/deppwang/Documents/youdaonote-pull/test1"
+    local_dir = '/Users/deppwang/Documents/youdaonote-pull/test1'
     if os.path.exists(local_dir):
         shutil.rmtree(local_dir)
-        
-        
+
+
 class Test(unittest.TestCase):
     def test_html_to_markdown(self):
-        new_content = md(f"""<div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><a href="http://bbs.pcbeta.com/viewthread-1095891-1-1.html">http://bbs.pcbeta.com/viewthread-1095891-1-1.html</a><br></span></div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><br></span></div>sudo perl -pi -e 's|\x75\x30\x89\xd8|\xeb\x30\x89\xd8|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC</span>
+        new_content = md(
+            f"""<div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><a href="http://bbs.pcbeta.com/viewthread-1095891-1-1.html">http://bbs.pcbeta.com/viewthread-1095891-1-1.html</a><br></span></div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><br></span></div>sudo perl -pi -e 's|\x75\x30\x89\xd8|\xeb\x30\x89\xd8|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC</span>
 """)
         print(new_content)
 
@@ -373,8 +377,8 @@ class TestDownLoad(unittest.TestCase):
             "password": "%s",
             "local_dir": "%s",
             "ydnote_dir": "test",
-            "smms_secret_token": "SGSLk9yWcTe4RenXYqEPMkqVrx0Y8qI0"
-        }""" % (Passport.username, Passport.password, local_dir)
+            "smms_secret_token": "%s"
+        }""" % (Passport.username, Passport.password, local_dir, Passport.smms_secret_token)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
@@ -414,7 +418,7 @@ class TestDownLoad(unittest.TestCase):
             "username": "%s",
             "password": "%s",
             "local_dir": "%s",
-           ∞: "test",
+            "ydnote_dir": "test",
             "smms_secret_token": ""
         }""" % (Passport.username, Passport.password, local_dir)
 
