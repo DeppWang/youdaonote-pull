@@ -178,7 +178,7 @@ python pull.py   # Windows
 2. 代码注解需要有[中英文空格](https://github.com/sparanoid/chinese-copywriting-guidelines)
 3. 请确保通过测试
    - 在 macOS 和 Windows 环境中直接执行 `pull.py` 没有问题（你可以指定下载一个文件夹测试）
-   - 在 `test.py` 配置中你的账号和密码和 `local_dir`，运行测试脚本  `test.py`  没有问题
+   - 在 `test.py` 配置中你的脚本参数（UserDefine），运行测试脚本  `test.py`  没有问题
 
 <!--## 打赏-->
 
