@@ -13,7 +13,7 @@ import re
 import logging
 from markdownify import markdownify as md
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 __author__ = 'Depp Wang (deppwxq@gmail.com)'
 __github__ = 'https//github.com/DeppWang/youdaonote-pull'
@@ -190,7 +190,7 @@ class YoudaoNoteSession(requests.Session):
             f.write(str(json.dumps(cookies_dict, indent=4, sort_keys=True)).encode())
 
     def cookies_login(self, cookies_dict) -> str:
-        """ 使用 Cookies 登录，其实就是设置 cookies """
+        """ 使用 Cookies 登录，其实就是设置 Cookies """
 
         cookiejar = self.cookies
         for cookie in cookies_dict:
@@ -226,7 +226,7 @@ class YoudaoNoteSession(requests.Session):
     def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
         """ 下载所有文件 """
 
-        # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，并将windows系统下路径分隔符替换为/
+        # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，如果是 Windows 系统，将路径分隔符（\\）替换为 /
         if local_dir == '':
             local_dir = os.path.join(os.getcwd(), 'youdaonote').replace('\\', '/')
 
@@ -303,7 +303,7 @@ class YoudaoNoteSession(requests.Session):
         local_file_path = os.path.join(local_dir, name).replace('\\', '/')  # 用于将后缀 .note 转换为 .md
         original_file_path = os.path.join(local_dir, name).replace('\\', '/')  # 保留本身后缀
 
-        tip = ''
+        tip = ''  # 用于输出云笔记原格式
 
         # 如果有有道云笔记是「笔记」类型，则设置提示类型
         if youdao_file_suffix == '.note':
@@ -318,6 +318,7 @@ class YoudaoNoteSession(requests.Session):
                 self.get_file(id, original_file_path, youdao_file_suffix)
                 print('新增「%s」%s' % (local_file_path, tip))
             except Exception as error:
+                logging.info(error)
                 print('「%s」转换为 Markdown 失败！请检查文件！' % original_file_path)
                 print('错误提示：%s' % format(error))
 
@@ -445,7 +446,7 @@ class YoudaoNoteSession(requests.Session):
                         break
 
             elif 'attach' in child.tag:
-                # resource在filename前
+                # resource 在 filename 前
                 for child2 in child:
                     if 'resource' in child2.tag:
                         attach_url = ''
@@ -560,14 +561,14 @@ class YoudaoNoteSession(requests.Session):
     def print_ydnote_file_name(self, file_path) -> None:
 
         ydnote_dirName = file_path.replace(self.local_dir, '')
-        print('正在转换有道云笔记「%s」中的有道云图片/附件链接...' % ydnote_dirName)
+        print('正在转换有道云笔记「%s」中的有道云图片链接...' % ydnote_dirName)
 
     def get_new_down_or_upload_url(self, url, file_path, attach_name='') -> str:
         """ 根据是否存在 smms_secret_token 判断是否需要上传到 sm.ms """
 
         if 'note.youdao.com' not in url:
             return url
-        # 附件不上传 SM.MS 图床，直接本地保存
+        # 当 smms_secret_token 为空（不上传到 SM.MS）和是附件时，下载到图片和附件到本地
         if self.smms_secret_token == '' or attach_name != '':
             return self.download_file(url, file_path, attach_name)
         new_url = self.upload_to_smms(url, self.smms_secret_token)
@@ -576,7 +577,7 @@ class YoudaoNoteSession(requests.Session):
         return self.download_file(url, file_path, attach_name)
 
     def download_file(self, url, file_path, attach_name) -> str:
-        """ 如果 smms_secret_token 为 null，将其下载到本地，返回相对 url """
+        """ 下载文件到本地，返回相对 url """
 
         try:
             response = self.get(url)
@@ -587,8 +588,13 @@ class YoudaoNoteSession(requests.Session):
             return url
 
         content_type = response.headers.get('Content-Type')
+
+        file_type = '图片'
+        if attach_name != '':
+            file_type = '附件'
+
         if response.status_code != 200 or content_type is None:
-            self.print_download_yd_file_error(url)
+            self.print_download_yd_file_error(url, file_type)
             return url
 
         if attach_name != '':
@@ -610,9 +616,12 @@ class YoudaoNoteSession(requests.Session):
         try:
             with open(local_file_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print('已将图片/附件「%s」转换为「%s」' % (url, local_file_path))
+            if attach_name != '':
+                print('已将附件「%s」转换为「%s」，SM.MS 只能上传图片，所以附件只下载到本地' % (url, local_file_path))
+            else:
+                print('已将图片「%s」转换为「%s」' % (url, local_file_path))
         except:
-            print(url + ' 图片/附件有误！')
+            print(url + ' %s有误！' % file_type)
             return url
 
         relative_file_path = self.set_relative_file_path(file_path, file_name, file_dirname)
@@ -659,7 +668,7 @@ class YoudaoNoteSession(requests.Session):
         try:
             res_json = res.json()
         except ValueError:
-            print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载到本地' % old_url)
+            print('SM.MS 免费版每分钟限额 20 张图片，每小时限额 100 张图片，大小限制 5 M，上传失败！「%s」未转换，将下载图片到本地' % old_url)
             return old_url
 
         url = old_url
@@ -667,7 +676,7 @@ class YoudaoNoteSession(requests.Session):
             if res_json['code'] == 'image_repeated':
                 url = res_json['images']
             elif res_json['code'] == 'flood':
-                print('SM.MS 每小时只能上传 100 张图片，「%s」未转换，将下载图片到本地' % url)
+                print('SM.MS 免费版每分钟限额 20 张图片，每小时限额 100 张图片，大小限制 5 M，上传失败！「%s」未转换，将下载图片到本地' % url)
                 return url
             else:
                 print(
@@ -678,8 +687,11 @@ class YoudaoNoteSession(requests.Session):
         print('已将图片「%s」转换为「%s」' % (old_url, url))
         return url
 
-    def print_download_yd_file_error(self, url) -> None:
-        print('下载「%s」失败！图片或附件可能已失效，可浏览器登录有道云笔记后，查看图片或附件是否能正常加载（验证登录才能查看）' % url)
+    def print_download_yd_file_error(self, url, file_type) -> None:
+        print('下载「%s」失败！%s可能已失效，可浏览器登录有道云笔记后，查看%s是否能正常加载（验证登录才能查看）' % (url, file_type, file_type))
+
+    def print_download_yd_image_error(self, url) -> None:
+        print('下载「%s」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常加载（验证登录才能查看）' % url)
 
 
 def main():
