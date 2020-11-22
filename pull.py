@@ -37,13 +37,12 @@ def check_config(config_name) -> dict:
         raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑「config.json」')
 
     # 如果某个 key 不存在，抛出异常
-    try:
-        username = config_dict['username']
-        config_dict['password']
-        config_dict['local_dir']
-        config_dict['ydnote_dir']
-        config_dict['smms_secret_token']
-    except KeyError:
+    username = config_dict.get('username', '')
+    password = config_dict.get('password', '')
+    local_dir = config_dict.get('local_dir', '')
+    ydnote_dir = config_dict.get('ydnote_dir', '')
+    smms_secret_token = config_dict.get('smms_secret_token', '')
+    if not username or not password or not local_dir or not ydnote_dir or not smms_secret_token:
         raise KeyError('请检查「config.json」的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
     if config_dict['username'] == '' or config_dict['password'] == '':
@@ -589,9 +588,7 @@ class YoudaoNoteSession(requests.Session):
 
         content_type = response.headers.get('Content-Type')
 
-        file_type = '图片'
-        if attach_name != '':
-            file_type = '附件'
+        file_type = '图片' if attach_name == '' else '附件'
 
         if response.status_code != 200 or content_type is None:
             self.print_download_yd_file_error(url, file_type)
