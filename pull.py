@@ -13,7 +13,7 @@ import re
 import logging
 from markdownify import markdownify as md
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 __author__ = 'Depp Wang (deppwxq@gmail.com)'
 __github__ = 'https//github.com/DeppWang/youdaonote-pull'
@@ -37,12 +37,13 @@ def check_config(config_name) -> dict:
         raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑「config.json」')
 
     # 如果某个 key 不存在，抛出异常
-    username = config_dict.get('username', '')
-    password = config_dict.get('password', '')
-    local_dir = config_dict.get('local_dir', '')
-    ydnote_dir = config_dict.get('ydnote_dir', '')
-    smms_secret_token = config_dict.get('smms_secret_token', '')
-    if not username or not password or not local_dir or not ydnote_dir or not smms_secret_token:
+    try:
+        config_dict['username']
+        config_dict['password']
+        config_dict['local_dir']
+        config_dict['ydnote_dir']
+        config_dict['smms_secret_token']
+    except KeyError:
         raise KeyError('请检查「config.json」的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
     if config_dict['username'] == '' or config_dict['password'] == '':
