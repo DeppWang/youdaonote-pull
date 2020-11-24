@@ -23,9 +23,9 @@ __description__ = """
 class UserDefine:
     username = 'your_youdao_username'
     password = 'your_youdao_password'
+    smms_secret_token = 'your_smms_secret_token'
     local_dir = '/Users/deppwang/Documents/youdaonote-pull/test1'  # 你本地存放有道云笔记文件的位置
     local_zh_Hans_dir = '/Users/deppwang/Documents/youdaonote-pull/测试'  # 用于验证目录包含中文时，能否正常下载
-    smms_secret_token = 'your_smms_secret_token'
 
 
 def set_right_cookies():
@@ -391,8 +391,8 @@ class TestDownLoad(unittest.TestCase):
             "password": "%s",
             "local_dir": "%s",
             "ydnote_dir": "test",
-            "smms_secret_token": "SGSLk9yWcTe4RenXYqEPMkqVrx0Y8error"
-        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir)
+            "smms_secret_token": "%s"
+        }""" % (UserDefine.username, UserDefine.password, UserDefine.local_dir, UserDefine.smms_secret_token)
 
         with open('config.json', 'wb') as f:
             f.write(config_str.encode('utf-8'))
