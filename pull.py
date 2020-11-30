@@ -567,6 +567,7 @@ class YoudaoNoteSession(requests.Session):
         with open(file_path, 'rb') as f:
             content_str = f.read().decode('utf-8')
         new_content = md(content_str)
+        #将 Markdown 中的有道云图床图片与附件转换为 sm.ms 图床
         new_content = self.covert_markdown_file_image_url(new_content, file_path)
         self.write_content(file_path, new_content)
 
@@ -581,8 +582,7 @@ class YoudaoNoteSession(requests.Session):
             f.write(new_content.encode())
 
     def covert_markdown_file_image_url(self, content, file_path) -> str:
-        """ 将 Markdown 中的有道云图床图片与附件转换为 sm.ms 图床 """
-
+        """ 将 Markdown 中的有道云图床图片转换为 sm.ms 图床，附件下载并更换为本地链接 """
         reg = r'\[.*?\]\((.*?note\.youdao\.com.*?)\)'
         p = re.compile(reg)
         urls = p.findall(content)
