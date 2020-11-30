@@ -246,6 +246,9 @@ class YoudaoNoteSession(requests.Session):
 
         self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
+        # self.covert_xml_to_markdown('D:/github/youdaonote-pull/youdaonote/NAS与软路由相关/windows下查看防火墙状态命令netsh firewall ,开启防火墙与关闭防火墙.note')
+        # "D:\github\youdaonote-pull\youdaonote\电子设备硬件\从零开始学USB（十九、USB接口HID类设备（一）_HID描述符）_运维_To_run_away的博客-CSDN博客.note"
+        # "D:\github\youdaonote-pull\youdaonote\NAS与软路由相关\windows下查看防火墙状态命令netsh firewall ,开启防火墙与关闭防火墙.note"
         self.get_file_recursively(root_id, local_dir)
 
     def get_dir_id(self, root_id, ydnote_dir) -> str:
@@ -381,7 +384,7 @@ class YoudaoNoteSession(requests.Session):
         with open(file_path, 'wb') as f:
             f.write(response.content)  # response.content 本身就是字节类型
 
-        # 如果文件是 .note 类型，将其转换为 MarkDown 类型
+        #如果文件是 .note 类型，将其转换为 MarkDown 类型
         if youdao_file_suffix == '.note':
             try:
                 self.covert_xml_to_markdown(file_path)
@@ -417,13 +420,44 @@ class YoudaoNoteSession(requests.Session):
         for child in root[1]:
             # 正常文本
             if 'para' in child.tag:
+                text = ''
                 for child2 in child:
+                    # text在最前
                     if 'text' in child2.tag:
                         # 将 None 转为 "
                         if child2.text is None:
                             child2.text = ''
-                        new_content += f'%s{nl}{nl}' % child2.text
-                        break
+                        text = child2.text
+                    if 'inline-styles' in child2.tag:
+                        prefix = ''
+                        bold, title, color = False, False, False
+                        for child3 in child2:
+                            # 依次按xml顺序读取
+                            if 'bold' in child3.tag and not bold:
+                                text = ''.join(('*', text, '*')) #转为斜体
+                                bold = True
+                            if 'font-size' in child3.tag and not title:
+                                for child4 in child3:
+                                    if 'value' in child4.tag:
+                                        font_size = int(child4.text)
+                                        if font_size > 16:
+                                            if font_size == 18:
+                                                prefix += '## '
+                                            else:
+                                                prefix += '# '
+                                            title = True
+                            if 'color' in child3.tag and 'back-color' not in child3.tag and not color:
+                                for child4 in child3:
+                                    if 'value' in child4.tag:
+                                        if child4.text > '#c00000':
+                                            text = ''.join(('**', text, '**')) #转为加粗
+                                            color = True
+                            if 'href' in child3.tag:
+                                for child4 in child3:
+                                    if 'value' in child4.tag:
+                                        text += f'[链接](%s)' % (child4.text)
+                        text = prefix + text
+                new_content += f'%s{nl}{nl}' % text
 
             elif 'image' in child.tag:
                 if flag == 0:
@@ -533,21 +567,23 @@ class YoudaoNoteSession(requests.Session):
         with open(file_path, 'rb') as f:
             content_str = f.read().decode('utf-8')
         new_content = md(content_str)
+        new_content = self.covert_markdown_file_image_url(new_content, file_path)
         self.write_content(file_path, new_content)
+
 
     def write_content(self, file_path, new_content):
         " File is **.note，new_content is markdown string "
 
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
-        os.rename(file_path, new_file_path)
+        # os.rename(file_path, new_file_path)
         with open(new_file_path, 'wb') as f:
             f.write(new_content.encode())
 
     def covert_markdown_file_image_url(self, content, file_path) -> str:
-        """ 将 Markdown 中的有道云图床图片转换为 sm.ms 图床 """
+        """ 将 Markdown 中的有道云图床图片与附件转换为 sm.ms 图床 """
 
-        reg = r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)'
+        reg = r'\[.*?\]\((.*?note\.youdao\.com.*?)\)'
         p = re.compile(reg)
         urls = p.findall(content)
         if len(urls) > 0:
@@ -578,6 +614,8 @@ class YoudaoNoteSession(requests.Session):
     def download_file(self, url, file_path, attach_name) -> str:
         """ 如果 smms_secret_token 为 null，将其下载到本地，返回相对 url """
 
+
+
         try:
             response = self.get(url)
         # 如果此处不抓异常，将退出运行
@@ -599,6 +637,7 @@ class YoudaoNoteSession(requests.Session):
             # 默认下载图片到 youdaonote-images 文件夹
             file_dirname = 'youdaonote-images'
             file_suffix = '.' + content_type.split('/')[1]
+            file_suffix = file_suffix.replace(';', '')
 
         local_file_dir = os.path.join(self.local_dir, file_dirname)
         if not os.path.exists(local_file_dir):
