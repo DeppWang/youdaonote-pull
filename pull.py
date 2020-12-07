@@ -602,7 +602,8 @@ class YoudaoNoteSession(requests.Session):
         else:
             # 默认下载图片到 youdaonote-images 文件夹
             file_dirname = 'youdaonote-images'
-            file_suffix = '.' + content_type.split('/')[1]
+            # 后缀 png 和 jpeg 后可能出现 ; `**.png;`, 原因未知
+            file_suffix = '.' + content_type.split('/')[1].replace(';', '')
 
         local_file_dir = os.path.join(self.local_dir, file_dirname)
         if not os.path.exists(local_file_dir):
