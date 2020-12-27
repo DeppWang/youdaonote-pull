@@ -69,7 +69,7 @@ pip install markdownify
 ```
 
 * username：**必填**，你的有道云笔记用户名
-* password：**必填**，你的有道云笔记密码
+* password：**必填**，你的有道云笔记密码。ps：如果你记不到账号和密码，你可以参考 issue 的 [cookie 登录](https://github.com/DeppWang/youdaonote-pull/issues/32)
 * local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 中使用本地链接
