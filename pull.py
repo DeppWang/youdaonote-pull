@@ -415,6 +415,7 @@ class YoudaoNoteSession(requests.Session):
 
         # 得到多维数组中的文本，因为是数组，不是对象（json），所以只能遍历
         # root[1] 为 body
+        catalogue = False # 目录 catalogue 只替换一次 替换成功后 变成 True
         for child in root[1]:
             # 正常文本
             if 'para' in child.tag:
@@ -423,6 +424,27 @@ class YoudaoNoteSession(requests.Session):
                         # 将 None 转为 "
                         if child2.text is None:
                             child2.text = ''
+                        new_content += f'%s{nl}{nl}' % child2.text
+                        break
+
+            # 目录 catalogue 只替换一次
+            elif 'catalogue' in child.tag:
+                if catalogue == False :
+                    new_content += f'[toc]{nl}{nl}'
+                catalogue = True
+
+            # 标题
+            elif 'heading' in child.tag:
+                level = child.attrib['level']
+                if level == 'a' or level == 'b':
+                    level = 1
+                for child2 in child:
+                    if 'text' in child2.tag:
+                        # 将 None 转为 "
+                        if child2.text is None:
+                            child2.text = ''
+                        else:
+                            new_content += f'%s ' % ("#" * int(level))
                         new_content += f'%s{nl}{nl}' % child2.text
                         break
 
