@@ -180,14 +180,13 @@ python pull.py   # Windows
    - 在 macOS 和 Windows 环境中直接执行 `pull.py` 没有问题（你可以指定下载一个文件夹测试）
    - 在 `test.py` 配置中你的脚本参数（UserDefine），运行测试脚本  `test.py`  没有问题
 
-<!--## 打赏-->
+## 捐赠
 
-<!--请作者吃包辣条？-->
+有小伙伴说可以放个赞赏码什么的，但考虑捐赠的意义，如果小伙伴有想捐赠的，可以支持一下「[微澜图书馆](http://park.sanzhi.org.cn/index.php?app=user&ac=welcome)」这个[流动儿童图书馆](https://yixi.tv/#/speech/detail?id=913)公益项目。想让我知道你的捐赠的话，就把[我](http://park.sanzhi.org.cn/index.php?app=user&ac=duty&id=11102)设为你的「[介绍人](http://park.sanzhi.org.cn/index.php?app=group&ac=topic&id=51)」吧
 
-<!--支付宝--> 
-<!--微信--> 
-<!--![IMG_2549](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142007.jpg)-->
-<!--![IMG_2550](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-16-142705.jpg)-->
+![img](http://park.sanzhi.org.cn/public/images/2wm.jpg)
+
+- 微澜图书馆公众号
 
 <!--## 同一文件夹重名问题-->
 
