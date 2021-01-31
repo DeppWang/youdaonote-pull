@@ -18,6 +18,8 @@ from markdownify import markdownify as md
 __author__ = 'Depp Wang (deppwxq@gmail.com)'
 __github__ = 'https//github.com/DeppWang/youdaonote-pull'
 
+from styles import covert_xml_node_to_has_styles_markdown, covert_json_to_markdown_table
+
 
 def timestamp() -> str:
     return str(int(time.time() * 1000))
@@ -390,6 +392,7 @@ class YoudaoNoteSession(requests.Session):
                 print('此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown...')
                 self.covert_html_to_markdown(file_path)
 
+
     def covert_xml_to_markdown(self, file_path) -> None:
         """ 转换 xml 为 Markdown """
 
@@ -419,13 +422,16 @@ class YoudaoNoteSession(requests.Session):
         for child in root[1]:
             # 正常文本
             if 'para' in child.tag:
-                for child2 in child:
-                    if 'text' in child2.tag:
-                        # 将 None 转为 "
-                        if child2.text is None:
-                            child2.text = ''
-                        new_content += f'%s{nl}{nl}' % child2.text
-                        break
+                this_text = covert_xml_node_to_has_styles_markdown(child)
+                new_content += f'%s{nl}{nl}' % this_text
+
+                # for child2 in child:
+                #     if 'text' in child2.tag:
+                #         # 将 None 转为 "
+                #         if child2.text is None:
+                #             child2.text = ''
+                #         new_content += f'%s{nl}{nl}' % child2.text
+                #         break
 
             # 目录 catalogue 只替换一次
             elif 'catalogue' in child.tag:
@@ -435,8 +441,9 @@ class YoudaoNoteSession(requests.Session):
 
             # 标题
             elif 'heading' in child.tag:
-                level = child.attrib['level']
-                if level == 'a' or level == 'b':
+                level = child.attrib['level'] if child.attrib.__contains__('level') else 1
+
+                if level is None or level == "a" or level == "b":
                     level = 1
                 for child2 in child:
                     if 'text' in child2.tag:
@@ -502,22 +509,32 @@ class YoudaoNoteSession(requests.Session):
                 # 无序列表
                 if list_item.get(child.attrib['list-id']) == 'unordered':
 
-                    for child2 in child:
-                        if 'text' in child2.tag:
-                            text = child2.text
-                            if text is None:
-                                text = ''
-                            new_content += f'- %s{nl}{nl}' % text
+                    this_text = covert_xml_node_to_has_styles_markdown(child)
+                    new_content += f'- %s{nl}{nl}' % this_text
+
+                    # for child2 in child:
+                    #     if 'text' in child2.tag:
+                    #         text = child2.text
+                    #         if text is None:
+                    #             text = ''
+                    #         new_content += f'- %s{nl}{nl}' % text
+
                 # 有序列表
                 elif list_item.get(child.attrib['list-id']) == 'ordered':
-                    for child2 in child:
-                        if 'text' in child2.tag:
-                            count = 1
-                            text = child2.text
-                            if text is None:
-                                text = ''
-                            new_content += f'%s. %s{nl}{nl}' % (count, text)
-                            # count += 1
+
+                    this_text = covert_xml_node_to_has_styles_markdown(child)
+                    count = 1
+                    new_content += f'%s. %s{nl}{nl}' % (count, this_text)
+
+                    # for child2 in child:
+                    #     if 'text' in child2.tag:
+                    #         count = 1
+                    #         text = child2.text
+                    #         if text is None:
+                    #             text = ''
+                    #         new_content += f'%s. %s{nl}{nl}' % (count, text)
+                    #         # count += 1
+
             # 复选框
             elif 'todo' in child.tag:
                 for child2 in child:
@@ -539,7 +556,11 @@ class YoudaoNoteSession(requests.Session):
             elif 'table' in child.tag:
                 for child2 in child:
                     if 'content' in child2.tag:
-                        new_content += f'```{nl}原来格式为表格（table），转换较复杂，未转换，需要手动复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
+                        try:
+                            table_data_md = covert_json_to_markdown_table(child2.text)
+                            new_content += f'%s{nl}{nl}' % table_data_md
+                        except :
+                            new_content += f'```{nl}原来格式为表格（table），转换较复杂，未转换，需要手动复制一下{nl}%s{nl}```{nl}{nl}' % child2.text
 
             # 其他
             else:
@@ -557,6 +578,7 @@ class YoudaoNoteSession(requests.Session):
             content_str = f.read().decode('utf-8')
         new_content = md(content_str)
         self.write_content(file_path, new_content)
+
 
     def write_content(self, file_path, new_content):
         " File is **.note，new_content is markdown string "
