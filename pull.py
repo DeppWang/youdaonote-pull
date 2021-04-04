@@ -645,24 +645,17 @@ class YoudaoNoteSession(requests.Session):
             print(url + ' %s有误！' % file_type)
             return url
 
-        relative_file_path = self.set_relative_file_path(file_path, file_name, file_dirname)
+        relative_file_path = self.set_relative_file_path(file_path, file_name, local_file_dir)
         return relative_file_path
 
-    def set_relative_file_path(self, file_path, file_name, file_dirname):
+    def set_relative_file_path(self, file_path, file_name, local_file_dir):
         """ 图片/附件设置为相对地址 """
 
-        relative_path = file_path.replace(self.local_dir, '')
-        logging.info('relative_path: %s', relative_path)
-        layer_count = len(relative_path.split('/'))
-        if layer_count == 2:
-            new_file_path = os.path.join('./', file_dirname, file_name).replace('\\', '/')
-            return new_file_path
-        relative = ''
-        if layer_count > 2:
-            sub_count = layer_count - 2
-            for i in range(sub_count):
-                relative = os.path.join(relative, '../')
-        new_file_path = os.path.join(relative, file_dirname, file_name).replace('\\', '/')
+        note_file_dir = os.path.dirname(file_path)
+        rel_file_dir = os.path.relpath(local_file_dir, note_file_dir)
+        rel_file_path = os.path.join(rel_file_dir, file_name)
+        new_file_path = rel_file_path.replace('\\', '/')
+
         return new_file_path
 
     def upload_to_smms(self, old_url, smms_secret_token) -> str:
