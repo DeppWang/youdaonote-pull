@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import base64
 import requests
 import sys
 import time
@@ -11,6 +12,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
 import re
 import logging
+from hashlib import sha1
 from markdownify import markdownify as md
 
 # logging.basicConfig(level=logging.INFO)
@@ -43,6 +45,7 @@ def check_config(config_name) -> dict:
         config_dict['local_dir']
         config_dict['ydnote_dir']
         config_dict['smms_secret_token']
+        config_dict['github']
     except KeyError:
         raise KeyError('请检查「config.json」的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
@@ -103,6 +106,9 @@ class YoudaoNoteSession(requests.Session):
         self.cstk = None
         self.local_dir = None
         self.smms_secret_token = None
+        self.github_user = None
+        self.github_email = None
+        self.github_token = None
 
     def check_and_login(self, username, password) -> str:
         try:
@@ -223,9 +229,9 @@ class YoudaoNoteSession(requests.Session):
             # raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！接口返回内容：',
             #                  json.dumps(parsed, indent=4, sort_keys=True))
 
-    def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
+    def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id, github_dict) -> None:
         """ 下载所有文件 """
-
+        
         # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，如果是 Windows 系统，将路径分隔符（\\）替换为 /
         if local_dir == '':
             local_dir = os.path.join(os.getcwd(), 'youdaonote').replace('\\', '/')
@@ -246,7 +252,12 @@ class YoudaoNoteSession(requests.Session):
 
         self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
+        self.github_token = github_dict['token']
+        self.github_user = github_dict['user']
+        self.github_email = github_dict['email']
+        
         self.get_file_recursively(root_id, local_dir)
+
 
     def get_dir_id(self, root_id, ydnote_dir) -> str:
         """ 获取有道云笔记指定文件夹 id，目前指定文件夹只能为顶层文件夹，如果要指定文件夹下面的文件夹，请自己改用递归实现 """
@@ -587,13 +598,19 @@ class YoudaoNoteSession(requests.Session):
 
     def get_new_down_or_upload_url(self, url, file_path, attach_name='') -> str:
         """ 根据是否存在 smms_secret_token 判断是否需要上传到 sm.ms """
-
+        
         if 'note.youdao.com' not in url:
             return url
         # 当 smms_secret_token 为空（不上传到 SM.MS）和是附件时，下载到图片和附件到本地
         if self.smms_secret_token == '' or attach_name != '':
-            return self.download_file(url, file_path, attach_name)
-        new_url = self.upload_to_smms(url, self.smms_secret_token)
+            if (self.github_token == ''):
+                return self.download_file(url, file_path, attach_name)
+
+        new_url = url
+        if (self.github_token == ''):
+            new_url = self.upload_to_smms(url, self.smms_secret_token)
+        else:
+            new_url = self.upload_to_github(url)
         if new_url != url:
             return new_url
         return self.download_file(url, file_path, attach_name)
@@ -701,6 +718,58 @@ class YoudaoNoteSession(requests.Session):
         print('已将图片「%s」转换为「%s」' % (old_url, url))
         return url
 
+    def upload_to_github(self, old_url) -> str:
+        try:
+            file_content = self.get(old_url).content
+        except:
+            self.print_download_yd_image_error(old_url)
+            return old_url
+
+        strlist = old_url.split("/")
+        file_name = str(strlist[len(strlist) - 1]) + '.png'
+
+        upload_api = 'https://api.github.com/repos/lxbwolf/blog_source_image/contents/' + file_name
+        header = {'Accept': 'application/vnd.github.v3+json',
+                  'Authorization': 'token ' + str(self.github_token),
+                  'Content-Type': 'application/json'
+                }
+        file_byte = base64.b64encode(file_content)
+        sha1_obj = sha1()
+        file_base64_content = str(file_byte).encode('ascii')
+        file_base64_content = b'blob %d\0' % len(file_base64_content) + file_base64_content
+        sha1_obj.update(file_base64_content)
+        sha1_obj = sha1_obj.hexdigest()
+        put_data = json.dumps({'message': 'add ' + str(file_name),
+                    'content': str(file_byte, encoding='utf-8'),
+                    'sha': str(sha1_obj),
+                    'committer': {
+                        'name': str(self.github_user),
+                        'email': str(self.github_email)
+                        }
+                    }
+                    )
+
+        try:
+            res = requests.put(upload_api, data=put_data, headers=header)
+            res_dict = json.loads(res.text)
+            print(res_dict, u'数据类型:', type(res_dict))
+        except requests.exceptions.ProxyError as err:
+            logging.info('网络错误，请重试')
+            print('网络错误，上传「%s」到 GitHub 失败！将下载图片到本地' % old_url)
+            print('错误提示：%s' % format(err))
+            return old_url
+
+        url = old_url
+        if ('content' in res_dict):
+            content_dict = res_dict['content']
+            if ('html_url' in content_dict):
+                url = content_dict['html_url']
+            else:
+                print('没有 html_url，转换失败')
+        else:
+            print('没有 content，转换失败')
+        return url
+
     def print_download_yd_file_error(self, url, file_type) -> None:
         print('下载「%s」失败！%s可能已失效，可浏览器登录有道云笔记后，查看%s是否能正常加载（验证登录才能查看）' % (url, file_type, file_type))
 
@@ -716,7 +785,7 @@ def main():
         session = YoudaoNoteSession()
         root_id = session.check_and_login(config_dict['username'], config_dict['password'])
         print('正在 pull，请稍后 ...')
-        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
+        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id, config_dict['github'])
 
     except requests.exceptions.ProxyError as proxyErr:
         print('请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')
