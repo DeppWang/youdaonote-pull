@@ -3,6 +3,6 @@
     "password": "",
     "local_dir": "",
     "ydnote_dir": "",
-    "smms_secret_token": ""
+    "smms_secret_token": "",
+    "bear_support": ""
 }
-

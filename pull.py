@@ -223,8 +223,10 @@ class YoudaoNoteSession(requests.Session):
             # raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！接口返回内容：',
             #                  json.dumps(parsed, indent=4, sort_keys=True))
 
-    def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
+    def get_all(self, config_dict, root_id) -> None:
         """ 下载所有文件 """
+        local_dir = config_dict['local_dir']
+        ydnote_dir = config_dict['ydnote_dir']
 
         # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，如果是 Windows 系统，将路径分隔符（\\）替换为 /
         if local_dir == '':
@@ -244,8 +246,13 @@ class YoudaoNoteSession(requests.Session):
             if root_id is None:
                 raise ValueError('此文件夹「%s」不是顶层文件夹，暂不能下载！' % ydnote_dir)
 
-        self.local_dir = local_dir  # 此处设置，后面会用，避免传参
-        self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
+        # 此处设置，后面会用，避免传参
+        self.local_dir = local_dir
+        self.ydnote_dir = ydnote_dir
+        self.smms_secret_token = config_dict['smms_secret_token']
+        if 'bear_support' in config_dict:
+            self.bear_support = config_dict['bear_support']
+
         self.get_file_recursively(root_id, local_dir)
 
     def get_dir_id(self, root_id, ydnote_dir) -> str:
@@ -564,8 +571,19 @@ class YoudaoNoteSession(requests.Session):
         base = os.path.splitext(file_path)[0]
         new_file_path = base + '.md'
         os.rename(file_path, new_file_path)
+        if hasattr(self, "bear_support") and self.bear_support == "true":
+            new_content = self.add_label_to_content(base, new_content)
         with open(new_file_path, 'wb') as f:
             f.write(new_content.encode())
+
+    def add_label_to_content(self, file_path_base, new_content) -> str:
+        cat_path = file_path_base.replace(self.local_dir + "/", "")
+        label = '#' + self.ydnote_dir
+        cats = cat_path.split("/")
+        cats.pop()
+        for cat in cats:
+            label += ("/" + cat)
+        return new_content + "\n" + label
 
     def covert_markdown_file_image_url(self, content, file_path) -> str:
         """ 将 Markdown 中的有道云图床图片转换为 sm.ms 图床 """
@@ -716,7 +734,7 @@ def main():
         session = YoudaoNoteSession()
         root_id = session.check_and_login(config_dict['username'], config_dict['password'])
         print('正在 pull，请稍后 ...')
-        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
+        session.get_all(config_dict, root_id)
 
     except requests.exceptions.ProxyError as proxyErr:
         print('请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')
