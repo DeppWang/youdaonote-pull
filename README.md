@@ -73,6 +73,7 @@ pip install markdownify
 * local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 中使用本地链接
+* bear_support：选填，当值为'true'时支持对熊笔记的迁移。效果为在笔记的内容最后追加当前笔记的目录路径，作为熊笔记的标签。
 * 提示：脚本单纯本地运行，不用担心你的账号密码泄露；建议使用 [Sublime](https://www.sublimetext.com/3) 编辑 config.json（避免编码格式错误）
 
 示例：
