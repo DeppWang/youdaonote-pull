@@ -84,6 +84,8 @@ class YoudaoNoteSession(requests.Session):
     ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
     DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=200&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
     FILE_URL = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=%s'
+    DIR_MES_URL_MORE = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=200&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s&lastId=%s'
+    RES_URL = '(http://note.youdao.com/yws/res/'
 
     # 莫有类方法
 
@@ -223,7 +225,7 @@ class YoudaoNoteSession(requests.Session):
             # raise LoginError('请检查账号密码是否正确！也可能因操作频繁导致需要验证码，请切换网络（改变 ip）或等待一段时间后重试！接口返回内容：',
             #                  json.dumps(parsed, indent=4, sort_keys=True))
 
-    def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id) -> None:
+    def get_all(self, local_dir, ydnote_dir, smms_secret_token, root_id, images_dir = 'youdaonote-images', attachments_dir = 'youdaonote-attachments') -> None:
         """ 下载所有文件 """
 
         # 如果本地为指定文件夹，下载到当前路径的 youdaonote 文件夹中，如果是 Windows 系统，将路径分隔符（\\）替换为 /
@@ -246,6 +248,8 @@ class YoudaoNoteSession(requests.Session):
 
         self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
+        self.images_dir = images_dir
+        self.attachments_dir = attachments_dir
         self.get_file_recursively(root_id, local_dir)
 
     def get_dir_id(self, root_id, ydnote_dir) -> str:
@@ -268,7 +272,8 @@ class YoudaoNoteSession(requests.Session):
     def get_file_recursively(self, id, local_dir) -> None:
         """ 递归遍历，根据 id 找到目录下的所有文件 """
 
-        url = self.DIR_MES_URL % (id, self.cstk)
+        parentId = id
+        url = self.DIR_MES_URL % (parentId, self.cstk)
 
         response = self.get(url)
         json_obj = json.loads(response.content)
@@ -280,19 +285,35 @@ class YoudaoNoteSession(requests.Session):
             logging.info('json_obj: %s', json_obj)
             raise KeyError('有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue')
 
-        for entry in json_obj['entries']:
-            file_entry = entry['fileEntry']
-            id = file_entry['id']
-            name = file_entry['name']
-            logging.info('name: %s', name)
-            # 如果是目录，继续遍历目录下文件
-            if file_entry['dir']:
-                sub_dir = os.path.join(local_dir, name)
-                if not os.path.exists(sub_dir):
-                    os.mkdir(sub_dir)
-                self.get_file_recursively(id, sub_dir)
-            else:
-                self.judge_add_or_update(id, name, local_dir, file_entry)
+        count = json_obj['count']
+        num = 0
+        lastId = ''
+
+        while True:
+
+            for entry in json_obj['entries']:
+                file_entry = entry['fileEntry']
+                id = file_entry['id']
+                name = file_entry['name']
+                lastId = id
+                logging.info('name: %s', name)
+                # 如果是目录，继续遍历目录下文件
+                if file_entry['dir']:
+                    sub_dir = os.path.join(local_dir, name)
+                    if not os.path.exists(sub_dir):
+                        os.mkdir(sub_dir)
+                    self.get_file_recursively(id, sub_dir)
+                else:
+                    self.judge_add_or_update(id, name, local_dir, file_entry)
+
+            num = num +  len(json_obj['entries'])
+            if num>=count:
+                break
+
+            url = self.DIR_MES_URL_MORE % (parentId, self.cstk,lastId)
+
+            response = self.get(url)
+            json_obj = json.loads(response.content)
 
     def judge_add_or_update(self, id, name, local_dir, file_entry) -> None:
         """ 判断是新增还是更新 """
@@ -452,10 +473,11 @@ class YoudaoNoteSession(requests.Session):
                 if flag == 0:
                     self.print_ydnote_file_name(file_path)
 
+                
+                image_url = ''
+                image_name = ''
                 for child2 in child:
-                    # source 在 text 前
                     if 'source' in child2.tag:
-                        image_url = ''
                         if child2.text is not None:
                             image_url = self.get_new_down_or_upload_url(child2.text, file_path)
                             flag += 1
@@ -464,8 +486,7 @@ class YoudaoNoteSession(requests.Session):
                         image_name = child2.text
                         if child2.text is None:
                             image_name = ''
-                        new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
-                        break
+                new_content += f'![%s](%s){nl}{nl}' % (image_name, image_url)
 
             elif 'attach' in child.tag:
                 # resource 在 filename 前
@@ -552,10 +573,31 @@ class YoudaoNoteSession(requests.Session):
 
         self.write_content(file_path, new_content)
 
+    def get_res_in_markdown(self, content):
+        links = []
+        startIndex = content.find(self.RES_URL)
+        while startIndex>=0:
+            endIndex = content.find(')',startIndex+len(self.RES_URL))
+            if endIndex<0:
+                break
+            link = content[startIndex:endIndex+1]
+            links.append(link[1:-1])
+            startIndex = content.find(self.RES_URL,endIndex+1)
+        return links
+
+    def download_file_in_markdown(self,content, file_path):
+        links = self.get_res_in_markdown(content)
+        for link in links:
+            image_url = self.get_new_down_or_upload_url(link, file_path)
+            content = content.replace(link,image_url)
+        return content
+
+
     def covert_html_to_markdown(self, file_path):
         with open(file_path, 'rb') as f:
             content_str = f.read().decode('utf-8')
-        new_content = md(content_str)
+        new_content = md(content_str.replace('<br>','<br><br>').replace('</div>','</div><br><br>')).rstrip()
+        new_content = self.download_file_in_markdown(new_content,file_path)
         self.write_content(file_path, new_content)
 
     def write_content(self, file_path, new_content):
@@ -602,7 +644,7 @@ class YoudaoNoteSession(requests.Session):
         """ 下载文件到本地，返回相对 url """
 
         try:
-            response = self.get(url)
+            response = self.head(url)
         # 如果此处不抓异常，将退出运行
         except requests.exceptions.ProxyError as err:
             print('网络错误，「%s」下载失败' % url)
@@ -619,11 +661,11 @@ class YoudaoNoteSession(requests.Session):
 
         if attach_name != '':
             # 默认下载附件到 youdaonote-attachments 文件夹
-            file_dirname = 'youdaonote-attachments'
+            file_dirname = self.attachments_dir
             file_suffix = attach_name
         else:
             # 默认下载图片到 youdaonote-images 文件夹
-            file_dirname = 'youdaonote-images'
+            file_dirname = self.images_dir
             # 后缀 png 和 jpeg 后可能出现 ; `**.png;`, 原因未知
             file_suffix = '.' + content_type.split('/')[1].replace(';', '')
 
@@ -634,16 +676,27 @@ class YoudaoNoteSession(requests.Session):
         file_name = file_basename + file_suffix
         local_file_path = os.path.join(local_file_dir, file_name)
 
-        try:
-            with open(local_file_path, 'wb') as f:
-                f.write(response.content)  # response.content 本身就为字节类型
-            if attach_name != '':
-                print('已将附件「%s」转换为「%s」，SM.MS 只能上传图片，所以附件只下载到本地' % (url, local_file_path))
-            else:
-                print('已将图片「%s」转换为「%s」' % (url, local_file_path))
-        except:
-            print(url + ' %s有误！' % file_type)
-            return url
+        # 如果不存在，则下载
+        if not os.path.exists(local_file_path):
+            try:
+                response = self.get(url)
+            # 如果此处不抓异常，将退出运行
+            except requests.exceptions.ProxyError as err:
+                print('网络错误，「%s」下载失败' % url)
+                print('错误提示：%s' % format(err))
+                return url
+            try:
+                with open(local_file_path, 'wb') as f:
+                    f.write(response.content)  # response.content 本身就为字节类型
+                if attach_name != '':
+                    print('已将附件「%s」转换为「%s」，SM.MS 只能上传图片，所以附件只下载到本地' % (url, local_file_path))
+                else:
+                    print('已将图片「%s」转换为「%s」' % (url, local_file_path))
+            except:
+                print(url + ' %s有误！' % file_type)
+                return url
+        else:
+            print('已存在「%s」' % (local_file_path))
 
         relative_file_path = self.set_relative_file_path(file_path, file_name, local_file_dir)
         return relative_file_path
@@ -716,7 +769,7 @@ def main():
         session = YoudaoNoteSession()
         root_id = session.check_and_login(config_dict['username'], config_dict['password'])
         print('正在 pull，请稍后 ...')
-        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
+        session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id, config_dict['images_dir'], config_dict['attachments_dir'])
 
     except requests.exceptions.ProxyError as proxyErr:
         print('请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')

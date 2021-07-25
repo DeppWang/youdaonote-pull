@@ -3,6 +3,8 @@
     "password": "",
     "local_dir": "",
     "ydnote_dir": "",
+    "attachments_dir": "youdaonote-attachments",
+    "images_dir": "youdaonote-images",
     "smms_secret_token": ""
 }
 
