@@ -247,6 +247,7 @@ class YoudaoNoteSession(requests.Session):
         self.local_dir = local_dir  # 此处设置，后面会用，避免传参
         self.smms_secret_token = smms_secret_token  # 此处设置，后面会用，避免传参
         self.get_file_recursively(root_id, local_dir)
+        self.check_unconverted_files(local_dir)  # 有道获取到的某些笔记虽然是内容是note文件，但并没有note后缀，添加该函数进行转换
 
     def get_dir_id(self, root_id, ydnote_dir) -> str:
         """ 获取有道云笔记指定文件夹 id，目前指定文件夹只能为顶层文件夹，如果要指定文件夹下面的文件夹，请自己改用递归实现 """
@@ -415,7 +416,7 @@ class YoudaoNoteSession(requests.Session):
 
         # 得到多维数组中的文本，因为是数组，不是对象（json），所以只能遍历
         # root[1] 为 body
-        catalogue = False # 目录 catalogue 只替换一次 替换成功后 变成 True
+        catalogue = False  # 目录 catalogue 只替换一次 替换成功后 变成 True
         for child in root[1]:
             # 正常文本
             if 'para' in child.tag:
@@ -429,7 +430,7 @@ class YoudaoNoteSession(requests.Session):
 
             # 目录 catalogue 只替换一次
             elif 'catalogue' in child.tag:
-                if catalogue == False :
+                if catalogue == False:
                     new_content += f'[toc]{nl}{nl}'
                 catalogue = True
 
@@ -706,6 +707,21 @@ class YoudaoNoteSession(requests.Session):
 
     def print_download_yd_image_error(self, url) -> None:
         print('下载「%s」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常加载（验证登录才能查看）' % url)
+
+    def check_unconverted_files(self, local_dir):
+        print("正在对遗漏的未被转换文件进行二次查找...")
+        for root, dirs, files in os.walk(local_dir):
+            for file in files:
+                # 对不是.md的文件进行筛查
+                if os.path.splitext(file)[1] != '.md':
+                    # 如果不进行替换，相对路径生成将出错
+                    absolute_file_path = os.path.join(root, file).replace('\\', '/')
+                    with open(absolute_file_path, "rb") as f:
+                        # 对没转换的xml文件进行转换
+                        content = f.read(5)
+                    if content == b"<?xml":
+                        print("找到未被转换的文件：「%s」，转换中" % absolute_file_path)
+                        self.covert_xml_to_markdown(absolute_file_path)
 
 
 def main():
