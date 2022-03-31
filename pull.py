@@ -82,7 +82,7 @@ class YoudaoNoteSession(requests.Session):
     LOGIN_URL = 'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp='
     COOKIE_URL = 'https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=%s'
     ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
-    DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=200&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
+    DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=1000&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
     FILE_URL = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=%s'
 
     # 莫有类方法
