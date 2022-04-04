@@ -87,11 +87,11 @@ pip install markdownify
 
 获取 Cookies 方式：
 
-1. 在浏览器如 Chrome 中使用账号密码登录
+1. 在浏览器如 Chrome 中使用账号密码或者其他方式登录有道云笔记
 2. 打开 DevTools (F12)，Network 下找「主」请求（一般是第一个），再找 Cookie
 3. 复制对应数据替换  `**`
 
-![image-20220404191952557](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2022-04-04-1649071192.png)
+![image.png](https://s2.loli.net/2022/04/04/N47KPEaSGvCpsfX.png)
 
 示例：
 
