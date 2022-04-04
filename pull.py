@@ -38,16 +38,16 @@ def check_config(config_name) -> dict:
 
     # 如果某个 key 不存在，抛出异常
     try:
-        config_dict['username']
-        config_dict['password']
+        # config_dict['username']
+        # config_dict['password']
         config_dict['local_dir']
         config_dict['ydnote_dir']
         config_dict['smms_secret_token']
     except KeyError:
         raise KeyError('请检查「config.json」的 key 是否分别为 username, password, local_dir, ydnote_dir, smms_secret_token')
 
-    if config_dict['username'] == '' or config_dict['password'] == '':
-        raise ValueError('账号密码不能为空，请检查「config.json」！')
+    # if config_dict['username'] == '' or config_dict['password'] == '':
+    #     raise ValueError('账号密码不能为空，请检查「config.json」！')
 
     return config_dict
 
@@ -62,7 +62,7 @@ def covert_cookies(file_name) -> list:
 
     try:
         # 将字符串转换为字典
-        cookies_dict = eval(json_str)
+        cookies_dict = json.loads(json_str)
         cookies = cookies_dict['cookies']
     except Exception:
         raise Exception('转换「' + file_name + '」为字典时出现错误')
@@ -78,8 +78,8 @@ class YoudaoNoteSession(requests.Session):
 
     # 类变量，不随着对象改变
     WEB_URL = 'https://note.youdao.com/web/'
-    SIGN_IN_URL = 'https://note.youdao.com/signIn/index.html?&callback=https%3A%2F%2Fnote.youdao.com%2Fweb%2F&from=web'  # 浏览器在传输链接的过程中是否都将符号转换为 Unicode？
-    LOGIN_URL = 'https://note.youdao.com/login/acc/urs/verify/check?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&er=https%3A%2F%2Fnote.youdao.com%2FsignIn%2F%2FloginCallback.html&vcode=&systemName=&deviceType=&timestamp='
+    SIGN_IN_URL = 'https://note.youdao.com/signIn/index.html?&callback=https://note.youdao.com/web&from=web'  # 浏览器在传输链接的过程中是否都将符号转换为 Unicode？
+    LOGIN_URL = 'https://note.youdao.com/login/acc/login?app=web&product=YNOTE&tp=urstoken&cf=6&fr=1&systemName=&deviceType=&ru=https://note.youdao.com/signIn//loginCallback.html&er=https://note.youdao.com/signIn//loginCallback.html&validate=&systemName=mac&deviceType=MacPC&timestamp='
     COOKIE_URL = 'https://note.youdao.com/yws/mapi/user?method=get&multilevelEnable=true&_=%s'
     ROOT_ID_URL = 'https://note.youdao.com/yws/api/personal/file?method=getByPath&keyfrom=web&cstk=%s'
     DIR_MES_URL = 'https://note.youdao.com/yws/api/personal/file/%s?all=true&f=true&len=1000&sort=1&isReverse=false&method=listPageByParentId&keyfrom=web&cstk=%s'
@@ -104,26 +104,19 @@ class YoudaoNoteSession(requests.Session):
         self.local_dir = None
         self.smms_secret_token = None
 
-    def check_and_login(self, username, password) -> str:
+    def check_and_login(self) -> str:
         try:
             cookies = covert_cookies('cookies.json')
         except Exception as err:
             logging.info('covert_cookies error: %s', format(err))
-            cookies = None
+            raise SyntaxError('请检查「config.json」格式是否为 utf-8 的 json！建议使用 Sublime 编辑「config.json」')
 
         # 如果 cookies 不为 null，使用 cookies 登录
-        if cookies is not None:
-            # 如果 Cookies 被修改或过期等原因导致 Cookies 登录失败，改用使用账号密码登录
-            try:
-                root_id = self.cookies_login(cookies)
-                print('本次使用 Cookies 登录')
-            except KeyError as err:
-                logging.info('cookie 登录出错：%s', format(err))
-                root_id = self.login(username, password)
-                print('本次使用账号密码登录，已将 Cookies 保存到「cookies.json」中，下次使用 Cookies 登录')
-        else:
-            root_id = self.login(username, password)
-            print('本次使用账号密码登录，已将 Cookies 保存到「cookies.json」中，下次使用 Cookies 登录')
+        try:
+            root_id = self.cookies_login(cookies)
+            print('本次使用 Cookies 登录')
+        except KeyError as err:
+            raise LoginError('Cookies 登录出错：{}'.format(err))
 
         return root_id
 
@@ -189,14 +182,14 @@ class YoudaoNoteSession(requests.Session):
         with open('cookies.json', 'wb') as f:
             f.write(str(json.dumps(cookies_dict, indent=4, sort_keys=True)).encode())
 
-    def cookies_login(self, cookies_dict) -> str:
+    def cookies_login(self, cookies) -> str:
         """ 使用 Cookies 登录，其实就是设置 Cookies """
 
         cookiejar = self.cookies
-        for cookie in cookies_dict:
+        for cookie in cookies:
             cookiejar.set(cookie[0], cookie[1], domain=cookie[2], path=cookie[3])
 
-        self.cstk = cookies_dict[0][1]
+        self.cstk = cookies[0][1]
 
         return self.get_root_id()
 
@@ -415,7 +408,7 @@ class YoudaoNoteSession(requests.Session):
 
         # 得到多维数组中的文本，因为是数组，不是对象（json），所以只能遍历
         # root[1] 为 body
-        catalogue = False # 目录 catalogue 只替换一次 替换成功后 变成 True
+        catalogue = False  # 目录 catalogue 只替换一次 替换成功后 变成 True
         for child in root[1]:
             # 正常文本
             if 'para' in child.tag:
@@ -429,7 +422,7 @@ class YoudaoNoteSession(requests.Session):
 
             # 目录 catalogue 只替换一次
             elif 'catalogue' in child.tag:
-                if catalogue == False :
+                if catalogue == False:
                     new_content += f'[toc]{nl}{nl}'
                 catalogue = True
 
@@ -714,7 +707,7 @@ def main():
     try:
         config_dict = check_config('config.json')
         session = YoudaoNoteSession()
-        root_id = session.check_and_login(config_dict['username'], config_dict['password'])
+        root_id = session.check_and_login()
         print('正在 pull，请稍后 ...')
         session.get_all(config_dict['local_dir'], config_dict['ydnote_dir'], config_dict['smms_secret_token'], root_id)
 

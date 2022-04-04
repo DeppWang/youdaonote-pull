@@ -24,8 +24,8 @@ class UserDefine:
     username = 'your_youdao_username'
     password = 'your_youdao_password'
     smms_secret_token = 'your_smms_secret_token'
-    local_dir = '/Users/deppwang/Documents/youdaonote-pull/test1'  # 你本地存放有道云笔记文件的位置
-    local_zh_Hans_dir = '/Users/deppwang/Documents/youdaonote-pull/测试'  # 用于验证目录包含中文时，能否正常下载
+    local_dir = '/Users/deppwang/Documents/youdaonote/test1'  # 你本地存放有道云笔记文件的位置
+    local_zh_Hans_dir = '/Users/deppwang/Documents/youdaonote/测试'  # 用于验证目录包含中文时，能否正常下载
 
 
 def set_right_cookies():
@@ -64,9 +64,9 @@ class TestAPI(unittest.TestCase):
         # print('验证使用 Cookies 是否能成功登录\m')
 
         session = pull.YoudaoNoteSession()
-        cookies_dict = pull.covert_json_str_to_dict('cookies.json')
-        logging.info(cookies_dict)
-        session.cookies_login(cookies_dict['cookies'])
+        cookies = pull.covert_cookies('cookies.json')
+        logging.info(cookies)
+        session.cookies_login(cookies)
         # root_id = session.get_root_id()
         # print(root_id)
         url = 'https://note.youdao.com/yws/api/personal/file?method=listPath&fileId=9d8a2385eeec77338211b4f04bbf844d&keyfrom=web&cstk=01PvSwwu'
@@ -82,9 +82,9 @@ class TestAPI(unittest.TestCase):
         # print('验证使用 Cookies 是否能成功登录\m')
 
         session = pull.YoudaoNoteSession()
-        cookies_dict = pull.covert_json_str_to_dict('cookies.json')
-        logging.info(cookies_dict)
-        session.cookies_login(cookies_dict['cookies'])
+        cookies = pull.covert_cookies('cookies.json')
+        logging.info(cookies)
+        session.cookies_login(cookies)
         # root_id = session.get_root_id()
         # print(root_id)
         url = 'https://note.youdao.com/yws/api/personal/sync?method=download&keyfrom=web&cstk=01PvSwwu'
@@ -103,9 +103,9 @@ class TestAPI(unittest.TestCase):
         # print('验证使用 Cookies 是否能成功登录\m')
 
         session = pull.YoudaoNoteSession()
-        cookies_dict = pull.covert_json_str_to_dict('cookies.json')
-        # logging.info(cookies_dict)
-        session.cookies_login(cookies_dict['cookies'])
+        cookies = pull.covert_cookies('cookies.json')
+        logging.info(cookies)
+        session.cookies_login(cookies)
         # root_id = session.get_root_id()
         # print(root_id)
         url = 'https://note.youdao.com/yws/api/personal/resource?method=listThumbsInfo&keyfrom=web&cstk=ZzXatKpy'
@@ -116,9 +116,9 @@ class TestAPI(unittest.TestCase):
         content = session.post(url, data)
         logging.info(content)
 
-    def test_image_url(self):
-        image_url = '![%s](https://www.zhihu.com/equation?tex=+k+%3D+%5Cleft%5B%5Cfrac%7Blog%28-z_%7Bvs%7D+%2F+near%29%7D%7Blog%281+%2B+%5Cfrac%7B2tan%5Ctheta%7D%7BS_y%7D%29%7D+%5Cright%5D+)' % 'test'
-        print(image_url)
+    # def test_image_url(self):
+    #     image_url = '![%s](https://www.zhihu.com/equation?tex=+k+%3D+%5Cleft%5B%5Cfrac%7Blog%28-z_%7Bvs%7D+%2F+near%29%7D%7Blog%281+%2B+%5Cfrac%7B2tan%5Ctheta%7D%7BS_y%7D%29%7D+%5Cright%5D+)' % 'test'
+    #     print(image_url)
 
 
 class TestErrorExit(unittest.TestCase):
@@ -198,7 +198,7 @@ class TestErrorExit(unittest.TestCase):
         with self.assertRaises(SystemExit):
             pull.main()
 
-    def test_config_username_password(self):
+    def _test_config_username_password(self):
         print('----------------')
         print('验证账号密码为空时，是否结束执行并输出提示\n')
 
@@ -440,7 +440,7 @@ class TestDownLoad(unittest.TestCase):
 
 class LoginTest(unittest.TestCase):
 
-    def test_login_right(self):
+    def _test_login_right(self):
         """
         验证账号密码登录
         """
@@ -532,7 +532,9 @@ class LoginTest(unittest.TestCase):
         with open('cookies.json', 'wb') as f:
             f.write(conkies_str.encode('utf-8'))
 
-        self.assertIsNone(pull.main())
+        # self.assertIsNone(pull.main())
+        with self.assertRaises(SystemExit):
+            pull.main()
 
         set_right_cookies()
 
@@ -545,7 +547,7 @@ def error_exit_suite():
     suite.addTest(TestErrorExit('test_config_format'))
     suite.addTest(TestErrorExit('test_config_format2'))
     suite.addTest(TestErrorExit('test_config_key'))
-    suite.addTest(TestErrorExit('test_config_username_password'))
+    # suite.addTest(TestErrorExit('test_config_username_password'))
     suite.addTest(TestErrorExit('test_config_ydnote_dir_err'))
     suite.addTest(TestErrorExit('test_config_local_dir_err'))
     suite.addTest(TestErrorExit('test_config_local_dir_err2'))
@@ -565,7 +567,7 @@ def download_suite():
 
 def login_suite():
     suite = unittest.TestSuite()
-    suite.addTest(LoginTest('test_login_right'))
+    # suite.addTest(LoginTest('test_login_right'))
 
     return suite
 
@@ -578,7 +580,7 @@ if __name__ == '__main__':
 
     error = error_exit_suite()
     download = download_suite()
-    login = login_suite()
+    # login = login_suite()
 
     logging.info(len(sys.argv))
     if len(sys.argv) == 1:
@@ -596,13 +598,13 @@ if __name__ == '__main__':
     suite = eval(sys.argv[1])
 
     # 因为容易封 ip，单独测试 login
-    if suite is login:
-        with open('cookies.json', 'rb') as f:
-            cookies = f.read().decode('utf-8')
-        # print(cookies)
-        runner.run(suite)
-        with open('cookies.json', 'wb') as f:
-            f.write(cookies.encode('utf-8'))
-        sys.exit(1)
+    # if suite is login:
+    #     with open('cookies.json', 'rb') as f:
+    #         cookies = f.read().decode('utf-8')
+    #     # print(cookies)
+    #     runner.run(suite)
+    #     with open('cookies.json', 'wb') as f:
+    #         f.write(cookies.encode('utf-8'))
+    #     sys.exit(1)
 
     runner.run(suite)

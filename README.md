@@ -56,20 +56,80 @@ pip install markdownify
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
-#### 3、设置脚本参数配置文件 config.json
+#### 3、设置登录 Cookies 文件 cookies.json
 
 ```json
 {
-    "username": "your_youdaonote_username",
-    "password": "your_youdaonote_password",
+    "cookies": [
+        [
+            "YNOTE_CSTK",
+            "**",
+            ".note.youdao.com",
+            "/"
+        ],
+        [
+            "YNOTE_LOGIN",
+            "**",
+            ".note.youdao.com",
+            "/"
+        ],
+        [
+            "YNOTE_SESS",
+            "**",
+            ".note.youdao.com",
+            "/"
+        ]
+    ]
+}
+```
+
+由于有道云笔记登录升级，目前不能使用账号密码登录，只能使用 Cookies 登录。
+
+获取 Cookies 方式：
+
+1. 在浏览器如 Chrome 中使用账号密码登录
+2. 打开 DevTools (F12)，Network 下找「主」请求（一般是第一个），再找 Cookie
+3. 复制对应数据替换  `**`
+
+![image-20220404191952557](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2022-04-04-1649071192.png)
+
+示例：
+
+```json
+{
+    "cookies": [
+        [
+            "YNOTE_CSTK",
+            "rR_Pejz0",
+            ".note.youdao.com",
+            "/"
+        ],
+        [
+            "YNOTE_LOGIN",
+            "3||1649054441155",
+            ".note.youdao.com",
+            "/"
+        ],
+        [
+            "YNOTE_SESS",
+            "v2|BdllbnwfaWl5RMUWOfqZ0gShf***6LqFRqB0MYfh4JLR",
+            ".note.youdao.com",
+            "/"
+        ]
+    ]
+}
+```
+
+#### 4、设置脚本参数配置文件 config.json
+
+```json
+{
     "local_dir": "",
     "ydnote_dir": "",
     "smms_secret_token": ""
 }
 ```
 
-* username：**必填**，你的有道云笔记用户名
-* password：**必填**，你的有道云笔记密码。ps：如果你记不到账号和密码，你可以参考 issue 的 [cookie 登录](https://github.com/DeppWang/youdaonote-pull/issues/32)
 * local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
 * ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 中使用本地链接
@@ -83,7 +143,7 @@ pip install markdownify
 {
     "username": "deppwangtest@163.com",
     "password": "12345678",
-    "local_dir": "/Users/yanjie/Documents/youdaonote-pull/test",
+    "local_dir": "/Users/deppwang/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
     "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
