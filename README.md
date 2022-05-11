@@ -48,11 +48,13 @@ python --version   # Windows
 sudo easy_install pip3      # 安装 Python3 Package Installer
 sudo pip3 install requests     #  安装 requests
 sudo pip3 install markdownify  #  安装 markdownify，用于 html 转化为 md
+sudo pip3 install brotli  #  安装 brotli，用于还原 br 类型压缩
 ```
 ```shell
 # Windows
 pip install requests  
 pip install markdownify
+pip install brotli
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
