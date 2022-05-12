@@ -431,7 +431,7 @@ class YoudaoNoteSession(requests.Session):
 
             # 标题
             elif 'heading' in child.tag:
-                level = child.attrib['level']
+                level = child.attrib.get('level', 0)
                 if level == 'a' or level == 'b':
                     level = 1
                 for child2 in child:
