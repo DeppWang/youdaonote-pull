@@ -5,7 +5,7 @@
 ## 功能
 
 - 可将所有笔记（文件）按原格式下载到本地
-- 由于「笔记」类型文件下载后默认为 Xml 格式，不是正常笔记内容，**默认将其转换为 Markdown 格式**
+- 由于「笔记」类型文件下载后默认为 `Xml` 格式，不是正常笔记内容，**默认将其转换为 `Markdown` 格式**
 - 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
 
 ## 使用步骤
@@ -42,15 +42,11 @@ python --version   # Windows
 ```shell
 # macOS
 sudo easy_install pip3      # 安装 Python3 Package Installer
-sudo pip3 install requests     #  安装 requests
-sudo pip3 install markdownify  #  安装 markdownify，用于 html 转化为 md
-sudo pip3 install brotli  #  安装 brotli，用于还原 br 类型压缩
+sudo pip3 install -r requirements.txt
 ```
 ```shell
 # Windows
-pip install requests  
-pip install markdownify
-pip install brotli
+pip install -r requirements.txt
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
@@ -81,12 +77,12 @@ pip install brotli
 }
 ```
 
-由于有道云笔记登录升级，**目前不能使用账号密码登录，只能使用 Cookies 登录。**
+由于有道云笔记登录升级，**目前不能使用账号密码登录，只能使用 `Cookies` 登录。**
 
-获取 Cookies 方式：
+获取 `Cookies` 方式：
 
 1. 在浏览器如 Chrome 中使用账号密码或者其他方式登录有道云笔记
-2. 打开 DevTools (F12)，Network 下找「主」请求（一般是第一个），再找 Cookie
+2. 打开 DevTools (F12)，Network 下找「主」请求（一般是第一个），再找 `Cookie`
 3. 复制对应数据替换  `**`
 
 ![image.png](https://s2.loli.net/2022/04/04/N47KPEaSGvCpsfX.png)
@@ -193,7 +189,7 @@ python pull.py   # Windows
 
 ## 原理
 
-正常用户操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。原理是[找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地。Xml 转换为 Markdown，借助了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
+正常用户浏览器操作时，浏览器（前端）调用服务器（后端）接口，接口返回文件内容由前端渲染显示。原理是[找到有道云笔记的接口](https://depp.wang/2020/06/11/how-to-find-the-api-of-a-website-eg-note-youdao-com)，模拟操作接口，将前端显示改为存放到本地。Xml 转换为 Markdown，借助了 [xml.etree.ElementTreeI](http://docs.python.org/3.7/library/xml.etree.elementtree.html)
 
 ## 感谢（参考）
 
@@ -211,20 +207,14 @@ python pull.py   # Windows
 
 欢迎贡献代码，但有几个注意事项：
 
-1. commit 请使用英文
-2. 代码注解需要有[中英文空格](https://github.com/sparanoid/chinese-copywriting-guidelines)
-3. 请确保通过测试
-   - 在 macOS 和 Windows 环境中直接执行 `pull.py` 没有问题（你可以指定下载一个文件夹测试）
-   - 在 `test.py` 配置中你的脚本参数（UserDefine），运行测试脚本  `test.py`  没有问题
+1. commit 请使用英文；一次 commit 只改一个点；一个 commit 一个 PR
+2. 代码注释需要有[中英文空格](https://github.com/sparanoid/chinese-copywriting-guidelines)
+3. 请确保通过测试用例：在 macOS 和 Windows 环境中直接执行 `test.py` 没有问题
 
 ## 捐赠
 
-有小伙伴说可以放个赞赏码什么的，但考虑捐赠的意义，如果小伙伴有想捐赠的，可以支持一下「[微澜图书馆](http://park.sanzhi.org.cn/index.php?app=user&ac=welcome)」这个[流动儿童图书馆](https://yixi.tv/#/speech/detail?id=913)公益项目。想让我知道你的捐赠的话，就把[我](http://park.sanzhi.org.cn/index.php?app=user&ac=duty&id=11102)设为你的「[介绍人](http://park.sanzhi.org.cn/index.php?app=group&ac=topic&id=51)」吧
+感觉有用可以支付宝请作者喝咖啡！
 
-![img](http://park.sanzhi.org.cn/public/images/2wm.jpg)
-
-- 微澜图书馆公众号
-
-
+![image-20220515222151911](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2022-05-15-1652624512.png)
 
 ![Profile views](https://gpvc.arturio.dev/youdaonote-pull)

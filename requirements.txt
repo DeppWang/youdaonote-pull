@@ -1,0 +1,3 @@
+requests==2.22.0
+markdownify==0.5.1  # 用于 html 转化为 md
+Brotli==1.0.9  # 用于还原有道云笔记网络请求 response br 类型压缩
