@@ -19,7 +19,7 @@ __github__ = 'https//github.com/DeppWang/youdaonote-pull'
 
 REGEX_SYMBOL = re.compile(r'[\\/:\*\?"<>\|]')  # 符号：\ / : * ? " < > |
 REGEX_IMAGE_URL = re.compile(r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)')
-REGEX_ATTACH = re.compile(r'\[(.*?)\]\((.*?note\.youdao\.com.*?)\)')
+REGEX_ATTACH = re.compile(r'\[(.*?)\]\(((http|https)://note\.youdao\.com.*?)\)')
 MARKDOWN_SUFFIX = '.md'
 NOTE_SUFFIX = '.note'
 
@@ -444,7 +444,7 @@ class YoudaoNotePull(object):
         self.smms_secret_token = config_dict['smms_secret_token']
         return self._get_ydnote_dir_id(ydnote_dir=config_dict['ydnote_dir'])
 
-    def pull_dir_by_id(self, dir_id, local_dir):
+    def pull_dir_by_id_recursively(self, dir_id, local_dir):
         """
         根据目录 ID 循环遍历下载目录下所有文件
         :param dir_id:
@@ -464,7 +464,7 @@ class YoudaoNotePull(object):
                 sub_dir = os.path.join(local_dir, name).replace('\\', '/')
                 if not os.path.exists(sub_dir):
                     os.mkdir(sub_dir)
-                self.pull_dir_by_id(id, sub_dir)
+                self.pull_dir_by_id_recursively(id, sub_dir)
             else:
                 modify_time = file_entry['modifyTimeForSort']
                 self._add_or_update_file(id, name, local_dir, modify_time)
@@ -764,7 +764,7 @@ if __name__ == '__main__':
             print(error_msg)
             sys.exit(1)
         print('正在 pull，请稍后 ...')
-        youdaonote_pull.pull_dir_by_id(ydnote_dir_id, youdaonote_pull.root_local_dir)
+        youdaonote_pull.pull_dir_by_id_recursively(ydnote_dir_id, youdaonote_pull.root_local_dir)
     except requests.exceptions.ProxyError as proxyErr:
         print('请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试')
         traceback.print_exc()

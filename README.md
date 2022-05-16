@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
 ```
-#### 3、设置登录 Cookies 文件 cookies.json
+#### 3、设置登录 `Cookies` 文件 `cookies.json`
 
 ```json
 {
@@ -77,7 +77,7 @@ pip install -r requirements.txt
 }
 ```
 
-由于有道云笔记登录升级，**目前不能使用账号密码登录，只能使用 `Cookies` 登录。**
+由于有道云笔记登录升级，**目前脚本不能使用账号密码登录，只能使用 `Cookies` 登录。**
 
 获取 `Cookies` 方式：
 
@@ -114,11 +114,11 @@ pip install -r requirements.txt
 }
 ```
 
-- 提示：脚本单纯本地运行，不用担心你的 Cookies 泄露
+- 提示：脚本单纯本地运行，不用担心你的 `Cookies` 泄露
 
-#### 4、设置脚本参数配置文件 config.json
+#### 4、设置脚本参数配置文件 `config.json`
 
-建议使用 [Sublime](https://www.sublimetext.com/3) 等三方编辑器编辑 config.json，避免编码格式错误
+建议使用 [Sublime](https://www.sublimetext.com/3) 等三方编辑器编辑 `config.json`，避免编码格式错误
 
 ```json
 {
@@ -128,9 +128,9 @@ pip install -r requirements.txt
 }
 ```
 
-* local_dir：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
-* ydnote_dir：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
-* smms_secret_token：选填， [SM.MS](https://sm.ms) 的 Secret Token（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（youdaonote-images 文件夹），Markdown 中使用本地链接
+* `local_dir`：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
+* `ydnote_dir`：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
+* `smms_secret_token`：选填， [SM.MS](https://sm.ms) 的 `Secret Token`（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（`youdaonote-images` 文件夹），`Markdown` 中使用本地链接
 
 示例：
 
@@ -180,9 +180,9 @@ python pull.py   # Windows
 
 ## 注意事项
 
-1. 如果你自己修改脚本，注意不要将 cookies.json 文件 push 到 GitHub
+1. 如果你自己修改脚本，注意不要将 `cookies.json` 文件 `push` 到 GitHub
 2. 如果你不是开发者，可能对上面的命令行操作有所陌生，建议按步骤慢慢操作一遍
-3. 请确认代码是否为最新，有问题请提交 [issue](https://github.com/DeppWang/youdaonote-pull/issues?q=is%3Aissue+is%3Aclosed)
+3. 请确认代码是否为最新，有问题请先看 [issue](https://github.com/DeppWang/youdaonote-pull/issues?q=is%3Aissue+is%3Aclosed) 是否存在，不存在再提 issue
    ```bash
    git pull origin master  # 更新代码
    ```
