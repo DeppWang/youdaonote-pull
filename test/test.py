@@ -50,7 +50,7 @@ class YoudaoNoteApiTest(unittest.TestCase):
                 }"""
 
         youdaonote_api = YoudaoNoteApi(cookies_path=self.TEST_COOKIES_PATH)
-        with patch('builtins.open', mock_open(read_data=cookies_json_str)):
+        with patch('builtins.open', mock_open(read_data=cookies_json_str.encode('utf-8'))):
             message = youdaonote_api.login_by_cookies()
             self.assertEqual(message, '转换「{}」为字典时出现错误'.format(self.TEST_COOKIES_PATH))
 
@@ -60,7 +60,7 @@ class YoudaoNoteApiTest(unittest.TestCase):
                                     ["YNOTE_SESS", "***", ".note.youdao.com", "/"]
                                 ]}"""
         youdaonote_api = YoudaoNoteApi(cookies_path=self.TEST_COOKIES_PATH)
-        with patch('builtins.open', mock_open(read_data=cookies_json_str)):
+        with patch('builtins.open', mock_open(read_data=cookies_json_str.encode('utf-8'))):
             message = youdaonote_api.login_by_cookies()
             self.assertEqual(message, 'YNOTE_CSTK 字段为空')
 
@@ -71,7 +71,7 @@ class YoudaoNoteApiTest(unittest.TestCase):
                                     ["YNOTE_SESS", "***", ".note.youdao.com", "/"]
                                 ]}"""
         youdaonote_api = YoudaoNoteApi(cookies_path=self.TEST_COOKIES_PATH)
-        with patch('builtins.open', mock_open(read_data=cookies_json_str)):
+        with patch('builtins.open', mock_open(read_data=cookies_json_str.encode('utf-8'))):
             message = youdaonote_api.login_by_cookies()
             self.assertFalse(message)
             self.assertEqual(youdaonote_api.cstk, "fPk5IkDg")
@@ -184,7 +184,7 @@ class YoudaoNotePullTest(unittest.TestCase):
                 "smms_secret_token": ""
             }
             """
-        with patch('builtins.open', mock_open(read_data=config_json_str)):
+        with patch('builtins.open', mock_open(read_data=config_json_str.encode('utf-8'))):
             config_dict, error_msg = youdaonote_pull._covert_config(self.TEST_CONFIG_PATH)
             self.assertFalse(config_dict)
             self.assertEqual(error_msg, '请检查「config.json」格式是否为 utf-8 格式的 json！建议使用 Sublime 编辑「config.json」')
@@ -196,7 +196,7 @@ class YoudaoNotePullTest(unittest.TestCase):
                         "smms_secret_token2": ""
                     }
                     """
-        with patch('builtins.open', mock_open(read_data=config_json_str)):
+        with patch('builtins.open', mock_open(read_data=config_json_str.encode('utf-8'))):
             config_dict, error_msg = youdaonote_pull._covert_config(self.TEST_CONFIG_PATH)
             self.assertFalse(config_dict)
             self.assertEqual(error_msg, '请检查「config.json」的 key 是否分别为 local_dir, ydnote_dir, smms_secret_token')
@@ -208,7 +208,7 @@ class YoudaoNotePullTest(unittest.TestCase):
                                 "smms_secret_token": ""
                             }
                             """
-        with patch('builtins.open', mock_open(read_data=config_json_str)):
+        with patch('builtins.open', mock_open(read_data=config_json_str.encode('utf-8'))):
             config_dict, error_msg = youdaonote_pull._covert_config(self.TEST_CONFIG_PATH)
             self.assertTrue(config_dict)
             self.assertEqual(len(config_dict), 3)

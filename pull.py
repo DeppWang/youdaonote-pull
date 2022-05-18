@@ -349,8 +349,8 @@ class YoudaoNoteApi(object):
         读取 cookies 文件的 cookies，并转换为字典
         :return: cookies
         """
-        with open(self.cookies_path, 'r', encoding='utf-8') as f:
-            json_str = f.read()
+        with open(self.cookies_path, 'rb') as f:
+            json_str = f.read().decode('utf-8')
 
         try:
             cookies_dict = json.loads(json_str)  # 将字符串转换为字典
@@ -476,8 +476,8 @@ class YoudaoNotePull(object):
         :return: (config_dict, error_msg)
         """
         config_path = config_path if config_path else self.CONFIG_PATH
-        with open(config_path, 'r') as f:
-            config_str = f.read()
+        with open(config_path, 'rb') as f:
+            config_str = f.read().decode('utf-8')
 
         try:
             config_dict = json.loads(config_str)
@@ -640,8 +640,8 @@ class YoudaoNotePull(object):
         :param file_path:
         :return:
         """
-        with open(file_path, 'r') as f:
-            content = f.read()
+        with open(file_path, 'rb') as f:
+            content = f.read().decode('utf-8')
 
         # 图片
         image_urls = REGEX_IMAGE_URL.findall(content)
