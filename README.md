@@ -213,8 +213,10 @@ python pull.py   # Windows
 
 ## 捐赠
 
-感觉有用可以支付宝请作者喝咖啡！
+有小伙伴说可以放个赞赏码什么的，但考虑捐赠的意义，如果小伙伴有想捐赠的，可以支持一下「[微澜图书馆](http://park.sanzhi.org.cn/index.php?app=user&ac=welcome)」这个[流动儿童图书馆](https://yixi.tv/#/speech/detail?id=913)公益项目。想让我知道你的捐赠的话，就把[我](http://park.sanzhi.org.cn/index.php?app=user&ac=duty&id=11102)设为你的「[介绍人](http://park.sanzhi.org.cn/index.php?app=group&ac=topic&id=51)」吧
 
-![image-20220515222151911](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2022-05-15-1652624512.png)
+![img](http://park.sanzhi.org.cn/public/images/2wm.jpg)
+
+- 微澜图书馆公众号
 
 ![Profile views](https://gpvc.arturio.dev/youdaonote-pull)
