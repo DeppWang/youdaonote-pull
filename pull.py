@@ -557,7 +557,7 @@ class YoudaoNotePull(object):
             self._pull_file(file_id, original_file_path, local_file_path, is_note, youdao_file_suffix)
             print('{}「{}」{}'.format(file_action.value, local_file_path, tip))
         except Exception as error:
-            print('{}「{}」失败！请检查文件！错误提示：'.format(file_action.value, original_file_path, format(error)))
+            print('{}「{}」失败！请检查文件！错误提示：{}'.format(file_action.value, original_file_path, format(error)))
 
     def _judge_is_note(self, file_id, youdao_file_suffix):
         """
