@@ -719,7 +719,8 @@ class YoudaoNotePull(object):
             # 默认下载图片到 youdaonote-images 文件夹
             file_dirname = 'youdaonote-images'
             # 后缀 png 和 jpeg 后可能出现 ; `**.png;`, 原因未知
-            file_suffix = '.' + content_type.split('/')[1].replace(';', '')
+            content_type_arr = content_type.split('/')
+            file_suffix = '.' + content_type_arr[1].replace(';', '') if len(content_type_arr) == 2 else "jpg"
 
         local_file_dir = os.path.join(self.root_local_dir, file_dirname).replace('\\', '/')
         if not os.path.exists(local_file_dir):
