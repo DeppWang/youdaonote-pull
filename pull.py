@@ -426,9 +426,9 @@ class YoudaoNotePull(object):
 
     def __init__(self):
         self.root_local_dir = None  # 本地文件根目录
-        self.is_relative_path = None  # 是否使用相对路径
         self.youdaonote_api = None
         self.smms_secret_token = None
+        self.is_relative_path = None  # 是否使用相对路径
 
     def get_ydnote_dir_id(self):
         """
@@ -490,9 +490,9 @@ class YoudaoNotePull(object):
         except:
             return {}, '请检查「config.json」格式是否为 utf-8 格式的 json！建议使用 Sublime 编辑「config.json」'
 
-        key_list = ['local_dir', 'is_relative_path', 'ydnote_dir', 'smms_secret_token']
+        key_list = ['local_dir', 'ydnote_dir', 'smms_secret_token', 'is_relative_path']
         if key_list != list(config_dict.keys()):
-            return {}, '请检查「config.json」的 key 是否分别为 local_dir, is_relative_path, ydnote_dir, smms_secret_token'
+            return {}, '请检查「config.json」的 key 是否分别为 local_dir, ydnote_dir, smms_secret_token, is_relative_path'
         return config_dict, ''
 
     def _check_local_dir(self, local_dir, test_default_dir=None) -> (str, str):
@@ -657,8 +657,8 @@ class YoudaoNotePull(object):
             image_path = self._get_new_image_path(file_path, image_url)
             if image_url == image_path:
                 continue
-            #将绝对路径替换为相对路径，实现满足obsidian格式要求
-            #将image_path路径中images之前的路径去掉，只保留以images开头的之后的路径
+            #将绝对路径替换为相对路径，实现满足 Obsidian 格式要求
+            #将 image_path 路径中 images 之前的路径去掉，只保留以 images 开头的之后的路径
             if self.is_relative_path:
                 image_path = image_path[image_path.find(IMAGES):]
             content = content.replace(image_url, image_path)
@@ -669,9 +669,12 @@ class YoudaoNotePull(object):
             print('正在转换有道云笔记「{}」中的有道云附件链接...'.format(file_path))
         for attach_name_and_url in attach_name_and_url_list:
             attach_url = attach_name_and_url[1]
-            attach_path = self._download_ydnote_url(attach_url, attach_name_and_url[0])
+            attach_path = self._download_ydnote_url(file_path, attach_url, attach_name_and_url[0])
             if not attach_path:
                 continue
+            # 将 attach_path 路径中 attachments 之前的路径去掉，只保留以 attachments 开头的之后的路径
+            if self.is_relative_path:
+                attach_path = attach_path[attach_path.find(ATTACH):]
             content = content.replace(attach_url, attach_path)
 
         with open(file_path, 'wb') as f:
@@ -724,22 +727,22 @@ class YoudaoNotePull(object):
             return ''
 
         if attach_name:
-            # 默认下载附件到 youdaonote-attachments 文件夹
+            # 默认下载附件到 attachments 文件夹
             file_dirname = ATTACH
             file_suffix = attach_name
         else:
-            # 默认下载图片到 youdaonote-images 文件夹
+            # 默认下载图片到 images 文件夹
             file_dirname = IMAGES
             # 后缀 png 和 jpeg 后可能出现 ; `**.png;`, 原因未知
             content_type_arr = content_type.split('/')
             file_suffix = '.' + content_type_arr[1].replace(';', '') if len(content_type_arr) == 2 else "jpg"
 
         local_file_dir = None
-        #如果file_name中不包含.号
+        #如果 file_name 中不包含 . 号
         if file_path.find('.') == -1:
             local_file_dir = os.path.join(self.root_local_dir, file_dirname).replace('\\', '/')
         else :
-            #截取字符串file_path中文件夹全路径(即实现在具体文件夹目录下再生成图片文件夹路径，而非在根目录生成图片文件夹路径)
+            #截取字符串 file_path 中文件夹全路径(即实现在具体文件夹目录下再生成图片文件夹路径，而非在根目录生成图片文件夹路径)
             local_file_dir = os.path.join(file_path[:file_path.rfind('/')], file_dirname).replace('\\', '/')
 
         if not os.path.exists(local_file_dir):

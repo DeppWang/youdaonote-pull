@@ -1,7 +1,7 @@
 {
     "local_dir": "",
-    "is_relative_path": false,
     "ydnote_dir": "",
-    "smms_secret_token": ""
+    "smms_secret_token": "",
+    "is_relative_path": true
 }
 
