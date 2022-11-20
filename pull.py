@@ -426,6 +426,7 @@ class YoudaoNotePull(object):
 
     def __init__(self):
         self.root_local_dir = None  # 本地文件根目录
+        self.is_relative_path = None  # 是否使用相对路径
         self.youdaonote_api = None
         self.smms_secret_token = None
 
@@ -446,6 +447,7 @@ class YoudaoNotePull(object):
         if error_msg:
             return '', error_msg
         self.smms_secret_token = config_dict['smms_secret_token']
+        self.is_relative_path = config_dict['is_relative_path']
         return self._get_ydnote_dir_id(ydnote_dir=config_dict['ydnote_dir'])
 
     def pull_dir_by_id_recursively(self, dir_id, local_dir):
@@ -488,9 +490,9 @@ class YoudaoNotePull(object):
         except:
             return {}, '请检查「config.json」格式是否为 utf-8 格式的 json！建议使用 Sublime 编辑「config.json」'
 
-        key_list = ['local_dir', 'ydnote_dir', 'smms_secret_token']
+        key_list = ['local_dir', 'is_relative_path', 'ydnote_dir', 'smms_secret_token']
         if key_list != list(config_dict.keys()):
-            return {}, '请检查「config.json」的 key 是否分别为 local_dir, ydnote_dir, smms_secret_token'
+            return {}, '请检查「config.json」的 key 是否分别为 local_dir, is_relative_path, ydnote_dir, smms_secret_token'
         return config_dict, ''
 
     def _check_local_dir(self, local_dir, test_default_dir=None) -> (str, str):
@@ -657,7 +659,8 @@ class YoudaoNotePull(object):
                 continue
             #将绝对路径替换为相对路径，实现满足obsidian格式要求
             #将image_path路径中images之前的路径去掉，只保留以images开头的之后的路径
-            image_path = image_path[image_path.find(IMAGES):]
+            if self.is_relative_path:
+                image_path = image_path[image_path.find(IMAGES):]
             content = content.replace(image_url, image_path)
 
         # 附件
