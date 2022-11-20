@@ -22,6 +22,10 @@ REGEX_IMAGE_URL = re.compile(r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)')
 REGEX_ATTACH = re.compile(r'\[(.*?)\]\(((http|https)://note\.youdao\.com.*?)\)')
 MARKDOWN_SUFFIX = '.md'
 NOTE_SUFFIX = '.note'
+# 有道云笔记的图片地址
+IMAGES = 'images'
+# 有道云笔记的附件地址
+ATTACH = 'attachments'
 
 
 class FileActionEnum(Enum):
@@ -648,9 +652,12 @@ class YoudaoNotePull(object):
         if len(image_urls) > 0:
             print('正在转换有道云笔记「{}」中的有道云图片链接...'.format(file_path))
         for image_url in image_urls:
-            image_path = self._get_new_image_path(image_url)
+            image_path = self._get_new_image_path(file_path, image_url)
             if image_url == image_path:
                 continue
+            #将绝对路径替换为相对路径，实现满足obsidian格式要求
+            #将image_path路径中images之前的路径去掉，只保留以images开头的之后的路径
+            image_path = image_path[image_path.find(IMAGES):]
             content = content.replace(image_url, image_path)
 
         # 附件
@@ -668,15 +675,16 @@ class YoudaoNotePull(object):
             f.write(content.encode())
         return
 
-    def _get_new_image_path(self, image_url) -> str:
+    def _get_new_image_path(self, file_path, image_url) -> str:
         """
         将图片链接转换为新的链接
+        :param file_path:
         :param image_url:
         :return: new_image_path
         """
         # 当 smms_secret_token 为空（不上传到 SM.MS），下载到图片到本地
         if not self.smms_secret_token:
-            image_path = self._download_ydnote_url(image_url)
+            image_path = self._download_ydnote_url(file_path, image_url)
             return image_path or image_url
 
         # smms_secret_token 不为空，上传到 SM.MS
@@ -686,12 +694,13 @@ class YoudaoNotePull(object):
         if not error_msg:
             return new_file_url
         print(error_msg)
-        image_path = self._download_ydnote_url(image_url)
+        image_path = self._download_ydnote_url(file_path, image_url)
         return image_path or image_url
 
-    def _download_ydnote_url(self, url, attach_name=None) -> str:
+    def _download_ydnote_url(self, file_path, url, attach_name=None) -> str:
         """
         下载文件到本地，返回本地路径
+        :param file_path:
         :param url:
         :param attach_name:
         :return:  path
@@ -713,22 +722,28 @@ class YoudaoNotePull(object):
 
         if attach_name:
             # 默认下载附件到 youdaonote-attachments 文件夹
-            file_dirname = 'youdaonote-attachments'
+            file_dirname = ATTACH
             file_suffix = attach_name
         else:
             # 默认下载图片到 youdaonote-images 文件夹
-            file_dirname = 'youdaonote-images'
+            file_dirname = IMAGES
             # 后缀 png 和 jpeg 后可能出现 ; `**.png;`, 原因未知
             content_type_arr = content_type.split('/')
             file_suffix = '.' + content_type_arr[1].replace(';', '') if len(content_type_arr) == 2 else "jpg"
 
-        local_file_dir = os.path.join(self.root_local_dir, file_dirname).replace('\\', '/')
+        local_file_dir = None
+        #如果file_name中不包含.号
+        if file_path.find('.') == -1:
+            local_file_dir = os.path.join(self.root_local_dir, file_dirname).replace('\\', '/')
+        else :
+            #截取字符串file_path中文件夹全路径(即实现在具体文件夹目录下再生成图片文件夹路径，而非在根目录生成图片文件夹路径)
+            local_file_dir = os.path.join(file_path[:file_path.rfind('/')], file_dirname).replace('\\', '/')
+
         if not os.path.exists(local_file_dir):
             os.mkdir(local_file_dir)
         file_basename = os.path.basename(urlparse(url).path)
         file_name = ''.join([file_basename, file_suffix])
         local_file_path = os.path.join(local_file_dir, file_name).replace('\\', '/')
-
         try:
             with open(local_file_path, 'wb') as f:
                 f.write(response.content)  # response.content 本身就为字节类型
