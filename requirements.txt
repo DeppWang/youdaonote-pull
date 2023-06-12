@@ -1,3 +1,4 @@
-requests==2.22.0
+requests~=2.30.0
 markdownify==0.5.1
 Brotli==1.0.9
+python-frontmatter==1.0.0
