@@ -748,7 +748,10 @@ class YoudaoNotePull(object):
         if not os.path.exists(local_file_dir):
             os.mkdir(local_file_dir)
         file_basename = os.path.basename(urlparse(url).path)
-        file_name = ''.join([file_basename, file_suffix])
+        #file_name = ''.join([file_basename, file_suffix])
+        #请求后的真实的URL中才有东西
+        realUrl = response.url
+        file_name = parse.parse_qs(urlparse(realUrl).query)['download'][0]
         local_file_path = os.path.join(local_file_dir, file_name).replace('\\', '/')
         try:
             with open(local_file_path, 'wb') as f:
