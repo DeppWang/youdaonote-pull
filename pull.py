@@ -751,7 +751,7 @@ class YoudaoNotePull(object):
         #file_name = ''.join([file_basename, file_suffix])
         #请求后的真实的URL中才有东西
         realUrl = response.url
-        file_name = parse.parse_qs(urlparse(realUrl).query)['download'][0]
+        file_name =file_basename+parse.parse_qs(urlparse(realUrl).query)['download'][0]
         local_file_path = os.path.join(local_file_dir, file_name).replace('\\', '/')
         try:
             with open(local_file_path, 'wb') as f:
