@@ -10,6 +10,7 @@ import time
 import traceback
 import xml.etree.ElementTree as ET
 from enum import Enum
+from urllib import parse
 from urllib.parse import urlparse
 
 import requests
