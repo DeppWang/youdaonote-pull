@@ -123,8 +123,36 @@ class XmlElementConvert(object):
         table_data_line = []
 
         for cells in table_data['cells']:
-            cell_value = XmlElementConvert._encode_string_to_md(cells['value'])
-            table_data_line.append(cell_value)
+            # 解析单元格中的文本样式
+            values = cells.get('value')
+            style = ''
+            url = ''
+            if values is None:
+                values = ''
+            else:
+                # 请注意此处对样式的解析不完善，有道用了下标序号来标识一段文本中的样式，from xx to xx: bold 之类
+                # 如果单元格中有多种文本样式，最终该格中所有样式都会综合到一起应用到文本上，如果有更细节需求请自行更改，我比较懒
+                inline_style = cells.get('inlineStyles')
+                if inline_style is not None:
+                    for item in inline_style:
+                        if item == 'bold':
+                            style += "**"
+                        elif item == 'italic':
+                            style += "*"
+                        elif item == 'strike':
+                            style += "~~"
+                        elif item == 'href':
+                            for link in inline_style.get('href'):
+                                url = link.get('value')
+            cell_value = XmlElementConvert._encode_string_to_md(values)
+            # 拼接样式和文本
+            if cell_value != '':
+                styled_text = '{lstyle}{text}{rstyle}'.format(lstyle = style, text = cell_value, rstyle = style[::-1])
+                if url != '':
+                    styled_text = '[{styled_text}]({url})'.format(styled_text = styled_text, url = url)
+            else:
+                styled_text = ''
+            table_data_line.append(styled_text)
             # 攒齐一行放到 table_data_arr 中，并重置 table_data_line
             if len(table_data_line) == table_data_len:
                 table_data_arr.append(table_data_line)
