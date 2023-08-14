@@ -44,8 +44,8 @@ class XmlElementConvert(object):
     def convert_para_func(**kwargs):
         # 正常文本
         # 粗体、斜体、删除线、链接
-        return kwargs.get('text')
-
+        return XmlElementConvert.get_styled_text(kwargs.get('element'))
+    
     @staticmethod
     def convert_heading_func(**kwargs):
         # 标题
@@ -77,12 +77,18 @@ class XmlElementConvert(object):
     @staticmethod
     def convert_todo_func(**kwargs):
         # to-do
-        return '- [ ] {text}'.format(text=kwargs.get('text'))
+        check_flag = XmlElementConvert.get_text_by_key(list(kwargs.get('element')), 'checked')
+        checked = ' '
+        if check_flag == 'true':
+            checked = 'x'
+        text = XmlElementConvert.get_styled_text(kwargs.get('element'))
+        return '- [{checked}] {text}'.format(checked=checked, text=text)
 
     @staticmethod
     def convert_quote_func(**kwargs):
         # 引用
-        return '> {text}'.format(text=kwargs.get('text'))
+        text = XmlElementConvert.get_styled_text(kwargs.get('element'))
+        return '> {text}'.format(text=text)
 
     @staticmethod
     def convert_horizontal_line_func(**kwargs):
@@ -94,7 +100,7 @@ class XmlElementConvert(object):
         # 列表
         list_id = kwargs.get('element').attrib['list-id']
         is_ordered = kwargs.get('list_item').get(list_id)
-        text = kwargs.get('text')
+        text = XmlElementConvert.get_styled_text(kwargs.get('element'))
         if is_ordered == 'unordered':
             return '- {text}'.format(text=text)
         elif is_ordered == 'ordered':
@@ -118,8 +124,36 @@ class XmlElementConvert(object):
         table_data_line = []
 
         for cells in table_data['cells']:
-            cell_value = XmlElementConvert._encode_string_to_md(cells['value'])
-            table_data_line.append(cell_value)
+            # 解析单元格中的文本样式
+            values = cells.get('value')
+            style = ''
+            url = ''
+            if values is None:
+                values = ''
+            else:
+                # 请注意此处对样式的解析不完善，有道用了下标序号来标识一段文本中的样式，from xx to xx: bold 之类
+                # 如果单元格中有多种文本样式，最终该格中所有样式都会综合到一起应用到文本上，如果有更细节需求请自行更改，我比较懒
+                inline_style = cells.get('inlineStyles')
+                if inline_style is not None:
+                    for item in inline_style:
+                        if item == 'bold':
+                            style += "**"
+                        elif item == 'italic':
+                            style += "*"
+                        elif item == 'strike':
+                            style += "~~"
+                        elif item == 'href':
+                            for link in inline_style.get('href'):
+                                url = link.get('value')
+            cell_value = XmlElementConvert._encode_string_to_md(values)
+            # 拼接样式和文本
+            if cell_value != '':
+                styled_text = '{lstyle}{text}{rstyle}'.format(lstyle = style, text = cell_value, rstyle = style[::-1])
+                if url != '':
+                    styled_text = '[{styled_text}]({url})'.format(styled_text = styled_text, url = url)
+            else:
+                styled_text = ''
+            table_data_line.append(styled_text)
             # 攒齐一行放到 table_data_arr 中，并重置 table_data_line
             if len(table_data_line) == table_data_len:
                 table_data_arr.append(table_data_line)
@@ -150,6 +184,45 @@ class XmlElementConvert(object):
             if key in sub_element.tag:
                 return sub_element.text if sub_element.text else ''
         return ''
+    
+    """
+    获取带样式的文本，包括 para, heading, todo, quote
+    样式支持: 加粗、斜体、删除线、URL (下划线木有)
+    todo: 目前只能对一整行进行样式处理，不能精确到某几个字，心累了，以后再整
+    """
+    @staticmethod
+    def get_styled_text(element_children):
+        style = ''
+        url = ''
+        text = None
+        for sub_element in element_children:
+            # 获取文本
+            if 'text' in sub_element.tag:
+                text = sub_element.text
+                # text 没东西就没必要再处理了
+                if text is None or text == '':
+                    break
+
+            # 有道用 inline-styles 表示样式，获取样式和 URL
+            elif 'inline-styles' in sub_element.tag:
+                for ele in sub_element:
+                    if 'bold' in ele.tag:
+                        style += "**"
+                    elif 'italic' in ele.tag:
+                        style += "*"
+                    elif 'strike' in ele.tag:
+                        style += "~~"
+                    elif 'href' in ele.tag:
+                        for val in ele:
+                            if 'value' in val.tag:
+                                url = val.text
+        if text is not None and text != '':
+            styled_text = '{lstyle}{text}{rstyle}'.format(lstyle = style, text = text, rstyle = style[::-1])
+            if url != '':
+                styled_text = '[{styled_text}]({url})'.format(styled_text = styled_text, url = url)
+        else:
+            styled_text = ''
+        return styled_text
 
     @staticmethod
     def _encode_string_to_md(original_text):
