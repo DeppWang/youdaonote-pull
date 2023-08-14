@@ -10,6 +10,7 @@ import time
 import traceback
 import xml.etree.ElementTree as ET
 from enum import Enum
+from urllib import parse
 from urllib.parse import urlparse
 
 import requests
@@ -748,7 +749,13 @@ class YoudaoNotePull(object):
         if not os.path.exists(local_file_dir):
             os.mkdir(local_file_dir)
         file_basename = os.path.basename(urlparse(url).path)
-        file_name = ''.join([file_basename, file_suffix])
+        #请求后的真实的URL中才有东西
+        realUrl = parse.parse_qs(urlparse(response.url).query)
+        if realUrl:
+            # dict 不为空再去取 download
+            file_name = file_basename + realUrl['download'][0]
+        else:
+            file_name = ''.join([file_basename, file_suffix])
         local_file_path = os.path.join(local_file_dir, file_name).replace('\\', '/')
         try:
             with open(local_file_path, 'wb') as f:
