@@ -118,7 +118,10 @@ class XmlElementConvert(object):
         table_data_line = []
 
         for cells in table_data['cells']:
-            cell_value = XmlElementConvert._encode_string_to_md(cells['value'])
+            values = cells.get('value')
+            if values is None:
+                values = ''
+            cell_value = XmlElementConvert._encode_string_to_md(values)
             table_data_line.append(cell_value)
             # 攒齐一行放到 table_data_arr 中，并重置 table_data_line
             if len(table_data_line) == table_data_len:
@@ -606,8 +609,8 @@ class YoudaoNotePull(object):
             except ET.ParseError:
                 print('此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown ...')
                 YoudaoNoteConvert.covert_html_to_markdown(file_path)
-            except Exception:
-                print('note 笔记转换 MarkDown 失败，将跳过')
+            except Exception as e:
+                print('note 笔记转换 MarkDown 失败，将跳过', repr(e))
 
         # 3、迁移文本文件里面的有道云笔记链接
         if is_note or youdao_file_suffix == MARKDOWN_SUFFIX:
