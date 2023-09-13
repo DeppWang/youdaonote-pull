@@ -755,8 +755,11 @@ class YoudaoNotePull(object):
         #请求后的真实的URL中才有东西
         realUrl = parse.parse_qs(urlparse(response.url).query)
         if realUrl:
+            urlname = 'filename'
+            if 'download' in realUrl:
+                urlname = 'download'
             # dict 不为空再去取 download
-            file_name = file_basename + realUrl['download'][0]
+            file_name = file_basename + realUrl[urlname][0]
         else:
             file_name = ''.join([file_basename, file_suffix])
         local_file_path = os.path.join(local_file_dir, file_name).replace('\\', '/')
