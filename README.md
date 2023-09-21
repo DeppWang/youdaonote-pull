@@ -169,6 +169,7 @@ python pull.py   # Windows
 
 ![2020-06-23-145839](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-04-073242.png)
 
+
 ### 三、多次导出
 
 多次导出时，同样使用以下命令：
@@ -181,6 +182,40 @@ python pull.py   # Windows
 根据有道云笔记文件最后修改时间是否大于本地文件最后修改时间来判断是否需要更新。再次导出时，只会导出有道云笔记上次导出后新增、修改或未导出的笔记，不会覆盖本地已经修改的文件。**但有道云笔记和本地不要同时修改同一个文件，这样可能会导致本地修改丢失**！
 
 更新时，会重新下载文件并覆盖原文件，图片也会重新下载。
+
+### 额外参数
+
+```bash
+python pull.py  --frontmatter  --retryurl
+```
+
+#### 支持导出文档元数据信息 
+
+有道笔记里记录了文章的创建日期, 修改日期, 文件大小等参数, 尤其是日期信息, 可以快速得知文档背后的故事. 直接导出为markdown后丢失了这部分信息, 对于使用有道云多年的用户而言比较可惜.
+
+支持增加参数 `--frontmatter`, 在markdown里增加元数据信息 `frontmatter`. 在原文档可以直接查看 `frontmatter`, 经过标准的markdown应用渲染后则无法看到, 不影响阅读.
+
+> 关于frontmatter的介绍: https://frontmatter.codes/docs/markdown
+
+支持对已经备份的文档再次运行该命令, 增加元数据信息.  同时也支持多次运行, 不会导致数据冗余. 
+
+```bash
+python pull.py --frontmatter
+```
+
+可以查看导出的例子
+
+[markdown-frontend](./test/test-frontmatter.md)
+
+
+#### 支持对下载链接进行再次重试
+
+对于历经几年数GB的youdao云笔记, 图片和链接的地址可能成千上万, 非常容易出现某些文档下载成功了, 但是图片却处理失败的情况.  增加参数`--retryurl`, 支持多次运行, 对未下载成功的图片和文档进行再次重试. 
+
+```bash
+python pull.py --retryurl
+```
+
 
 ## 注意事项
 

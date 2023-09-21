@@ -12,7 +12,10 @@ import xml.etree.ElementTree as ET
 from enum import Enum
 from urllib import parse
 from urllib.parse import urlparse
+from datetime import datetime
 
+import yaml
+import frontmatter
 import requests
 
 __author__ = 'Depp Wang (deppwxq@gmail.com)'
@@ -422,6 +425,14 @@ class YoudaoNoteApi(object):
         return self.http_post(url, data=data)
 
 
+class AdditionalArgs(object):
+    """
+    支持简单的命令行配置
+    """
+    PATCH_MARKDOWN_FRONT_MATTER  = False
+    RETRY_DOWNLOAD_MARKDOWN_URL  = False
+
+
 class YoudaoNotePull(object):
     """
     有道云笔记 Pull 封装
@@ -477,7 +488,7 @@ class YoudaoNotePull(object):
                 self.pull_dir_by_id_recursively(id, sub_dir)
             else:
                 modify_time = file_entry['modifyTimeForSort']
-                self._add_or_update_file(id, name, local_dir, modify_time)
+                self._add_or_update_file(id, name, local_dir, modify_time, entry)
 
     def _covert_config(self, config_path=None) -> (dict, str):
         """
@@ -539,7 +550,26 @@ class YoudaoNotePull(object):
 
         return '', '有道云笔记指定顶层目录不存在'
 
-    def _add_or_update_file(self, file_id, file_name, local_dir, modify_time):
+    def _additional_file_action(self, local_file_path, entry):
+        """
+        对本地文件额外操作, 支持多次运行重试.
+
+        Args:
+            local_file_path (_type_): _description_
+            entry (_type_): _description_
+        """
+        if not os.path.exists(local_file_path):
+            return
+
+        # 添加 markdown frontmatter 参数
+        if AdditionalArgs.PATCH_MARKDOWN_FRONT_MATTER:
+            self._patch_markdown_front_matter(local_file_path, entry)
+        
+        # 额外重试下载失败的图片和附件链接 (失败的链接仍然保持youdao.com的标记, 可以直接重试)
+        if AdditionalArgs.RETRY_DOWNLOAD_MARKDOWN_URL:
+            self._migration_ydnote_url(local_file_path)
+
+    def _add_or_update_file(self, file_id, file_name, local_dir, modify_time, entry):
         """
         新增或更新文件
         :param file_id:
@@ -558,13 +588,14 @@ class YoudaoNotePull(object):
         # 如果有有道云笔记是「note」类型，则提示类型
         tip = '，云笔记原格式为 note' if is_note else ''
         file_action = self._get_file_action(local_file_path, modify_time)
+        self._additional_file_action(local_file_path, entry)
         if file_action == FileActionEnum.CONTINUE:
             return
         if file_action == FileActionEnum.UPDATE:
             # 考虑到使用 f.write() 直接覆盖原文件，在 Windows 下报错（WinError 183），先将其删除
             os.remove(local_file_path)
         try:
-            self._pull_file(file_id, original_file_path, local_file_path, is_note, youdao_file_suffix)
+            self._pull_file(file_id, original_file_path, local_file_path, is_note, youdao_file_suffix, entry)
             print('{}「{}」{}'.format(file_action.value, local_file_path, tip))
         except Exception as error:
             print('{}「{}」失败！请检查文件！错误提示：{}'.format(file_action.value, original_file_path, format(error)))
@@ -587,7 +618,7 @@ class YoudaoNotePull(object):
             is_note = True if content == b"<?xml" else False
         return is_note
 
-    def _pull_file(self, file_id, file_path, local_file_path, is_note, youdao_file_suffix):
+    def _pull_file(self, file_id, file_path, local_file_path, is_note, youdao_file_suffix, entry):
         """
         下载文件
         :param file_id:
@@ -615,6 +646,49 @@ class YoudaoNotePull(object):
         # 3、迁移文本文件里面的有道云笔记链接
         if is_note or youdao_file_suffix == MARKDOWN_SUFFIX:
             self._migration_ydnote_url(local_file_path)
+        
+        # 4、增加markdown frontmatter信息
+        if AdditionalArgs.PATCH_MARKDOWN_FRONT_MATTER:
+            self._patch_markdown_front_matter(local_file_path, entry)
+
+    def _patch_markdown_front_matter(self, local_file_path, file_params):
+        """
+        将有道云笔记的参数做为markdown的frontmatter记录, 主要用于记录创建时间和修改时间.
+
+        Args:
+            local_file_path (_type_): _description_
+            file_params (_type_): _description_
+        """
+        
+        if not local_file_path.endswith(".md"):
+            print(f"非markdown文件, 不需要处理markdown frontmatter: {local_file_path}")
+            return
+        
+        file_entry =  file_params["fileEntry"]
+        with open(local_file_path, "r") as f:
+            try:
+                fm = frontmatter.load(f)
+            except yaml.scanner.ScannerError as ex:
+                print(f"识别 markdown frontmatter错误, 忽略. file {f} except: {ex}")
+                return
+            remote_modified_time = file_entry["modifyTimeForSort"]
+            stored_update_time = fm.metadata.get("noteMeta", {}).get("modifyTimeForSort", -1)
+            if stored_update_time >= remote_modified_time:
+                return
+            fm.metadata["noteMeta"] = {
+                "id": file_entry["id"],
+                "name":  file_entry["name"],
+                "parentId":  file_entry["parentId"],
+                "version": file_entry["version"],
+                "fileSize": file_entry["fileSize"],
+                "checksum": file_entry["checksum"],
+                "createTimeForSort":  file_entry["createTimeForSort"],
+                "modifyTimeForSort":  file_entry["modifyTimeForSort"]
+            }
+            fm.metadata["createTime"] = datetime.fromtimestamp(file_entry["createTimeForSort"]).isoformat()
+            fm.metadata["modifyTime"] = datetime.fromtimestamp(file_entry["modifyTimeForSort"]).isoformat()
+            print(f"update metadata: {file_entry['name']} modified at {fm.metadata['modifyTime']}")
+        frontmatter.dump(fm, local_file_path)           
 
     def _get_file_action(self, local_file_path, modify_time) -> Enum:
         """
@@ -650,6 +724,13 @@ class YoudaoNotePull(object):
         :param file_path:
         :return:
         """
+        
+        # 有道笔记后来支持直接上传excel等附件, 这类文件不需要迁移url
+        # 不然下方会报错 /youdao-backup/abc.xlsx 'utf-8' codec can't decode byte 0x87 in position 10: invalid start byte
+        if not file_path.endswith(".md"):
+            print(f"非markdown文件, 不需要处理markdown链接: {file_path}")
+            return
+        
         with open(file_path, 'rb') as f:
             content = f.read().decode('utf-8')
 
@@ -665,6 +746,7 @@ class YoudaoNotePull(object):
             #将 image_path 路径中 images 之前的路径去掉，只保留以 images 开头的之后的路径
             if self.is_relative_path:
                 image_path = image_path[image_path.find(IMAGES):]
+            # 其实 image 与附件的正则表达式差不多, 不过这里先处理了图片, 就不会继续尝试附件下载了
             content = content.replace(image_url, image_path)
 
         # 附件
@@ -715,7 +797,12 @@ class YoudaoNotePull(object):
         :param attach_name:
         :return:  path
         """
-        try:
+        
+        # patch for: requests.exceptions.MissingSchema: Invalid URL '//note.youdao.com/src/xxxx
+        if url.startswith("//note.youdao.com"):
+            url = "https:" + url
+
+        try:            
             response = self.youdaonote_api.http_get(url)
         except requests.exceptions.ProxyError as err:
             error_msg = '网络错误，「{}」下载失败。错误提示：{}'.format(url, format(err))
@@ -725,8 +812,7 @@ class YoudaoNotePull(object):
         content_type = response.headers.get('Content-Type')
         file_type = '附件' if attach_name else '图片'
         if response.status_code != 200 or not content_type:
-            error_msg = '下载「{}」失败！{}可能已失效，可浏览器登录有道云笔记后，查看{}是否能正常加载'.format(url, file_type,
-                                                                           file_type)
+            error_msg = f'下载「{url}」失败！{file_type}可能已失效，可浏览器登录有道云笔记后，查看{file_type}是否能正常加载: statusCode: {response.status_code}, content_type: {content_type}'
             print(error_msg)
             return ''
 
@@ -792,6 +878,15 @@ class YoudaoNotePull(object):
 
 if __name__ == '__main__':
     start_time = int(time.time())
+    
+    # 简化版命令行解析, 支持导出markdown frontmatter, 支持重试文章中的图片和附件链接
+    print(f"sys args: {sys.argv}")
+    if "--frontmatter" in sys.argv:
+        AdditionalArgs.PATCH_MARKDOWN_FRONT_MATTER = True
+    if "--retryurl" in sys.argv:
+        AdditionalArgs.RETRY_DOWNLOAD_MARKDOWN_URL = True
+    print(f"Additional Args: {AdditionalArgs.PATCH_MARKDOWN_FRONT_MATTER}, {AdditionalArgs.RETRY_DOWNLOAD_MARKDOWN_URL}")
+    
     try:
         youdaonote_pull = YoudaoNotePull()
         ydnote_dir_id, error_msg = youdaonote_pull.get_ydnote_dir_id()
