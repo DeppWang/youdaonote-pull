@@ -40,15 +40,10 @@ python --version   # Windows
 - 安装依赖包
 
 ```shell
-
-. venv/bin/activate
-```
-
-```shell
 # macOS
 sudo easy_install pip3      # 安装 Python3 Package Installer
-python3 -m venv venv # 使用虚拟环境
-. venv/bin/activate
+python3 -m venv venv        # 使用虚拟环境
+. venv/bin/activate         # 激活虚拟环境
 sudo pip3 install -r requirements.txt
 ```
 ```shell
