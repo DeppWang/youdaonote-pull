@@ -1,5 +1,3 @@
-## 目前（2023.8.20）发现新创建的「空白文档」格式笔记的存储格式变为了 `Json`，不再为 `Xml`，导致出现下载的「空白文档」格式笔记无法转换为 `Markdown`。建议大家尽快导出。
-
 # youdaonote-pull
 
 现在有道云笔记不能导出笔记，迁移笔记很麻烦。此脚本可将所有笔记下载到本地。
@@ -7,7 +5,7 @@
 ## 功能
 
 - 可将所有笔记（文件）按原格式下载到本地
-- 由于「笔记」类型文件下载后默认为 `Xml` 格式，不是正常笔记内容，**默认将其转换为 `Markdown` 格式**
+- 由于「笔记」类型文件下载后默认为 `Xml` 或者是 `Json` 格式，不是正常笔记内容，**默认将其转换为 `Markdown` 格式**
 - 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
 
 ## 使用步骤
@@ -42,8 +40,15 @@ python --version   # Windows
 - 安装依赖包
 
 ```shell
+
+. venv/bin/activate
+```
+
+```shell
 # macOS
 sudo easy_install pip3      # 安装 Python3 Package Installer
+python3 -m venv venv # 使用虚拟环境
+. venv/bin/activate
 sudo pip3 install -r requirements.txt
 ```
 ```shell
@@ -213,14 +218,4 @@ python pull.py   # Windows
 
 1. commit 请使用英文；一次 commit 只改一个点；一个 commit 一个 PR
 2. 代码注释需要有[中英文空格](https://github.com/sparanoid/chinese-copywriting-guidelines)
-3. 请确保通过测试用例：在 macOS 和 Windows 环境中直接执行 `test.py` 没有问题
-
-## 捐赠
-
-有小伙伴说可以放个赞赏码什么的，但考虑捐赠的意义，如果小伙伴有想捐赠的，可以支持一下「[微澜图书馆](http://park.sanzhi.org.cn/index.php?app=user&ac=welcome)」这个[流动儿童图书馆](https://yixi.tv/#/speech/detail?id=913)公益项目。想让我知道你的捐赠的话，就把[我](http://park.sanzhi.org.cn/index.php?app=user&ac=duty&id=11102)设为你的「[介绍人](http://park.sanzhi.org.cn/index.php?app=group&ac=topic&id=51)」吧
-
-![img](http://park.sanzhi.org.cn/public/images/2wm.jpg)
-
-- 微澜图书馆公众号
-
-![Profile views](https://gpvc.arturio.dev/youdaonote-pull)
+3. 请确保通过测试用例：在 macOS 和 Windows 环境中直接执行 `python3 test/test.py` 没有问题

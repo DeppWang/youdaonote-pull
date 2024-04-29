@@ -2,3 +2,6 @@
 *.iml
 cookies.json
 .python-version
+.history
+__pycache__
+test-pull
