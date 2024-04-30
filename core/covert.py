@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-from typing import Tuple
 import xml.etree.ElementTree as ET
+from typing import Tuple
 
 MARKDOWN_SUFFIX = ".md"
 
@@ -191,7 +191,7 @@ class JsonConvert(object):
 
     def _convert_text_attribute(self, text: str, text_attrs: list):
         """文本属性"""
-        
+
         if isinstance(text_attrs, list) and text_attrs and text:
             for attr in text_attrs:
                 if attr["2"] == "b":
@@ -250,7 +250,7 @@ class JsonConvert(object):
         return text
 
     def convert_im_func(self, content):
-        """图片"""   
+        """图片"""
         image_url = content["4"]["u"]
         return "![]({image_url})".format(image_url=image_url)
 
@@ -325,7 +325,7 @@ class YoudaoNoteConvert(object):
     """
     有道云笔记 note 内容转换为 markdown 内容
     """
-    
+
     @staticmethod
     def covert_html_to_markdown(file_path):
         """

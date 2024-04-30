@@ -1,4 +1,5 @@
 import json
+
 import requests
 
 
@@ -28,7 +29,7 @@ class YoudaoNoteApi(object):
         self.session = requests.session()  # 使用 session 维持有道云笔记的登陆状态
         self.session.headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/100.0.4896.88 Safari/537.36",
+                          "Chrome/100.0.4896.88 Safari/537.36",
             "Accept": "*/*",
             "Accept-Encoding": "gzip, deflate",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
