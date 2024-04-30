@@ -5,3 +5,4 @@ cookies.json
 .history
 __pycache__
 test-pull
+logs

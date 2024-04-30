@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 from typing import Tuple
@@ -37,7 +38,7 @@ class ImagePull:
         # 图片
         image_urls = REGEX_IMAGE_URL.findall(content)
         if len(image_urls) > 0:
-            print("正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path))
+            logging.info("正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path))
         for image_url in image_urls:
             image_path = self._get_new_image_path(file_path, image_url)
             if image_url == image_path:
@@ -51,7 +52,7 @@ class ImagePull:
         # 附件
         attach_name_and_url_list = REGEX_ATTACH.findall(content)
         if len(attach_name_and_url_list) > 0:
-            print("正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path))
+            logging.info("正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path))
         for attach_name_and_url in attach_name_and_url_list:
             attach_url = attach_name_and_url[1]
             attach_path = self._download_ydnote_url(
@@ -89,7 +90,7 @@ class ImagePull:
         # 如果上传失败，仍下载到本地
         if not error_msg:
             return new_file_url
-        print(error_msg)
+        logging.info(error_msg)
         image_path = self._download_ydnote_url(file_path, image_url)
         return image_path or image_url
 
@@ -107,7 +108,7 @@ class ImagePull:
             error_msg = "网络错误，「{}」下载失败。错误提示：{}".format(
                 url, format(err)
             )
-            print(error_msg)
+            logging.info(error_msg)
             return ""
 
         content_type = response.headers.get("Content-Type")
@@ -116,7 +117,7 @@ class ImagePull:
             error_msg = "下载「{}」失败！{}可能已失效，可浏览器登录有道云笔记后，查看{}是否能正常加载".format(
                 url, file_type, file_type
             )
-            print(error_msg)
+            logging.info(error_msg)
             return ""
 
         if attach_name:
@@ -163,10 +164,10 @@ class ImagePull:
         try:
             with open(local_file_path, "wb") as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            print("已将{}「{}」转换为「{}」".format(file_type, url, local_file_path))
+            logging.info("已将{}「{}」转换为「{}」".format(file_type, url, local_file_path))
         except:
             error_msg = "{} {}有误！".format(url, file_type)
-            print(error_msg)
+            logging.info(error_msg)
             return ""
 
         # relative_file_path = self._set_relative_file_path(file_path, file_name, local_file_dir)
@@ -229,11 +230,11 @@ class ImageUpload(object):
 
         if res_json.get("success"):
             url = res_json["data"]["url"]
-            print("已将图片「{}」转换为「{}」".format(image_url, url))
+            logging.info("已将图片「{}」转换为「{}」".format(image_url, url))
             return url, ""
         if res_json.get("code") == "image_repeated":
             url = res_json["images"]
-            print("已将图片「{}」转换为「{}」".format(image_url, url))
+            logging.info("已将图片「{}」转换为「{}」".format(image_url, url))
             return url, ""
         if res_json.get("code") == "flood":
             return "", error_msg

@@ -17,6 +17,7 @@ import requests
 from core.api import YoudaoNoteApi
 from core.covert import YoudaoNoteConvert
 from core.image import ImagePull
+from core import log
 
 __author__ = "Depp Wang (deppwxq@gmail.com)"
 __github__ = "https//github.com/DeppWang/youdaonote-pull"
@@ -134,6 +135,7 @@ class YoudaoNotePull(object):
         self.root_local_dir = local_dir
         self.youdaonote_api = YoudaoNoteApi()
         error_msg = self.youdaonote_api.login_by_cookies()
+        logging.info("本次使用 Cookies 登录")
         if error_msg:
             return "", error_msg
         self.smms_secret_token = config_dict["smms_secret_token"]
@@ -254,9 +256,9 @@ class YoudaoNotePull(object):
                 note_type,
                 youdao_file_suffix,
             )
-            print("{}「{}」{}".format(file_action.value, local_file_path, tip))
+            logging.info("{}「{}」{}".format(file_action.value, local_file_path, tip))
         except Exception as error:
-            print(
+            logging.info(
                 "{}「{}」失败！请检查文件！错误提示：{}".format(
                     file_action.value, original_file_path, format(error)
                 )
@@ -284,12 +286,12 @@ class YoudaoNotePull(object):
             try:
                 YoudaoNoteConvert.covert_xml_to_markdown(file_path)
             except ET.ParseError:
-                print(
+                logging.info(
                     "此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown ..."
                 )
                 YoudaoNoteConvert.covert_html_to_markdown(file_path)
             except Exception as e:
-                print("note 笔记转换 MarkDown 失败，将跳过", repr(e))
+                logging.info("note 笔记转换 MarkDown 失败，将跳过", repr(e))
         elif note_type == NoteType.JSON:
             YoudaoNoteConvert.covert_json_to_markdown(file_path)
 
@@ -302,37 +304,39 @@ class YoudaoNotePull(object):
 
 
 if __name__ == "__main__":
+    log.init_logging()
+    
     start_time = int(time.time())
     try:
         youdaonote_pull = YoudaoNotePull()
         ydnote_dir_id, error_msg = youdaonote_pull.get_ydnote_dir_id()
         if error_msg:
-            print(error_msg)
+            logging.info(error_msg)
             sys.exit(1)
-        print("正在 pull，请稍后 ...")
+        logging.info("正在 pull，请稍后 ...")
         youdaonote_pull.pull_dir_by_id_recursively(
             ydnote_dir_id, youdaonote_pull.root_local_dir
         )
     except requests.exceptions.ProxyError as proxyErr:
-        print(
+        logging.info(
             "请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试"
         )
         traceback.print_exc()
-        print("已终止执行")
+        logging.info("已终止执行")
         sys.exit(1)
     except requests.exceptions.ConnectionError as connectionErr:
-        print(
+        logging.info(
             "网络错误，请检查网络是否正常连接。若突然执行中断，可忽略此错误，重新运行脚本"
         )
         traceback.print_exc()
-        print("已终止执行")
+        logging.info("已终止执行")
         sys.exit(1)
     # 链接错误等异常
     except Exception as err:
-        print("其他错误：", format(err))
+        logging.info("其他错误：", format(err))
         traceback.print_exc()
-        print("已终止执行")
+        logging.info("已终止执行")
         sys.exit(1)
 
     end_time = int(time.time())
-    print("运行完成！耗时 {} 秒".format(str(end_time - start_time)))
+    logging.info("运行完成！耗时 {} 秒".format(str(end_time - start_time)))
