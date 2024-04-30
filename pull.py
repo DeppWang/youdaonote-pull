@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+import platform
 import re
 import sys
 import time
@@ -13,18 +14,18 @@ from enum import Enum
 from typing import Tuple
 
 import requests
+from win32_setctime import setctime
 
+from core import log
 from core.api import YoudaoNoteApi
 from core.covert import YoudaoNoteConvert
 from core.image import ImagePull
-from core import log
 
 __author__ = "Depp Wang (deppwxq@gmail.com)"
 __github__ = "https//github.com/DeppWang/youdaonote-pull"
 
 REGEX_SYMBOL = re.compile(r'[\\/:\*\?"<>\|]')  # 符号：\ / : * ? " < > |
 MARKDOWN_SUFFIX = ".md"
-NOTE_SUFFIX = ".note"
 
 
 class NoteType(Enum):
@@ -187,11 +188,21 @@ class YoudaoNotePull(object):
 
     def _optimize_file_name(self, name) -> str:
         """
-        优化文件名，替换特殊符号为下划线
+        优化文件名
         :param name:
         :return:
         """
-        name = REGEX_SYMBOL.sub("_", name)
+        # 替换下划线
+        regex_symbol = re.compile(r"[<]")  # 符号： <
+        # 删除特殊字符
+        del_regex_symbol = re.compile(r'[\\/":\|\*\?#>]')  # 符号：\ / " : | * ? # >
+        # 首尾的空格
+        name = name.replace("\n", "")
+        # 去除换行符
+        name = name.strip()
+        # 替换一些特殊符号
+        name = regex_symbol.sub("_", name)
+        name = del_regex_symbol.sub("", name)
         return name
 
     def pull_dir_by_id_recursively(self, dir_id, local_dir):
@@ -217,15 +228,17 @@ class YoudaoNotePull(object):
                 self.pull_dir_by_id_recursively(id, sub_dir)
             else:
                 modify_time = file_entry["modifyTimeForSort"]
-                self._add_or_update_file(id, name, local_dir, modify_time)
+                create_time = file_entry["createTimeForSort"]
+                self._add_or_update_file(id, name, local_dir, modify_time, create_time)
 
-    def _add_or_update_file(self, file_id, file_name, local_dir, modify_time):
+    def _add_or_update_file(self, file_id, file_name, local_dir, modify_time, create_time):
         """
         新增或更新文件
         :param file_id:
         :param file_name:
         :param local_dir:
         :param modify_time:
+        :param create_time:
         :return:
         """
         file_name = self._optimize_file_name(file_name)
@@ -256,7 +269,16 @@ class YoudaoNotePull(object):
                 note_type,
                 youdao_file_suffix,
             )
-            logging.info("{}「{}」{}".format(file_action.value, local_file_path, tip))
+            if file_action == FileActionEnum.CONTINUE:
+                logging.debug('{}「{}」{}'.format(file_action.value, local_file_path, tip))
+            else:
+                logging.info('{}「{}」{}'.format(file_action.value, local_file_path, tip))
+
+            if platform.system() == "Windows":
+                setctime(local_file_path, create_time)
+            else:
+                os.utime(local_file_path, (create_time, modify_time))
+
         except Exception as error:
             logging.info(
                 "{}「{}」失败！请检查文件！错误提示：{}".format(
@@ -305,8 +327,9 @@ class YoudaoNotePull(object):
 
 if __name__ == "__main__":
     log.init_logging()
-    
+
     start_time = int(time.time())
+
     try:
         youdaonote_pull = YoudaoNotePull()
         ydnote_dir_id, error_msg = youdaonote_pull.get_ydnote_dir_id()

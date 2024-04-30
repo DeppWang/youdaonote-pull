@@ -26,12 +26,27 @@ class ImagePull:
         self.smms_secret_token = smms_secret_token
         self.is_relative_path = is_relative_path
 
+    @classmethod
+    def _url_encode(cls, file_path: str):
+        """对一些特殊字符url编码
+        :param file_path:
+        """
+        file_path = file_path.replace(' ', '%20')
+        return file_path
+    
     def migration_ydnote_url(self, file_path):
         """
         迁移有道云笔记文件 URL
         :param file_path:
         :return:
         """
+        
+        # 如果文件为空，结束
+        stats = os.stat(file_path)
+        if stats.st_size == 0:
+            logging.error(f"{file_path} {stats.st_size}")
+            return
+        
         with open(file_path, "rb") as f:
             content = f.read().decode("utf-8")
 
@@ -47,6 +62,8 @@ class ImagePull:
             # 将 image_path 路径中 images 之前的路径去掉，只保留以 images 开头的之后的路径
             if self.is_relative_path and not self.smms_secret_token:
                 image_path = image_path[image_path.find(IMAGES):]
+                
+            image_path = self._url_encode(image_path)
             content = content.replace(image_url, image_path)
 
         # 附件
@@ -150,7 +167,7 @@ class ImagePull:
         if not os.path.exists(local_file_dir):
             os.mkdir(local_file_dir)
         file_basename = os.path.basename(urlparse(url).path)
-        # 请求后的真实的URL中才有东西
+        # 请求后的真实的 URL 中才有东西
         realUrl = parse.parse_qs(urlparse(response.url).query)
         if realUrl:
             urlname = "filename"
