@@ -48,6 +48,8 @@ sudo pip3 install -r requirements.txt
 ```
 ```shell
 # Windows
+python -m venv venv         # 使用虚拟环境
+. venv/bin/activate         # 激活虚拟环境
 pip install -r requirements.txt
 
 # 有问题可参考 https://www.liaoxuefeng.com/wiki/1016959663602400/1017493741106496
@@ -167,7 +169,7 @@ python pull.py   # Windows
 
 效果：
 
-![2020-06-23-145839](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/2020-08-04-073242.png)
+![image-20240430154201191](https://deppwang.oss-cn-beijing.aliyuncs.com/blog/image-20240430154201191.png)
 
 ### 三、多次导出
 
