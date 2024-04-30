@@ -254,7 +254,7 @@ class YoudaoNotePull(object):
             local_dir, "".join([os.path.splitext(file_name)[0], MARKDOWN_SUFFIX])
         ).replace("\\", "/")
         # 如果有有道云笔记是「note」类型，则提示类型
-        tip = "，云笔记原格式为 note" if note_type != NoteType.MARKDOWN else ""
+        tip = "，云笔记原格式为 {}".format(note_type.name)
         file_action = self._get_file_action(local_file_path, modify_time)
         if file_action == FileActionEnum.CONTINUE:
             return
