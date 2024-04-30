@@ -3,6 +3,7 @@ import re
 from typing import Tuple
 from urllib import parse
 from urllib.parse import urlparse
+
 import requests
 
 REGEX_IMAGE_URL = re.compile(r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)')
@@ -12,17 +13,18 @@ IMAGES = 'images'
 # 有道云笔记的附件地址
 ATTACH = 'attachments'
 
+
 class ImagePull:
     def __init__(
-        self,
-        youdaonote_api,
-        smms_secret_token: str,
-        is_relative_path: bool,
+            self,
+            youdaonote_api,
+            smms_secret_token: str,
+            is_relative_path: bool,
     ):
         self.youdaonote_api = youdaonote_api
         self.smms_secret_token = smms_secret_token
-        self.is_relative_path = is_relative_path 
-        
+        self.is_relative_path = is_relative_path
+
     def migration_ydnote_url(self, file_path):
         """
         迁移有道云笔记文件 URL
@@ -42,8 +44,8 @@ class ImagePull:
                 continue
             # 将绝对路径替换为相对路径，实现满足 Obsidian 格式要求
             # 将 image_path 路径中 images 之前的路径去掉，只保留以 images 开头的之后的路径
-            if self.is_relative_path:
-                image_path = image_path[image_path.find(IMAGES) :]
+            if self.is_relative_path and not self.smms_secret_token:
+                image_path = image_path[image_path.find(IMAGES):]
             content = content.replace(image_url, image_path)
 
         # 附件
@@ -59,7 +61,7 @@ class ImagePull:
                 continue
             # 将 attach_path 路径中 attachments 之前的路径去掉，只保留以 attachments 开头的之后的路径
             if self.is_relative_path:
-                attach_path = attach_path[attach_path.find(ATTACH) :]
+                attach_path = attach_path[attach_path.find(ATTACH):]
             content = content.replace(attach_url, attach_path)
 
         with open(file_path, "wb") as f:
