@@ -209,8 +209,19 @@ class YoudaoNoteCovert(unittest.TestCase):
         )
         expected_content = """<http://bbs.pcbeta.com/viewthread-1095891-1-1.html>  
   
-sudo perl -pi -e 's|u0Ø|ë0Ø|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC """
+sudo perl -pi -e 's|u0Ø|ë0Ø|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC\n"""
         self.assertEqual(new_content, expected_content)
+        
+    def test_covert_json_to_markdown_content(self):
+        """
+        测试 json 转换 markdown
+        python test.py YoudaoNoteCovert.test_covert_json_to_markdown_content
+        """
+        content = YoudaoNoteConvert._covert_json_to_markdown_content("test/test.json")
+        with open("test/test-json.md", "rb") as f:
+            content_target = f.read().decode()
+        # CRLF => \r\n, LF => \n
+        self.assertEqual(content.replace("\r\n", "\n"), content_target)
 
 
 class YoudaoNotePullTest(unittest.TestCase):
