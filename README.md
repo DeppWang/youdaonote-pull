@@ -10,6 +10,8 @@
 
 ## 使用步骤
 
+- [视频教程](https://www.bilibili.com/video/BV11F411F7vG/?share_source=copy_web&vd_source=8bd019082f4e243f4bb5c3b6fabf4dd8)
+
 ### 一、导出前的准备工作
 
 #### 1、安装  [Git](https://git-scm.com/downloads)、clone 项目
