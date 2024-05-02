@@ -175,13 +175,9 @@ class ImagePull:
 
         # 请求后的真实的 URL 中才有东西
         realUrl = parse.parse_qs(urlparse(response.url).query)
-
-        if ∞:
-            filename = (
-                realUrl.get("filename")[0]
-                if realUrl.get("filename")
-                else realUrl.get("download")[0] if realUrl.get("download") else ""
-            )
+        
+        if realUrl:
+            filename = realUrl.get("filename")[0] if realUrl.get("filename") else realUrl.get("download")[0] if realUrl.get("download") else ""
             file_name = file_basename + filename
         else:
             file_name = "".join([file_basename, file_suffix])
