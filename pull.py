@@ -28,7 +28,8 @@ REGEX_SYMBOL = re.compile(r'[\\/:\*\?"<>\|]')  # 符号：\ / : * ? " < > |
 MARKDOWN_SUFFIX = ".md"
 
 
-class NoteType(Enum):
+class FileType(Enum):
+    OTHER = 0
     MARKDOWN = 1
     XML = 2
     JSON = 3
@@ -150,22 +151,20 @@ class YoudaoNotePull(object):
         :param youdao_file_suffix:
         :return:
         """
-        note_type = 0
+        file_type = FileType.OTHER
         # 1、如果文件是 .md 类型
         if youdao_file_suffix == MARKDOWN_SUFFIX:
-            note_type = NoteType.MARKDOWN
-            return note_type
+            file_type = FileType.MARKDOWN
+            return file_type
         elif youdao_file_suffix == ".note" or youdao_file_suffix == ".clip":
             response = self.youdaonote_api.get_file_by_id(file_id)
             # 2、如果文件以 `<?xml` 开头
             if response.content[:5] == b"<?xml":
-                note_type = NoteType.XML
+                file_type = FileType.XML
             # 3、如果文件以 `{` 开头
             elif response.content.startswith(b'{"'):
-                note_type = NoteType.JSON
-        else:
-            logging.warning("文件类型未识别，将跳过")
-        return note_type
+                file_type = FileType.JSON
+        return file_type
 
     def _get_file_action(self, local_file_path, modify_time) -> Enum:
         """
@@ -180,7 +179,7 @@ class YoudaoNotePull(object):
 
         # 如果已经存在，判断是否需要更新
         # 如果有道云笔记文件更新时间小于本地文件时间，说明没有更新，则不下载，跳过
-        if modify_time < os.path.getmtime(local_file_path):
+        if modify_time <= os.path.getmtime(local_file_path):
             logging.info("此文件「%s」不更新，跳过", local_file_path)
             return FileActionEnum.CONTINUE
         # 同一目录存在同名 md 和 note 文件时，后更新文件将覆盖另一个
@@ -246,15 +245,16 @@ class YoudaoNotePull(object):
         original_file_path = os.path.join(local_dir, file_name).replace(
             "\\", "/"
         )  # 原后缀路径
-        note_type = self._judge_type(file_id, youdao_file_suffix)
-        if not note_type:
-            return
+        file_type = self._judge_type(file_id, youdao_file_suffix)
+            
         # 「note」类型本地文件均已 .md 结尾
         local_file_path = os.path.join(
             local_dir, "".join([os.path.splitext(file_name)[0], MARKDOWN_SUFFIX])
-        ).replace("\\", "/")
+        ).replace("\\", "/") if file_type != FileType.OTHER else original_file_path
+        
         # 如果有有道云笔记是「note」类型，则提示类型
-        tip = "，云笔记原格式为 {}".format(note_type.name)
+        tip = "，云笔记原格式为 {}".format(file_type.name) if file_type != FileType.OTHER else ""
+        
         file_action = self._get_file_action(local_file_path, modify_time)
         if file_action == FileActionEnum.CONTINUE:
             return
@@ -266,7 +266,7 @@ class YoudaoNotePull(object):
                 file_id,
                 original_file_path,
                 local_file_path,
-                note_type,
+                file_type,
                 youdao_file_suffix,
             )
             if file_action == FileActionEnum.CONTINUE:
@@ -274,6 +274,7 @@ class YoudaoNotePull(object):
             else:
                 logging.info('{}「{}」{}'.format(file_action.value, local_file_path, tip))
 
+            # 本地文件时间设置为有道云笔记的时间
             if platform.system() == "Windows":
                 setctime(local_file_path, create_time)
             else:
@@ -281,20 +282,20 @@ class YoudaoNotePull(object):
 
         except Exception as error:
             logging.info(
-                "{}「{}」失败！请检查文件！错误提示：{}".format(
+                "{}「{}」可能失败！请检查文件！错误提示：{}".format(
                     file_action.value, original_file_path, format(error)
                 )
             )
 
     def _pull_file(
-        self, file_id, file_path, local_file_path, note_type, youdao_file_suffix
+        self, file_id, file_path, local_file_path, file_type, youdao_file_suffix
     ):
         """
         下载文件
         :param file_id:
         :param file_path:
         :param local_file_path: 本地
-        :param note_type:
+        :param file_type:
         :param youdao_file_suffix:
         :return:
         """
@@ -304,7 +305,7 @@ class YoudaoNotePull(object):
             f.write(response.content)  # response.content 本身就是字节类型
 
         # 2、如果文件是 note 类型，将其转换为 MarkDown 类型
-        if note_type == NoteType.XML:
+        if file_type == FileType.XML:
             try:
                 YoudaoNoteConvert.covert_xml_to_markdown(file_path)
             except ET.ParseError:
@@ -314,16 +315,15 @@ class YoudaoNotePull(object):
                 YoudaoNoteConvert.covert_html_to_markdown(file_path)
             except Exception as e:
                 logging.info("note 笔记转换 MarkDown 失败，将跳过", repr(e))
-        elif note_type == NoteType.JSON:
+        elif file_type == FileType.JSON:
             YoudaoNoteConvert.covert_json_to_markdown(file_path)
 
         # 3、迁移文本文件里面的有道云笔记图片（链接）
-        if note_type or youdao_file_suffix == MARKDOWN_SUFFIX:
+        if file_type != FileType.OTHER or youdao_file_suffix == MARKDOWN_SUFFIX:
             imagePull = ImagePull(
                 self.youdaonote_api, self.smms_secret_token, self.is_relative_path
             )
             imagePull.migration_ydnote_url(local_file_path)
-
 
 if __name__ == "__main__":
     log.init_logging()

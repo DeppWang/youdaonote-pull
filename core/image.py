@@ -7,20 +7,20 @@ from urllib.parse import urlparse
 
 import requests
 
-REGEX_IMAGE_URL = re.compile(r'!\[.*?\]\((.*?note\.youdao\.com.*?)\)')
-REGEX_ATTACH = re.compile(r'\[(.*?)\]\(((http|https)://note\.youdao\.com.*?)\)')
+REGEX_IMAGE_URL = re.compile(r"!\[.*?\]\((.*?note\.youdao\.com.*?)\)")
+REGEX_ATTACH = re.compile(r"\[(.*?)\]\(((http|https)://note\.youdao\.com.*?)\)")
 # 有道云笔记的图片地址
-IMAGES = 'images'
+IMAGES = "images"
 # 有道云笔记的附件地址
-ATTACH = 'attachments'
+ATTACH = "attachments"
 
 
 class ImagePull:
     def __init__(
-            self,
-            youdaonote_api,
-            smms_secret_token: str,
-            is_relative_path: bool,
+        self,
+        youdaonote_api,
+        smms_secret_token: str,
+        is_relative_path: bool,
     ):
         self.youdaonote_api = youdaonote_api
         self.smms_secret_token = smms_secret_token
@@ -31,45 +31,50 @@ class ImagePull:
         """对一些特殊字符url编码
         :param file_path:
         """
-        file_path = file_path.replace(' ', '%20')
+        file_path = file_path.replace(" ", "%20")
         return file_path
-    
+
     def migration_ydnote_url(self, file_path):
         """
         迁移有道云笔记文件 URL
         :param file_path:
         :return:
         """
-        
-        # 如果文件为空，结束
-        stats = os.stat(file_path)
-        if stats.st_size == 0:
-            logging.error(f"{file_path} {stats.st_size}")
-            return
-        
+
         with open(file_path, "rb") as f:
             content = f.read().decode("utf-8")
 
         # 图片
         image_urls = REGEX_IMAGE_URL.findall(content)
         if len(image_urls) > 0:
-            logging.info("正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path))
+            logging.info(
+                "正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path)
+            )
         for image_url in image_urls:
-            image_path = self._get_new_image_path(file_path, image_url)
+            try:
+                image_path = self._get_new_image_path(file_path, image_url)
+            except Exception as error:
+                logging.info(
+                    "下载图片「{}」可能失败！请检查图片！错误提示：{}".format(
+                        image_url, format(error)
+                    )
+                )
             if image_url == image_path:
                 continue
             # 将绝对路径替换为相对路径，实现满足 Obsidian 格式要求
             # 将 image_path 路径中 images 之前的路径去掉，只保留以 images 开头的之后的路径
             if self.is_relative_path and not self.smms_secret_token:
-                image_path = image_path[image_path.find(IMAGES):]
-                
+                image_path = image_path[image_path.find(IMAGES) :]
+
             image_path = self._url_encode(image_path)
             content = content.replace(image_url, image_path)
 
         # 附件
         attach_name_and_url_list = REGEX_ATTACH.findall(content)
         if len(attach_name_and_url_list) > 0:
-            logging.info("正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path))
+            logging.info(
+                "正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path)
+            )
         for attach_name_and_url in attach_name_and_url_list:
             attach_url = attach_name_and_url[1]
             attach_path = self._download_ydnote_url(
@@ -79,7 +84,7 @@ class ImagePull:
                 continue
             # 将 attach_path 路径中 attachments 之前的路径去掉，只保留以 attachments 开头的之后的路径
             if self.is_relative_path:
-                attach_path = attach_path[attach_path.find(ATTACH):]
+                attach_path = attach_path[attach_path.find(ATTACH) :]
             content = content.replace(attach_url, attach_path)
 
         with open(file_path, "wb") as f:
@@ -167,27 +172,32 @@ class ImagePull:
         if not os.path.exists(local_file_dir):
             os.mkdir(local_file_dir)
         file_basename = os.path.basename(urlparse(url).path)
+
         # 请求后的真实的 URL 中才有东西
         realUrl = parse.parse_qs(urlparse(response.url).query)
-        if realUrl:
-            urlname = "filename"
-            if "download" in realUrl:
-                urlname = "download"
-            # dict 不为空再去取 download
-            file_name = file_basename + realUrl[urlname][0]
+
+        if ∞:
+            filename = (
+                realUrl.get("filename")[0]
+                if realUrl.get("filename")
+                else realUrl.get("download")[0] if realUrl.get("download") else ""
+            )
+            file_name = file_basename + filename
         else:
             file_name = "".join([file_basename, file_suffix])
         local_file_path = os.path.join(local_file_dir, file_name).replace("\\", "/")
+
         try:
             with open(local_file_path, "wb") as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            logging.info("已将{}「{}」转换为「{}」".format(file_type, url, local_file_path))
+            logging.info(
+                "已将{}「{}」转换为「{}」".format(file_type, url, local_file_path)
+            )
         except:
             error_msg = "{} {}有误！".format(url, file_type)
             logging.info(error_msg)
             return ""
 
-        # relative_file_path = self._set_relative_file_path(file_path, file_name, local_file_dir)
         return local_file_path
 
     def _set_relative_file_path(self, file_path, file_name, local_file_dir) -> str:
