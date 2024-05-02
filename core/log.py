@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 
@@ -7,6 +8,10 @@ DATE_FORMAT = "%Y/%m/%d %H:%M:%S "
 
 
 def init_logging():
+    log_dir = "logs"
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+        
     logging.basicConfig(
         handlers=[
             logging.FileHandler(
