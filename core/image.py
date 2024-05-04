@@ -41,6 +41,7 @@ class ImagePull:
         :return:
         """
 
+        # 文件内容为空，也下载到本地
         with open(file_path, "rb") as f:
             content = f.read().decode("utf-8")
 

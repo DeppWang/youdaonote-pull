@@ -245,14 +245,16 @@ class YoudaoNotePull(object):
         original_file_path = os.path.join(local_dir, file_name).replace(
             "\\", "/"
         )  # 原后缀路径
+        
+        # 所有类型文件均下载，不做处理
         file_type = self._judge_type(file_id, youdao_file_suffix)
             
-        # 「note」类型本地文件均已 .md 结尾
+        # 「文档」类型本地文件均已 .md 结尾
         local_file_path = os.path.join(
             local_dir, "".join([os.path.splitext(file_name)[0], MARKDOWN_SUFFIX])
         ).replace("\\", "/") if file_type != FileType.OTHER else original_file_path
         
-        # 如果有有道云笔记是「note」类型，则提示类型
+        # 如果有有道云笔记是「文档」类型，则提示类型
         tip = "，云笔记原格式为 {}".format(file_type.name) if file_type != FileType.OTHER else ""
         
         file_action = self._get_file_action(local_file_path, modify_time)
