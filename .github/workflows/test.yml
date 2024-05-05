@@ -41,5 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: pip install -r requirements.txt
       - name: Run test.py
         run: python test/test.py
