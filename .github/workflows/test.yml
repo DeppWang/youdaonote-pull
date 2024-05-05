@@ -1,0 +1,44 @@
+name: test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          architecture: x64
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+      - name: pip/pre-commit cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.pip-cache.outputs.dir }}
+            ~/.cache/pre-commit
+          key: ${{ runner.os }}-pip-pre-commit-${{ hashFiles('**/.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-pre-commit
+      - name: pre-commit
+        run: |
+          pip install -U pre-commit
+          pre-commit install --install-hooks
+          pre-commit run --all-files
+  test:
+    needs: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run test.py
+        run: python test/test.py
