@@ -1,7 +1,17 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "-l", "88", "--trailing-comma", "--multi-line", "3"]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v1.2.3
     hooks:
     - id: flake8
       types: [python]
-      args: ["--max-line-length", "120", "--ignore", "E501,E722,W291"]
+      args: ["--max-line-length", "120", "--ignore", "E501,E722,W291,W293,E402,E203,F541"]
