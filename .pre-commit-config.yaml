@@ -1,0 +1,7 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v1.2.3
+    hooks:
+    - id: flake8
+      types: [python]
+      args: ["--max-line-length", "120", "--ignore", "E501,E722,W291"]
