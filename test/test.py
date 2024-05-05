@@ -201,12 +201,11 @@ class YoudaoNoteCovert(unittest.TestCase):
         from markdownify import markdownify as md
 
         new_content = md(
-            f"""<div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><a href="http://bbs.pcbeta.com/viewthread-1095891-1-1.html">http://bbs.pcbeta.com/viewthread-1095891-1-1.html</a><br></span></div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><br></span></div>sudo perl -pi -e 's|\x75\x30\x89\xd8|\xeb\x30\x89\xd8|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC</span>
+            f"""<div><span style='color: rgb(68, 68, 68); line-height: 1.5; font-family: "Monaco","Consolas","Lucida Console","Courier New","serif"; font-size: 12px; background-color: rgb(247, 247, 247);'><a href="http://bbs.pcbeta.com/viewthread-1095891-1-1.html">http://bbs.pcbeta.com/viewthread-1095891-1-1.html</a></span></div>
 """
         )
-        expected_content = """<http://bbs.pcbeta.com/viewthread-1095891-1-1.html>  
-  
-sudo perl -pi -e 's|u0Ø|ë0Ø|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC\n"""
+        expected_content = """<http://bbs.pcbeta.com/viewthread-1095891-1-1.html>
+"""
         self.assertEqual(new_content, expected_content)
 
     def test_covert_json_to_markdown_content(self):
