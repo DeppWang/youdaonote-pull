@@ -40,5 +40,6 @@ jobs:
     needs: pre-commit
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Run test.py
         run: python test/test.py
