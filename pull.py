@@ -97,9 +97,7 @@ class YoudaoNotePull(object):
             try:
                 os.mkdir(local_dir)
             except:
-                return "", "请检查「{}」上层文件夹是否存在，并使用绝对路径！".format(
-                    local_dir
-                )
+                return "", "请检查「{}」上层文件夹是否存在，并使用绝对路径！".format(local_dir)
         return local_dir, ""
 
     def _get_ydnote_dir_id(self, ydnote_dir) -> Tuple[str, str]:
@@ -230,7 +228,9 @@ class YoudaoNotePull(object):
                 create_time = file_entry["createTimeForSort"]
                 self._add_or_update_file(id, name, local_dir, modify_time, create_time)
 
-    def _add_or_update_file(self, file_id, file_name, local_dir, modify_time, create_time):
+    def _add_or_update_file(
+        self, file_id, file_name, local_dir, modify_time, create_time
+    ):
         """
         新增或更新文件
         :param file_id:
@@ -245,18 +245,24 @@ class YoudaoNotePull(object):
         original_file_path = os.path.join(local_dir, file_name).replace(
             "\\", "/"
         )  # 原后缀路径
-        
+
         # 所有类型文件均下载，不做处理
         file_type = self._judge_type(file_id, youdao_file_suffix)
-            
+
         # 「文档」类型本地文件均已 .md 结尾
-        local_file_path = os.path.join(
-            local_dir, "".join([os.path.splitext(file_name)[0], MARKDOWN_SUFFIX])
-        ).replace("\\", "/") if file_type != FileType.OTHER else original_file_path
-        
+        local_file_path = (
+            os.path.join(
+                local_dir, "".join([os.path.splitext(file_name)[0], MARKDOWN_SUFFIX])
+            ).replace("\\", "/")
+            if file_type != FileType.OTHER
+            else original_file_path
+        )
+
         # 如果有有道云笔记是「文档」类型，则提示类型
-        tip = "，云笔记原格式为 {}".format(file_type.name) if file_type != FileType.OTHER else ""
-        
+        tip = (
+            "，云笔记原格式为 {}".format(file_type.name) if file_type != FileType.OTHER else ""
+        )
+
         file_action = self._get_file_action(local_file_path, modify_time)
         if file_action == FileActionEnum.CONTINUE:
             return
@@ -272,9 +278,11 @@ class YoudaoNotePull(object):
                 youdao_file_suffix,
             )
             if file_action == FileActionEnum.CONTINUE:
-                logging.debug('{}「{}」{}'.format(file_action.value, local_file_path, tip))
+                logging.debug(
+                    "{}「{}」{}".format(file_action.value, local_file_path, tip)
+                )
             else:
-                logging.info('{}「{}」{}'.format(file_action.value, local_file_path, tip))
+                logging.info("{}「{}」{}".format(file_action.value, local_file_path, tip))
 
             # 本地文件时间设置为有道云笔记的时间
             if platform.system() == "Windows":
@@ -311,9 +319,7 @@ class YoudaoNotePull(object):
             try:
                 YoudaoNoteConvert.covert_xml_to_markdown(file_path)
             except ET.ParseError:
-                logging.info(
-                    "此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown ..."
-                )
+                logging.info("此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown ...")
                 YoudaoNoteConvert.covert_html_to_markdown(file_path)
             except Exception as e:
                 logging.info("note 笔记转换 MarkDown 失败，将跳过", repr(e))
@@ -326,6 +332,7 @@ class YoudaoNotePull(object):
                 self.youdaonote_api, self.smms_secret_token, self.is_relative_path
             )
             imagePull.migration_ydnote_url(local_file_path)
+
 
 if __name__ == "__main__":
     log.init_logging()
@@ -342,17 +349,15 @@ if __name__ == "__main__":
         youdaonote_pull.pull_dir_by_id_recursively(
             ydnote_dir_id, youdaonote_pull.root_local_dir
         )
-    except requests.exceptions.ProxyError as proxyErr:
+    except requests.exceptions.ProxyError:
         logging.info(
             "请检查网络代理设置；也有可能是调用有道云笔记接口次数达到限制，请等待一段时间后重新运行脚本，若一直失败，可删除「cookies.json」后重试"
         )
         traceback.print_exc()
         logging.info("已终止执行")
         sys.exit(1)
-    except requests.exceptions.ConnectionError as connectionErr:
-        logging.info(
-            "网络错误，请检查网络是否正常连接。若突然执行中断，可忽略此错误，重新运行脚本"
-        )
+    except requests.exceptions.ConnectionError:
+        logging.info("网络错误，请检查网络是否正常连接。若突然执行中断，可忽略此错误，重新运行脚本")
         traceback.print_exc()
         logging.info("已终止执行")
         sys.exit(1)

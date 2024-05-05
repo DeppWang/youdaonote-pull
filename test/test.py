@@ -3,16 +3,15 @@
 from __future__ import absolute_import
 
 import os
-import unittest
-from unittest.mock import patch, mock_open, Mock
 import sys
+import unittest
+from unittest.mock import Mock, mock_open, patch
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from core.api import YoudaoNoteApi
 from core.covert import YoudaoNoteConvert
 from pull import YoudaoNotePull
-
 
 # 使用 test_cookies.json 作为 cookies 地址，避免 cookies.json 数据在运行测试用例时被错误覆盖
 TEST_COOKIES_PATH = "test_cookies.json"
@@ -60,9 +59,7 @@ class YoudaoNoteApiTest(unittest.TestCase):
             "builtins.open", mock_open(read_data=cookies_json_str.encode("utf-8"))
         ):
             message = youdaonote_api.login_by_cookies()
-            self.assertEqual(
-                message, "转换「{}」为字典时出现错误".format(self.TEST_COOKIES_PATH)
-            )
+            self.assertEqual(message, "转换「{}」为字典时出现错误".format(self.TEST_COOKIES_PATH))
 
         # 如果 cookies 格式正确，但少了 YNOTE_CSTK。期待：登录失败
         cookies_json_str = """{"cookies": [
@@ -211,7 +208,7 @@ class YoudaoNoteCovert(unittest.TestCase):
   
 sudo perl -pi -e 's|u0Ø|ë0Ø|' /System/Library/Extensions/AppleRTC.kext/Contents/MacOS/AppleRTC\n"""
         self.assertEqual(new_content, expected_content)
-        
+
     def test_covert_json_to_markdown_content(self):
         """
         测试 json 转换 markdown

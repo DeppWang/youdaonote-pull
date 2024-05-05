@@ -48,17 +48,13 @@ class ImagePull:
         # 图片
         image_urls = REGEX_IMAGE_URL.findall(content)
         if len(image_urls) > 0:
-            logging.info(
-                "正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path)
-            )
+            logging.info("正在转换有道云笔记「{}」中的有道云图片链接...".format(file_path))
         for image_url in image_urls:
             try:
                 image_path = self._get_new_image_path(file_path, image_url)
             except Exception as error:
                 logging.info(
-                    "下载图片「{}」可能失败！请检查图片！错误提示：{}".format(
-                        image_url, format(error)
-                    )
+                    "下载图片「{}」可能失败！请检查图片！错误提示：{}".format(image_url, format(error))
                 )
             if image_url == image_path:
                 continue
@@ -73,9 +69,7 @@ class ImagePull:
         # 附件
         attach_name_and_url_list = REGEX_ATTACH.findall(content)
         if len(attach_name_and_url_list) > 0:
-            logging.info(
-                "正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path)
-            )
+            logging.info("正在转换有道云笔记「{}」中的有道云附件链接...".format(file_path))
         for attach_name_and_url in attach_name_and_url_list:
             attach_url = attach_name_and_url[1]
             attach_path = self._download_ydnote_url(
@@ -128,9 +122,7 @@ class ImagePull:
         try:
             response = self.youdaonote_api.http_get(url)
         except requests.exceptions.ProxyError as err:
-            error_msg = "网络错误，「{}」下载失败。错误提示：{}".format(
-                url, format(err)
-            )
+            error_msg = "网络错误，「{}」下载失败。错误提示：{}".format(url, format(err))
             logging.info(error_msg)
             return ""
 
@@ -176,9 +168,15 @@ class ImagePull:
 
         # 请求后的真实的 URL 中才有东西
         realUrl = parse.parse_qs(urlparse(response.url).query)
-        
+
         if realUrl:
-            filename = realUrl.get("filename")[0] if realUrl.get("filename") else realUrl.get("download")[0] if realUrl.get("download") else ""
+            filename = (
+                realUrl.get("filename")[0]
+                if realUrl.get("filename")
+                else realUrl.get("download")[0]
+                if realUrl.get("download")
+                else ""
+            )
             file_name = file_basename + filename
         else:
             file_name = "".join([file_basename, file_suffix])
@@ -187,9 +185,7 @@ class ImagePull:
         try:
             with open(local_file_path, "wb") as f:
                 f.write(response.content)  # response.content 本身就为字节类型
-            logging.info(
-                "已将{}「{}」转换为「{}」".format(file_type, url, local_file_path)
-            )
+            logging.info("已将{}「{}」转换为「{}」".format(file_type, url, local_file_path))
         except:
             error_msg = "{} {}有误！".format(url, file_type)
             logging.info(error_msg)
@@ -228,9 +224,7 @@ class ImageUpload(object):
         try:
             smfile = youdaonote_api.http_get(image_url).content
         except:
-            error_msg = "下载「{}」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常加载".format(
-                image_url
-            )
+            error_msg = "下载「{}」失败！图片可能已失效，可浏览器登录有道云笔记后，查看图片是否能正常加载".format(image_url)
             return "", error_msg
         files = {"smfile": smfile}
         upload_api_url = "https://sm.ms/api/v2/upload"
@@ -263,7 +257,9 @@ class ImageUpload(object):
         if res_json.get("code") == "flood":
             return "", error_msg
 
-        error_msg = "上传「{}」到 SM.MS 失败，请检查图片 url 或 smms_secret_token（{}）是否正确！将下载图片到本地".format(
-            image_url, smms_secret_token
+        error_msg = (
+            "上传「{}」到 SM.MS 失败，请检查图片 url 或 smms_secret_token（{}）是否正确！将下载图片到本地".format(
+                image_url, smms_secret_token
+            )
         )
         return "", error_msg
