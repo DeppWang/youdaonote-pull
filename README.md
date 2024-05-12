@@ -34,7 +34,7 @@ cd youdaonote-pull
 
 #### 2、安装 [Python3](https://www.python.org/downloads/)、安装依赖模块（包）
 
-- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装 Python3，测试是否安装成功
+- 可根据 [廖雪峰 Python 教程](https://www.liaoxuefeng.com/wiki/1016959663602400/1016959856222624) 安装，最好安装 Python 3.11.7 (可使用 pyenv)，最新版 Python 下载会有[此错误](https://github.com/DeppWang/youdaonote-pull/issues/137)， 测试是否安装成功
 
 ```shell
 python3 --version  # macOS/Linux
