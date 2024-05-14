@@ -174,20 +174,23 @@ class JsonConvert(object):
         :return
             text(text): 文本内容
         """
-        text = ""
+        all_text = ""
         # 5 内容
         five_contents = content.get("5")
         # 判断是否是普通文本
         if five_contents:
             seven_contents = five_contents[0].get("7")
-            if seven_contents:
+            if not seven_contents:
+                return all_text
+            for seven_content in seven_contents:
                 # 8 文本
-                text = seven_contents[0].get("8")
+                text = seven_content.get("8")
                 # 9 文本属性
-                text_attrs = seven_contents[0].get("9")
+                text_attrs = seven_content.get("9")
                 if text and text_attrs:
                     text = self._convert_text_attribute(text, text_attrs)
-        return text
+                all_text += text
+        return all_text
 
     def _convert_text_attribute(self, text: str, text_attrs: list):
         """文本属性"""

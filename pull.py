@@ -363,7 +363,7 @@ if __name__ == "__main__":
         sys.exit(1)
     # 链接错误等异常
     except Exception as err:
-        logging.info("其他错误：", format(err))
+        logging.info("Cookies 可能已过期！其他错误：", format(err))
         traceback.print_exc()
         logging.info("已终止执行")
         sys.exit(1)
