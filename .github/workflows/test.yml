@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-pip-pre-commit-${{ hashFiles('**/.pre-commit-config.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pip-pre-commit
-      - name: pre-commit
+      - name: pre-commit 
         run: |
           pip install -U pre-commit
           pre-commit install --install-hooks
