@@ -1,5 +1,5 @@
 ---
-name: issue template
+name: issue 模版
 about: " issue 格式"
 title: ''
 labels: ''
