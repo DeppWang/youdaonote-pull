@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-pip-pre-commit-${{ hashFiles('**/.pre-commit-config.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pip-pre-commit
-      - name: pre-commit
+      - name: pre-commit # 只需要安装 pre-commit，不需要安装 requirements.txt
         run: |
           pip install -U pre-commit
           pre-commit install --install-hooks
