@@ -154,7 +154,7 @@ class YoudaoNotePull(object):
         if youdao_file_suffix == MARKDOWN_SUFFIX:
             file_type = FileType.MARKDOWN
             return file_type
-        elif youdao_file_suffix == ".note" or youdao_file_suffix == ".clip":
+        elif youdao_file_suffix == ".note" or youdao_file_suffix == ".clip" or youdao_file_suffix == "":
             response = self.youdaonote_api.get_file_by_id(file_id)
             # 2、如果文件以 `<?xml` 开头
             if response.content[:5] == b"<?xml":
