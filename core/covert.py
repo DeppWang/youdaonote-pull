@@ -212,6 +212,8 @@ class JsonConvert(object):
         one_five_contents = content.get("5")
         if one_five_contents:
             for one_five_content in one_five_contents:
+                # 3 高亮块
+                three_content = one_five_content.get("3")
                 # 包含 6 和 7
                 two_five_contents = one_five_content.get("5")
                 # 文本类型
@@ -236,6 +238,10 @@ class JsonConvert(object):
                         text = f"[{source_text}]({hf})"
                     else:
                         text = ""
+                # 如果是高亮块
+                elif three_content and two_five_contents:
+                    source_text = self._get_common_text(one_five_content)
+                    text = "```\r\n{text}\r\n```".format(text=source_text)
                 else:
                     text = ""
                 if text:
