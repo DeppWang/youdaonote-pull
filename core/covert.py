@@ -212,8 +212,6 @@ class JsonConvert(object):
         one_five_contents = content.get("5")
         if one_five_contents:
             for one_five_content in one_five_contents:
-                # 3 高亮块
-                three_content = one_five_content.get("3")
                 # 包含 6 和 7
                 two_five_contents = one_five_content.get("5")
                 # 文本类型
@@ -238,10 +236,6 @@ class JsonConvert(object):
                         text = f"[{source_text}]({hf})"
                     else:
                         text = ""
-                # 如果是高亮块
-                elif three_content and two_five_contents:
-                    source_text = self._get_common_text(one_five_content)
-                    text = "```\r\n{text}\r\n```".format(text=source_text)
                 else:
                     text = ""
                 if text:
@@ -276,12 +270,21 @@ class JsonConvert(object):
         code_block = ""
         for code in codes:
             text = self._get_common_text(code)
-            if text:
-                code_block += text + "\n"
+            code_block += text + "\n"
 
         return "```{language}\r\n{code_block}```".format(
             language=language, code_block=code_block
         )
+
+    def convert_la_func(self, content):
+        """高亮块"""
+        codes: list = content.get("5")
+        code_block = ""
+        for code in codes:
+            text = self._get_common_text(code)
+            code_block += text + "\n"
+
+        return "```\r\n{code_block}```".format(code_block=code_block)
 
     def convert_q_func(self, content):
         """引用"""
