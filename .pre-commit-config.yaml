@@ -14,4 +14,4 @@ repos:
     hooks:
     - id: flake8
       types: [python]
-      args: ["--max-line-length", "120", "--ignore", "E501,E722,W291,E402,E203,F541"]
+      args: ["--max-line-length", "120", "--ignore", "E501,E722,W291,W503,E402,E203,F541"]
