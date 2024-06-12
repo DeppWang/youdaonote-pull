@@ -278,13 +278,13 @@ class JsonConvert(object):
 
     def convert_la_func(self, content):
         """高亮块"""
-        codes: list = content.get("5")
-        code_block = ""
-        for code in codes:
-            text = self._get_common_text(code)
-            code_block += text + "\n"
+        lines: list = content.get("5")
+        highlight_block = ""
+        for line in lines:
+            text = self._get_common_text(line)
+            highlight_block += text + "\n"
 
-        return "```\r\n{code_block}```".format(code_block=code_block)
+        return "```\r\n{highlight_block}```".format(highlight_block=highlight_block)
 
     def convert_q_func(self, content):
         """引用"""
