@@ -6,3 +6,4 @@ cookies.json
 __pycache__
 test-pull
 logs
+.vscode
