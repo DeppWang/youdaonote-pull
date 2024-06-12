@@ -1,6 +1,18 @@
 import json
+import os
+import sys
 
 import requests
+
+
+def get_script_directory():
+    """获取脚本所在的目录"""
+    if getattr(sys, "frozen", False):
+        # 如果是打包后的可执行文件
+        return os.path.dirname(sys.executable)
+    else:
+        # 如果是普通脚本
+        return "."
 
 
 class YoudaoNoteApi(object):
@@ -37,8 +49,11 @@ class YoudaoNoteApi(object):
             "sec-ch-ua-mobile": "?0",
             "sec-ch-ua-platform": '"macOS"',
         }
-
-        self.cookies_path = cookies_path if cookies_path else "cookies.json"
+        self.cookies_path = (
+            cookies_path
+            if cookies_path
+            else os.path.join(get_script_directory(), "cookies.json")
+        )
         self.cstk = None
 
     def login_by_cookies(self) -> str:
