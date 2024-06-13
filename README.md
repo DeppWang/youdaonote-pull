@@ -137,7 +137,7 @@ pip install -r requirements.txt
 }
 ```
 
-* `local_dir`：选填，本地存放导出文件的文件夹，不填则默认为当前文件夹
+* `local_dir`：选填，本地存放导出文件的文件夹（绝对路径），不填则默认为当前文件夹
 * `ydnote_dir`：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * `smms_secret_token`：选填， [SM.MS](https://sm.ms) 的 `Secret Token`（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（`youdaonote-images` 文件夹），`Markdown` 中使用本地链接
 * `is_relative_path`：选填，在 MD 文件中图片 / 附件是否采用相对路径展示，不填或 false 为绝对路径，true 为相对路径    
