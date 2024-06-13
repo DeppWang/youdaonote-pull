@@ -18,6 +18,7 @@ from win32_setctime import setctime
 
 from core import log
 from core.api import YoudaoNoteApi
+from core.common import get_script_directory
 from core.covert import YoudaoNoteConvert
 from core.image import ImagePull
 
@@ -39,16 +40,6 @@ class FileActionEnum(Enum):
     CONTINUE = "跳过"
     ADD = "新增"
     UPDATE = "更新"
-
-
-def get_script_directory():
-    """获取脚本所在的目录"""
-    if getattr(sys, "frozen", False):
-        # 如果是打包后的可执行文件
-        return os.path.dirname(sys.executable)
-    else:
-        # 如果是普通脚本
-        return os.path.dirname(os.path.abspath(__file__))
 
 
 class YoudaoNotePull(object):
@@ -103,7 +94,7 @@ class YoudaoNotePull(object):
         if not local_dir:
             add_dir = test_default_dir if test_default_dir else "youdaonote"
             # 兼容 Windows 系统，将路径分隔符（\\）替换为 /
-            local_dir = os.path.join(os.getcwd(), add_dir).replace("\\", "/")
+            local_dir = os.path.join(get_script_directory(), add_dir).replace("\\", "/")
 
         # 如果指定的本地文件夹不存在，创建文件夹
         if not os.path.exists(local_dir):
