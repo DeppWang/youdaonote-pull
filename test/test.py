@@ -292,16 +292,16 @@ class YoudaoNotePullTest(unittest.TestCase):
         """
         youdaonote_pull = YoudaoNotePull()
         test_default_dir = "test/test_youdaonote"
-        local_dir_expect = os.path.join(os.getcwd(), test_default_dir).replace(
-            "\\", "/"
-        )
+        # local_dir_expect = os.path.join(os.getcwd(), test_default_dir).replace(
+        #     "\\", "/"
+        # )
 
         # 当不指定文件夹时。期待：当前目录新增 youdaonote 目录
         local_dir, error_msg = youdaonote_pull._check_local_dir(
             local_dir="", test_default_dir=test_default_dir
         )
-        self.assertEqual(local_dir, local_dir_expect)
-        self.assertTrue(os.path.exists(local_dir_expect))
+        self.assertEqual(local_dir, "./test/test_youdaonote")
+        self.assertTrue(os.path.exists(test_default_dir))
         self.assertEqual(error_msg, "")
 
         # 当指定文件不存在时。期待：创建文件夹
@@ -311,13 +311,13 @@ class YoudaoNotePullTest(unittest.TestCase):
 
         # 当指定文件夹存在时。期待：正常
         local_dir, error_msg = youdaonote_pull._check_local_dir(
-            local_dir=local_dir_expect
+            local_dir=test_default_dir
         )
-        self.assertEqual(local_dir, local_dir_expect)
+        self.assertEqual(local_dir, test_default_dir)
         self.assertEqual(error_msg, "")
 
         try:
-            os.removedirs(local_dir_expect)
+            os.removedirs(test_default_dir)
         except:
             pass
 
