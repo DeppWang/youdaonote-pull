@@ -10,6 +10,10 @@
 - 由于「笔记」类型文件下载后默认为 `Xml` 或者是 `Json` 格式，不是正常笔记内容，**默认将其转换为 `Markdown` 格式**
 - 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
 
+## 非技术人员使用
+
+如果你是非技术人员，也提供[可直接本地运行程序](https://github.com/DeppWang/youdaonote-pull/releases/)，不需要安装 Git、Python 和下载代码。具体使用教程请看[更简单的「有道云笔记」导出与备份](https://depp.wang/2024/simple-youdaonote-pull/)
+
 ## 使用步骤
 
 - [视频教程](https://www.bilibili.com/video/BV11F411F7vG/?share_source=copy_web&vd_source=8bd019082f4e243f4bb5c3b6fabf4dd8)
@@ -85,9 +89,11 @@ pip install -r requirements.txt
 }
 ```
 
-由于有道云笔记登录升级，**目前脚本不能使用账号密码登录，只能使用 `Cookies` 登录。**
+由于有道云笔记登录升级，加了图形验证吗。**目前脚本不能使用账号密码登录，只能使用 `Cookies` 登录。**
 
-获取 `Cookies` 方式：
+你可以通过安装插件「[Cookie-copy](https://chromewebstore.google.com/detail/cookie-copy/igfcbpdchlohbhjdfbcimhbpajlglaac?hl=zh-CN&utm_source=ext_sidebar)」快速复制 Cookie。
+
+或者直接在浏览器 DevTools 中获取 `Cookies`：
 
 1. 在浏览器如 Chrome 中使用账号密码或者其他方式登录有道云笔记
 2. 打开 DevTools (F12)，Network 下找「主」请求（一般是第一个），再找 `Cookie`
