@@ -1,5 +1,5 @@
 ---
-name: Issue 模版
+name: 提 Issue 请使用这个模版
 about: " Issue 格式"
 title: ''
 labels: ''
