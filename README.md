@@ -217,7 +217,7 @@ python pull.py   # Windows
 
 发现有道云笔记最新的 Mac 客户端和网页端去除了导出所有笔记的功能！这是什么逻辑，怕用户跑了么。所以在原来 pull 脚本的基础上修改得到此脚本。
 
-现在我使用 [Obsidian](https://obsidian.md/) + GitHub + [Working Copy](https://workingcopyapp.com/) 实现自动同步笔记和手机查看编辑的功能，很香。[使用教程](https://catcoding.me/p/obsidian-for-programmer/)
+现在我使用 [Obsidian](https://obsidian.md/) + iCloud + 1Writer 实现自动同步笔记和手机查看编辑的功能，很香。[使用教程](https://depp.wang/2024/my-obsidian-experience/)
 
 ## 贡献
 
