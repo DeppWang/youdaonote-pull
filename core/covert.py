@@ -302,7 +302,8 @@ class JsonConvert(object):
         text = self._get_common_text(content=content)
         is_ordered = content.get("4").get("lt")
         if is_ordered == "unordered":
-            return "- {text}".format(text=text)
+            level = content.get("4").get("ll")
+            return "\t" * (level - 1) + "- {text}".format(text=text)
         elif is_ordered == "ordered":
             # 有序列表都设置为 1，有些 MD 编辑自动转为有序列表
             return "1. {text}".format(text=text)
