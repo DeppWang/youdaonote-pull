@@ -221,10 +221,15 @@ class JsonConvert(object):
 
                 # 获取文本和属性
                 if seven_contents and not two_five_contents:
-                    text = seven_contents[0].get("8")
-                    text_attrs = seven_contents[0].get("9")
-                    if text and text_attrs:
-                        text = self._convert_text_attribute(text, text_attrs)
+                    text = ""
+                    for seven_content in seven_contents:
+                        # 8 文本
+                        raw = seven_content.get("8")
+                        # 9 文本属性
+                        text_attrs = seven_content.get("9")
+                        if raw and text_attrs:
+                            raw = self._convert_text_attribute(raw, text_attrs)
+                        text += raw
 
                 # 链接类型
                 elif text_type == "li" and two_five_contents:
