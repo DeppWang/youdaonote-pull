@@ -217,6 +217,17 @@ class YoudaoNoteCovert(unittest.TestCase):
         # CRLF => \r\n, LF => \n
         self.assertEqual(content.replace("\r\n", "\n"), content_target)
 
+    def test_covert_json_to_markdown_single_line(self):
+        """
+        测试 json 转换 markdown 单行富文本
+        python test.py YoudaoNoteCovert.test_covert_json_to_markdown_single_line
+        """
+        line = YoudaoNoteConvert._covert_json_to_markdown_content("test/test-convert.json")
+        with open("test/test-convert.md", "rb") as f:
+            target = f.read().decode()
+        # CRLF => \r\n, LF => \n
+        self.assertEqual(line.replace("\r\n", "\n"), target)
+
 
 class YoudaoNotePullTest(unittest.TestCase):
     TEST_CONFIG_PATH = "test_config.json"
