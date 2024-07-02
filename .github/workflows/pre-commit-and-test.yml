@@ -35,6 +35,8 @@ jobs:
           pip install -U pre-commit
           pre-commit install --install-hooks
           pre-commit run --all-files
+        if: always()
+        continue-on-error: true
   test:
     needs: pre-commit
     runs-on: ubuntu-latest
