@@ -1,5 +1,3 @@
-最近在玩 [X(Twitter)](https://twitter.com/deppwang1)，欢迎关注！
-
 # youdaonote-pull
 
 现在有道云笔记不能导出笔记，迁移笔记很麻烦。此脚本可将所有笔记下载到本地。脚本完全本地运行，你不用担心数据安全。
