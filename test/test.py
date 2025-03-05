@@ -244,6 +244,7 @@ class YoudaoNotePullTest(unittest.TestCase):
                 "local_dir": "",
                 "ydnote_dir": "",
                 "smms_secret_token": "",
+                "exclude_dirs",
                 "is_relative_path": true
             }
             """

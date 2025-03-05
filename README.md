@@ -137,6 +137,7 @@ pip install -r requirements.txt
     "local_dir": "",
     "ydnote_dir": "",
     "smms_secret_token": "",
+    "exclude_dirs": [],
     "is_relative_path": true
 }
 ```
@@ -144,6 +145,7 @@ pip install -r requirements.txt
 * `local_dir`：选填，本地存放导出文件的文件夹（绝对路径），不填则默认为当前文件夹
 * `ydnote_dir`：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * `smms_secret_token`：选填， [SM.MS](https://sm.ms) 的 `Secret Token`（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（`youdaonote-images` 文件夹），`Markdown` 中使用本地链接
+* `exclude_dirs`：选填，指定不导出的文件夹的名称的一部分，不填则默认不排除文件夹，比如笔记里的文件夹名称为 `我的手机`，则填写 `"的手机"` 也可以
 * `is_relative_path`：选填，在 MD 文件中图片 / 附件是否采用相对路径展示，不填或 false 为绝对路径，true 为相对路径    
 
 示例：
@@ -154,7 +156,8 @@ pip install -r requirements.txt
 {
     "local_dir": "/Users/deppwang/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
-    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
+    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample",
+    "exclude_dirs": ["我的手机"],
 }
 ```
 
@@ -164,7 +167,8 @@ pip install -r requirements.txt
 {
     "local_dir": "D:/Documents/youdaonote-pull/test",
     "ydnote_dir": "",
-    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
+    "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample",
+    "exclude_dirs": ["我的手机"],
 }
 ```
 

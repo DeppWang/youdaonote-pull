@@ -52,6 +52,7 @@ class YoudaoNotePull(object):
         self.youdaonote_api = None
         self.smms_secret_token = None
         self.is_relative_path = None  # 是否使用相对路径
+        self.exclude_dirs = None  # 需要排除的目录
 
     def _covert_config(self, config_path=None) -> Tuple[dict, str]:
         """
@@ -76,11 +77,11 @@ class YoudaoNotePull(object):
                 "请检查「config.json」格式是否为 utf-8 格式的 json！建议使用 Sublime 编辑「config.json」",
             )
 
-        key_list = ["local_dir", "ydnote_dir", "smms_secret_token", "is_relative_path"]
-        if key_list != list(config_dict.keys()):
+        key_list = {"local_dir", "ydnote_dir", "exclude_dirs", "smms_secret_token", "is_relative_path"}
+        if key_list != set(config_dict.keys()):
             return (
                 {},
-                "请检查「config.json」的 key 是否分别为 local_dir, ydnote_dir, smms_secret_token, is_relative_path",
+                "请检查「config.json」的 key 是否分别为 local_dir, ydnote_dir, exclude_dirs, smms_secret_token, is_relative_path",
             )
         return config_dict, ""
 
@@ -137,6 +138,7 @@ class YoudaoNotePull(object):
         if error_msg:
             return "", error_msg
         self.root_local_dir = local_dir
+        self.exclude_dirs = config_dict['exclude_dirs']
         self.youdaonote_api = YoudaoNoteApi()
         error_msg = self.youdaonote_api.login_by_cookies()
         logging.info("本次使用 Cookies 登录")
@@ -224,17 +226,26 @@ class YoudaoNotePull(object):
             raise KeyError("有道云笔记修改了接口地址，此脚本暂时不能使用！请提 issue")
         for entry in entries:
             file_entry = entry["fileEntry"]
-            id = file_entry["id"]
+            dir_id = file_entry["id"]
             name = file_entry["name"]
             if file_entry["dir"]:
                 sub_dir = os.path.join(local_dir, name).replace("\\", "/")
+                # 排除不需要导出的文件夹（一级目录）
+                is_excluded = False
+                for item in self.exclude_dirs:
+                    if name.find(item) != -1:
+                        logging.info("文件夹 [%s] 已排除，不需要导出", name)
+                        is_excluded = True
+                        break
+                if is_excluded:
+                    continue
                 if not os.path.exists(sub_dir):
                     os.mkdir(sub_dir)
-                self.pull_dir_by_id_recursively(id, sub_dir)
+                self.pull_dir_by_id_recursively(dir_id, sub_dir)
             else:
                 modify_time = file_entry["modifyTimeForSort"]
                 create_time = file_entry["createTimeForSort"]
-                self._add_or_update_file(id, name, local_dir, modify_time, create_time)
+                self._add_or_update_file(dir_id, name, local_dir, modify_time, create_time)
 
     def _add_or_update_file(
         self, file_id, file_name, local_dir, modify_time, create_time
