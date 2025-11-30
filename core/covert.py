@@ -76,12 +76,14 @@ class XmlElementConvert(object):
     def convert_list_item_func(**kwargs):
         """列表"""
         list_id = kwargs.get("element").attrib["list-id"]
+        level = kwargs.get("element").attrib.get("level", 1)
         is_ordered = kwargs.get("list_item").get(list_id)
         text = kwargs.get("text")
+        indentation = "\t" * (int(level) - 1)
         if is_ordered == "unordered":
-            return "- {text}".format(text=text)
+            return indentation +  "- {text}".format(text=text)
         elif is_ordered == "ordered":
-            return "1. {text}".format(text=text)
+            return indentation +  "1. {text}".format(text=text)
 
     @staticmethod
     def convert_table_func(**kwargs):
@@ -308,13 +310,15 @@ class JsonConvert(object):
         """有序列表和无序列表，有序列表转成无序列表"""
         text = self._get_common_text(content=content)
         is_ordered = content.get("4").get("lt")
+        level = content.get("4").get("ll")
+        indentation = "\t" * (level - 1)
         if is_ordered == "unordered":
             level = content.get("4").get("ll")
-            return "\t" * (level - 1) + "- {text}".format(text=text)
+            return indentation + "- {text}".format(text=text)
         elif is_ordered == "ordered":
             # 有序列表都设置为 1，有些 MD 编辑自动转为有序列表
             level = content.get("4").get("ll")
-            return "\t" * (level - 1) + "1. {text}".format(text=text)
+            return indentation + "1. {text}".format(text=text)
 
     def convert_t_func(self, content):
         """
@@ -391,7 +395,7 @@ class YoudaoNoteConvert(object):
                 continue
             line_content = convert_func(text=text, element=element, list_item=list_item)
             new_content_list.append(line_content)
-        return f"\r\n\r\n".join(new_content_list)  # 换行 1 行
+        return f"\r\n".join(new_content_list)  # 换行
 
     @staticmethod
     def covert_xml_to_markdown(file_path) -> bool:
