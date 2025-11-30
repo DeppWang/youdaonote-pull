@@ -412,9 +412,10 @@ class YoudaoNoteConvert(object):
             return False
 
         new_content = YoudaoNoteConvert._covert_xml_to_markdown_content(file_path)
+        fixed_content = MarkdownFix.fix_markdown_file(new_content)
         os.rename(file_path, new_file_path)
         with open(new_file_path, "wb") as f:
-            f.write(new_content.encode("utf-8"))
+            f.write(fixed_content.encode("utf-8"))
         return True
 
     @staticmethod
@@ -463,7 +464,7 @@ class YoudaoNoteConvert(object):
             os.rename(file_path, new_file_path)
             return False
         new_content = YoudaoNoteConvert._covert_json_to_markdown_content(file_path)
-        fixed_content = MarkdownFix.fix_ordered_list_numbers(new_content)
+        fixed_content = MarkdownFix.fix_markdown_file(new_content)
         with open(new_file_path, "wb") as f:
             f.write(fixed_content.encode("utf-8"))
         # 删除旧文件

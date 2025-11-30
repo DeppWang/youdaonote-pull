@@ -5,6 +5,12 @@ class MarkdownFix(object):
     修复 markdown 文件，转换出来的 markdown 文件可能需要修复
     比如有序列表的编号
     """
+
+    @staticmethod
+    def fix_markdown_file(file_path):
+        fixed_markdown_content = MarkdownFix.fix_ordered_list_numbers(file_path)
+
+        return fixed_markdown_content
     
     @staticmethod
     def fix_ordered_list_numbers(markdown_content):
