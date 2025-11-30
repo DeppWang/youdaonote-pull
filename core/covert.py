@@ -4,6 +4,8 @@ import os
 import xml.etree.ElementTree as ET
 from typing import Tuple
 
+from core.fix import MarkdownFix
+
 MARKDOWN_SUFFIX = ".md"
 
 
@@ -311,7 +313,8 @@ class JsonConvert(object):
             return "\t" * (level - 1) + "- {text}".format(text=text)
         elif is_ordered == "ordered":
             # 有序列表都设置为 1，有些 MD 编辑自动转为有序列表
-            return "1. {text}".format(text=text)
+            level = content.get("4").get("ll")
+            return "\t" * (level - 1) + "1. {text}".format(text=text)
 
     def convert_t_func(self, content):
         """
@@ -337,7 +340,6 @@ class JsonConvert(object):
                 table_line = table_line + table_text + " | "
             table_lines = table_lines + table_line + f"{nl}"
         return table_lines
-
 
 class YoudaoNoteConvert(object):
     """
@@ -441,7 +443,7 @@ class YoudaoNoteConvert(object):
             # 判断是否有内容
             if line_content:
                 new_content_list.append(line_content)
-        return f"\r\n\r\n".join(new_content_list)  # 换行 1 行
+        return f"\r\n".join(new_content_list)  # 换行
 
     @staticmethod
     def covert_json_to_markdown(file_path) -> str:
@@ -457,8 +459,9 @@ class YoudaoNoteConvert(object):
             os.rename(file_path, new_file_path)
             return False
         new_content = YoudaoNoteConvert._covert_json_to_markdown_content(file_path)
+        fixed_content = MarkdownFix.fix_ordered_list_numbers(new_content)
         with open(new_file_path, "wb") as f:
-            f.write(new_content.encode("utf-8"))
+            f.write(fixed_content.encode("utf-8"))
         # 删除旧文件
         if os.path.exists(file_path):
             os.remove(file_path)
