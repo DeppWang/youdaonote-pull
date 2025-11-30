@@ -242,7 +242,11 @@ class JsonConvert(object):
                     four_contents = one_five_content.get("4")
                     if four_contents:
                         hf = four_contents.get("hf")
-                        text = f"[{source_text}]({hf})"
+                        # 如果hf以note://开头，使用[[source_text]]格式
+                        if hf and hf.startswith("note://"):
+                            text = f"[[{source_text}]]"
+                        else:
+                            text = f"[{source_text}]({hf})"
                     else:
                         text = ""
                 else:
