@@ -10,8 +10,10 @@ class MarkdownFix(object):
     def fix_markdown_file(markdown_content):
         # 先修复列表缩进
         fixed_content = MarkdownFix.fix_list_indentation(markdown_content)
-        # 再修复有序列表的编号
+        # 修复有序列表的编号
         fixed_content = MarkdownFix.fix_ordered_list_numbers(fixed_content)
+        # 修复段落间距
+        fixed_content = MarkdownFix.fix_paragraph_spacing(fixed_content)
         
         return fixed_content
     
@@ -160,3 +162,87 @@ class MarkdownFix(object):
                 current_list_stack = []
                 
         return '\n'.join(fixed_lines)
+    
+    @staticmethod
+    def fix_paragraph_spacing(markdown_content):
+        """
+        修复段落间距，在连续的普通文本段落之间添加空行
+        """
+        lines = markdown_content.split('\n')
+        fixed_lines = []
+        
+        in_code_block = False  # 跟踪是否在代码块中
+        
+        for i in range(len(lines)):
+            line = lines[i]
+            
+            # 检查是否进入或退出代码块
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+            
+            fixed_lines.append(line)
+            
+            # 只有不在代码块中时才考虑添加空行
+            if not in_code_block:
+                # 判断是否需要在当前行后添加空行
+                if MarkdownFix._should_add_line_break(lines, i):
+                    fixed_lines.append("")  # 添加空行
+        
+        return '\n'.join(fixed_lines)
+    
+    @staticmethod
+    def _should_add_line_break(lines, current_index):
+        """
+        判断是否需要在当前行后添加空行分隔段落
+        """
+        # 如果是最后一行，不需要添加空行
+        if current_index >= len(lines) - 1:
+            return False
+            
+        current_line = lines[current_index]
+        next_line = lines[current_index + 1]
+        
+        # 如果当前行为空行，不需要再添加空行
+        if not current_line.strip():
+            return False
+            
+        # 如果下一行为空行，说明已经有分隔了，不需要再添加
+        if not next_line.strip():
+            return False
+            
+        # 检查当前行和下一行是否都是普通文本行
+        if (MarkdownFix._is_plain_text_line(current_line) and 
+            MarkdownFix._is_plain_text_line(next_line)):
+            return True
+            
+        return False
+    
+    @staticmethod
+    def _is_plain_text_line(line):
+        """
+        判断一行是否为普通文本（而不是特殊格式）
+        """
+        stripped_line = line.strip()
+        
+        # 空行不是普通文本
+        if not stripped_line:
+            return False
+            
+        # 特殊格式的行不是普通文本
+        special_patterns = [
+            r'^[-*+]\s',           # 无序列表
+            r'^\d+\.\s',           # 有序列表
+            r'^#{1,6}\s',          # 标题
+            r'^!\[.*\]\(.*\)',     # 图片
+            r'^\[.*\]\(.*\)',      # 链接
+            r'^\[\[.*\]\]',        # 内部链接
+            r'^```',               # 代码块开始/结束
+            r'^>',                 # 引用
+            r'^\s*[-*_]{3,}\s*$',  # 分割线
+        ]
+        
+        for pattern in special_patterns:
+            if re.match(pattern, stripped_line):
+                return False
+                
+        return True
