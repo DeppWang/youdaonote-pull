@@ -316,12 +316,10 @@ class JsonConvert(object):
         is_ordered = content.get("4").get("lt")
         level = content.get("4").get("ll")
         indentation = "\t" * (level - 1)
+
         if is_ordered == "unordered":
-            level = content.get("4").get("ll")
             return indentation + "- {text}".format(text=text)
         elif is_ordered == "ordered":
-            # 有序列表都设置为 1，有些 MD 编辑自动转为有序列表
-            level = content.get("4").get("ll")
             return indentation + "1. {text}".format(text=text)
 
     def convert_t_func(self, content):
