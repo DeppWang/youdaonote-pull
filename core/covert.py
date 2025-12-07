@@ -312,7 +312,7 @@ class JsonConvert(object):
 
     def convert_l_func(self, content):
         """有序列表和无序列表，有序列表转成无序列表"""
-        text = self._get_common_text(content=content)
+        text = self.convert_text_func(content=content)
         is_ordered = content.get("4").get("lt")
         level = content.get("4").get("ll")
         indentation = "\t" * (level - 1)
