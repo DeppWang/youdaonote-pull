@@ -12,3 +12,4 @@ dist
 *.spec
 wine
 xiaobai
+.DS_store

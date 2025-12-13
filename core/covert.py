@@ -4,6 +4,8 @@ import os
 import xml.etree.ElementTree as ET
 from typing import Tuple
 
+from core.fix import MarkdownFix
+
 MARKDOWN_SUFFIX = ".md"
 
 
@@ -74,12 +76,14 @@ class XmlElementConvert(object):
     def convert_list_item_func(**kwargs):
         """列表"""
         list_id = kwargs.get("element").attrib["list-id"]
+        level = kwargs.get("element").attrib.get("level", 1)
         is_ordered = kwargs.get("list_item").get(list_id)
         text = kwargs.get("text")
+        indentation = "\t" * (int(level) - 1)
         if is_ordered == "unordered":
-            return "- {text}".format(text=text)
+            return indentation +  "- {text}".format(text=text)
         elif is_ordered == "ordered":
-            return "1. {text}".format(text=text)
+            return indentation +  "1. {text}".format(text=text)
 
     @staticmethod
     def convert_table_func(**kwargs):
@@ -238,7 +242,11 @@ class JsonConvert(object):
                     four_contents = one_five_content.get("4")
                     if four_contents:
                         hf = four_contents.get("hf")
-                        text = f"[{source_text}]({hf})"
+                        # 如果hf以note://开头，使用[[source_text]]格式，这样可以尽可能保持笔记的引用关系
+                        if hf and hf.startswith("note://"):
+                            text = f"[[{source_text}]]"
+                        else:
+                            text = f"[{source_text}]({hf})"
                     else:
                         text = ""
                 else:
@@ -303,15 +311,16 @@ class JsonConvert(object):
         return text
 
     def convert_l_func(self, content):
-        """有序列表和无序列表，有序列表转成无序列表"""
-        text = self._get_common_text(content=content)
+        """有序列表和无序列表"""
+        text = self.convert_text_func(content=content)
         is_ordered = content.get("4").get("lt")
+        level = content.get("4").get("ll")
+        indentation = "\t" * (level - 1)
+
         if is_ordered == "unordered":
-            level = content.get("4").get("ll")
-            return "\t" * (level - 1) + "- {text}".format(text=text)
+            return indentation + "- {text}".format(text=text)
         elif is_ordered == "ordered":
-            # 有序列表都设置为 1，有些 MD 编辑自动转为有序列表
-            return "1. {text}".format(text=text)
+            return indentation + "1. {text}".format(text=text)
 
     def convert_t_func(self, content):
         """
@@ -337,7 +346,6 @@ class JsonConvert(object):
                 table_line = table_line + table_text + " | "
             table_lines = table_lines + table_line + f"{nl}"
         return table_lines
-
 
 class YoudaoNoteConvert(object):
     """
@@ -389,7 +397,7 @@ class YoudaoNoteConvert(object):
                 continue
             line_content = convert_func(text=text, element=element, list_item=list_item)
             new_content_list.append(line_content)
-        return f"\r\n\r\n".join(new_content_list)  # 换行 1 行
+        return f"\r\n".join(new_content_list)  # 换行
 
     @staticmethod
     def covert_xml_to_markdown(file_path) -> bool:
@@ -406,9 +414,10 @@ class YoudaoNoteConvert(object):
             return False
 
         new_content = YoudaoNoteConvert._covert_xml_to_markdown_content(file_path)
+        fixed_content = MarkdownFix.fix_markdown_file(new_content)
         os.rename(file_path, new_file_path)
         with open(new_file_path, "wb") as f:
-            f.write(new_content.encode("utf-8"))
+            f.write(fixed_content.encode("utf-8"))
         return True
 
     @staticmethod
@@ -441,7 +450,7 @@ class YoudaoNoteConvert(object):
             # 判断是否有内容
             if line_content:
                 new_content_list.append(line_content)
-        return f"\r\n\r\n".join(new_content_list)  # 换行 1 行
+        return f"\r\n".join(new_content_list)  # 换行
 
     @staticmethod
     def covert_json_to_markdown(file_path) -> str:
@@ -457,8 +466,9 @@ class YoudaoNoteConvert(object):
             os.rename(file_path, new_file_path)
             return False
         new_content = YoudaoNoteConvert._covert_json_to_markdown_content(file_path)
+        fixed_content = MarkdownFix.fix_markdown_file(new_content)
         with open(new_file_path, "wb") as f:
-            f.write(new_content.encode("utf-8"))
+            f.write(fixed_content.encode("utf-8"))
         # 删除旧文件
         if os.path.exists(file_path):
             os.remove(file_path)
