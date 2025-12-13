@@ -242,7 +242,7 @@ class JsonConvert(object):
                     four_contents = one_five_content.get("4")
                     if four_contents:
                         hf = four_contents.get("hf")
-                        # 如果hf以note://开头，使用[[source_text]]格式
+                        # 如果hf以note://开头，使用[[source_text]]格式，这样可以尽可能保持笔记的引用关系
                         if hf and hf.startswith("note://"):
                             text = f"[[{source_text}]]"
                         else:
@@ -311,7 +311,7 @@ class JsonConvert(object):
         return text
 
     def convert_l_func(self, content):
-        """有序列表和无序列表，有序列表转成无序列表"""
+        """有序列表和无序列表"""
         text = self.convert_text_func(content=content)
         is_ordered = content.get("4").get("lt")
         level = content.get("4").get("ll")
