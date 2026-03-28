@@ -72,7 +72,7 @@ class YoudaoNoteApi(object):
         :return: cookies
         """
         with open(self.cookies_path, "rb") as f:
-            json_str = f.read().decode("utf-8")
+            json_str = f.read().decode("utf-8-sig")
 
         try:
             cookies_dict = json.loads(json_str)  # 将字符串转换为字典

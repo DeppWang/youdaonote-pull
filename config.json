@@ -2,6 +2,16 @@
     "local_dir": "",
     "ydnote_dir": "",
     "smms_secret_token": "",
-    "is_relative_path": true
+    "is_relative_path": true,
+    "image_uploader": "local",
+    "picgo_config_path": "",
+    "aliyun_oss": {
+        "endpoint": "",
+        "bucket": "",
+        "access_key_id": "",
+        "access_key_secret": "",
+        "path": "",
+        "custom_domain": "",
+        "use_https": true
+    }
 }
-

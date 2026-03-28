@@ -6,7 +6,9 @@
 
 - 可将所有笔记（文件）按原格式下载到本地
 - 由于「笔记」类型文件下载后默认为 `Xml` 或者是 `Json` 格式，不是正常笔记内容，**默认将其转换为 `Markdown` 格式**
-- 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms)**
+- 由于有道云笔记图床图片不能在有道云笔记外显示，**默认将其下载到本地，或指定上传到 [SM.MS](https://sm.ms) 或阿里云 OSS**
+- 支持从本地 PicGo 配置读取 SM.MS / 阿里云 OSS 配置
+- 提供 tkinter 配置 UI，减少手改 `config.json`
 
 ## 非技术人员使用
 
@@ -130,6 +132,27 @@ pip install -r requirements.txt
 
 #### 4、设置脚本参数配置文件 `config.json`
 
+##### 方式一：使用 UI 配置（推荐）
+
+```shell
+python3 pull.py --ui  # macOS/Linux
+python pull.py --ui   # Windows
+```
+
+![UI](doc/UI.png)
+
+UI 支持：
+- 选择导出目录
+- 设置要导出的有道云顶层目录
+- Cookie 配置与测试
+- 选择图片处理方式（本地 / SM.MS / 阿里云 OSS）
+- 录入 SM.MS Token
+- 录入阿里云 OSS 配置
+- 读取默认 PicGo 配置
+- 手动选择 PicGo 的配置文件导入
+
+##### 方式二：直接编辑 `config.json`
+
 建议使用 [Sublime](https://www.sublimetext.com/3) 等三方编辑器编辑 `config.json`，避免编码格式错误
 
 ```json
@@ -137,14 +160,37 @@ pip install -r requirements.txt
     "local_dir": "",
     "ydnote_dir": "",
     "smms_secret_token": "",
-    "is_relative_path": true
+    "is_relative_path": true,
+    "image_uploader": "local",
+    "picgo_config_path": "",
+    "aliyun_oss": {
+        "endpoint": "",
+        "bucket": "",
+        "access_key_id": "",
+        "access_key_secret": "",
+        "path": "",
+        "custom_domain": "",
+        "use_https": true
+    }
 }
 ```
+
+参数说明：
 
 * `local_dir`：选填，本地存放导出文件的文件夹（绝对路径），不填则默认为当前文件夹
 * `ydnote_dir`：选填，有道云笔记指定导出文件夹名，不填则导出所有文件
 * `smms_secret_token`：选填， [SM.MS](https://sm.ms) 的 `Secret Token`（注册后 -> Dashboard -> API Token），用于上传笔记中有道云图床图片到 SM.MS 图床，不填则只下载到本地（`youdaonote-images` 文件夹），`Markdown` 中使用本地链接
-* `is_relative_path`：选填，在 MD 文件中图片 / 附件是否采用相对路径展示，不填或 false 为绝对路径，true 为相对路径    
+* `is_relative_path`：选填，在 MD 文件中图片 / 附件是否采用相对路径展示，不填或 false 为绝对路径，true 为相对路径
+* `image_uploader`：选填，图片处理方式，`local`（默认，仅下载到本地）/ `smms`（上传到 SM.MS）/ `aliyun_oss`（上传到阿里云 OSS）
+* `picgo_config_path`：选填，PicGo 配置文件路径，用于导入配置
+* `aliyun_oss`：阿里云 OSS 配置，当 `image_uploader` 为 `aliyun_oss` 时使用
+    * `endpoint`：OSS Endpoint，如 `oss-cn-shanghai.aliyuncs.com`
+    * `bucket`：Bucket 名称
+    * `access_key_id`：AccessKey ID
+    * `access_key_secret`：AccessKey Secret
+    * `path`：上传目录前缀，如 `youdaonote/images`
+    * `custom_domain`：自定义域名，可选
+    * `use_https`：是否使用 HTTPS，默认 true
 
 示例：
 
@@ -167,6 +213,37 @@ pip install -r requirements.txt
     "smms_secret_token": "SGSLk9yWdTe4RenXYqEPWkqVrx0Yexample"
 }
 ```
+
+- 阿里云 OSS
+
+```json
+{
+    "local_dir": "D:/Documents/youdaonote-pull/test",
+    "ydnote_dir": "",
+    "image_uploader": "aliyun_oss",
+    "aliyun_oss": {
+        "endpoint": "oss-cn-shanghai.aliyuncs.com",
+        "bucket": "your-bucket",
+        "access_key_id": "your-access-key-id",
+        "access_key_secret": "your-access-key-secret",
+        "path": "youdaonote/images",
+        "custom_domain": "",
+        "use_https": true
+    }
+}
+```
+
+##### PicGo 配置导入
+
+支持读取常见 PicGo 配置中的：
+- `picBed.smms`
+- `picBed.aliyun`
+
+默认会优先读取 PicGo 当前启用的上传器；如果当前上传器不在支持范围内，会回退到已存在的 SM.MS / 阿里云 OSS 配置。
+
+常见默认路径：
+- Windows: `%APPDATA%\picgo\data.json` 或 `%APPDATA%\PicGo\data.json`
+- macOS / Linux: `~/.picgo/config.json` 或 `~/.picgo/data.json`
 
 ###  二、运行导出脚本
 
@@ -209,7 +286,7 @@ python pull.py   # Windows
 
 - [YoudaoNoteExport](https://github.com/wesley2012/YoudaoNoteExport)
 
-## 出发点 
+## 出发点
 
 原来一直是有道云笔记的忠实用户，后面接触到了「所见即所得」的 [Typora](https://typora.io/)，有点用不惯有道云笔记了，想着有什么法子能电脑本地文件和有道云笔记同步，这样电脑使用 Typora，手机使用有道云笔记。发现有道云笔记有 [Open API](http://note.youdao.com/open/developguide.html) ，打算利用提供的 API，写两个脚本，一个 pull 所有文件到本地，一个 push 本地文件到云笔记。但 API 太难用了，N 多年没更新了，问客服也没更新的意思，开发到最后发现竟然没有 Markdown 文件的接口，醉了。遂放弃。
 
