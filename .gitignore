@@ -12,3 +12,11 @@ dist
 *.spec
 wine
 xiaobai
+
+# Python 虚拟环境
+venv/
+env/
+.venv/
+.env/
+*.pyc
+*.pyo
