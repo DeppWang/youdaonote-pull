@@ -1,4 +1,4 @@
-requests==2.22.0
+requests==2.32.3
 markdownify==0.5.1
 Brotli==1.0.9
 win32-setctime==1.1.0
