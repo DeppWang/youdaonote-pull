@@ -252,9 +252,15 @@ class JsonConvert(object):
         type_name = content.get("4").get("l")
         text = self._get_common_text(content=content)
         if text and type_name:
-            level_str = type_name.replace("h", "")
+            level_str = str(type_name).replace("h", "")
+            # 部分笔记的标题 l 字段被写成 "subtitle" 等非 h{n} 值，
+            # 直接 int() 会抛 ValueError 中断整篇转换
+            if not level_str.isdigit():
+                return text
             level = int(level_str)
-            text = " ".join(["#" * int(level), text])
+            if level > 6:
+                level = 6
+            text = " ".join(["#" * level, text])
         return text
 
     def convert_im_func(self, content):
@@ -422,7 +428,12 @@ class YoudaoNoteConvert(object):
                 logging.error(e)
                 json_data = {}
 
-        json_contents = json_data["5"]  # 3 代表 id，4 代表信息，5 代表内容，6 代表类型
+        # 部分笔记根节点缺少 "5"（内容）字段，直接取会抛 KeyError
+        # 3 代表 id，4 代表信息，5 代表内容，6 代表类型
+        json_contents = json_data.get("5") if isinstance(json_data, dict) else None
+        if not json_contents:
+            logging.error("json 结构缺少内容字段「5」，跳过转换：%s", file_path)
+            return ""
         for content in json_contents:
             type = content.get("6")
             # 根据类型处理，无类型的为普通文本
@@ -434,7 +445,12 @@ class YoudaoNoteConvert(object):
                 if not convert_func:
                     line_content = JsonConvert().convert_text_func(content)
                 else:
-                    line_content = convert_func(content)
+                    try:
+                        line_content = convert_func(content)
+                    except Exception as err:
+                        # 单个内容块结构异常不应中断整篇转换
+                        logging.error("块「%s」转换失败，已跳过：%r", type, err)
+                        continue
             else:
                 line_content = JsonConvert().convert_text_func(content)
 

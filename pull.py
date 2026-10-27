@@ -205,10 +205,17 @@ class YoudaoNotePull(object):
         name = name.replace("\n", "")
         # 去除换行符
         name = name.strip()
+        # 去除 \r \t 等控制字符：Windows 文件名不允许这些字符，
+        # 否则写入时会抛 Permission denied
+        name = re.sub(r"[\x00-\x1f\x7f]", "", name)
         # 替换一些特殊符号
         name = regex_symbol.sub("_", name)
         name = del_regex_symbol.sub("", name)
-        return name
+        # Windows 保留设备名（CON / PRN / AUX / NUL / COM1-9 / LPT1-9）不能作为文件名
+        name = re.sub(
+            r"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.|$)", r"_\1\2", name, flags=re.I
+        )
+        return name or "未命名"
 
     def pull_dir_by_id_recursively(self, dir_id, local_dir):
         """
@@ -226,15 +233,28 @@ class YoudaoNotePull(object):
             file_entry = entry["fileEntry"]
             id = file_entry["id"]
             name = file_entry["name"]
-            if file_entry["dir"]:
-                sub_dir = os.path.join(local_dir, name).replace("\\", "/")
-                if not os.path.exists(sub_dir):
-                    os.mkdir(sub_dir)
-                self.pull_dir_by_id_recursively(id, sub_dir)
-            else:
-                modify_time = file_entry["modifyTimeForSort"]
-                create_time = file_entry["createTimeForSort"]
-                self._add_or_update_file(id, name, local_dir, modify_time, create_time)
+            try:
+                if file_entry["dir"]:
+                    # 目录名同样需要清洗：Windows 非法字符会导致 mkdir 直接
+                    # 抛 FileNotFoundError / WinError 3，中断整个拉取流程
+                    dir_name = self._optimize_file_name(name)
+                    sub_dir = os.path.join(local_dir, dir_name).replace("\\", "/")
+                    try:
+                        os.makedirs(sub_dir, exist_ok=True)
+                    except OSError as mkdir_err:
+                        logging.error("目录「%s」创建失败，已跳过：%s", sub_dir, mkdir_err)
+                        continue
+                    self.pull_dir_by_id_recursively(id, sub_dir)
+                else:
+                    modify_time = file_entry["modifyTimeForSort"]
+                    create_time = file_entry["createTimeForSort"]
+                    self._add_or_update_file(
+                        id, name, local_dir, modify_time, create_time
+                    )
+            except Exception as err:
+                # 单个文件 / 目录失败不应终止整轮拉取
+                logging.error("处理「%s」失败，已跳过：%r", name, err)
+                traceback.print_exc()
 
     def _add_or_update_file(
         self, file_id, file_name, local_dir, modify_time, create_time
@@ -293,10 +313,14 @@ class YoudaoNotePull(object):
                 logging.info("{}「{}」{}".format(file_action.value, local_file_path, tip))
 
             # 本地文件时间设置为有道云笔记的时间
-            if platform.system() == "Windows":
-                setctime(local_file_path, create_time)
-            else:
-                os.utime(local_file_path, (create_time, modify_time))
+            try:
+                if platform.system() == "Windows":
+                    setctime(local_file_path, create_time)
+                else:
+                    os.utime(local_file_path, (create_time, modify_time))
+            except OSError as time_err:
+                # 路径过长等情况下设置时间可能失败，不应影响文件本身
+                logging.debug("设置文件时间失败「%s」：%s", local_file_path, time_err)
 
         except Exception as error:
             logging.info(
@@ -371,7 +395,7 @@ if __name__ == "__main__":
         sys.exit(1)
     # 链接错误等异常
     except Exception as err:
-        logging.info("Cookies 可能已过期！其他错误：", format(err))
+        logging.info("Cookies 可能已过期！其他错误：%r", err)
         traceback.print_exc()
         logging.info("已终止执行")
         sys.exit(1)
