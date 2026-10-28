@@ -21,6 +21,7 @@ from core.api import YoudaoNoteApi
 from core.common import get_script_directory
 from core.covert import YoudaoNoteConvert
 from core.image import ImagePull
+import note2md
 
 __author__ = "Depp Wang (deppwxq@gmail.com)"
 __github__ = "https//github.com/DeppWang/youdaonote-pull"
@@ -107,7 +108,8 @@ class YoudaoNotePull(object):
     def _get_ydnote_dir_id(self, ydnote_dir) -> Tuple[str, str]:
         """
         获取指定有道云笔记指定目录 ID
-        :param ydnote_dir: 指定有道云笔记指定目录
+        :param ydnote_dir: 指定有道云笔记指定目录，支持用 / 分隔的多层路径
+                           如 "Apple/MarsTech./66 逆向与安全/00 DebugUniverse"
         :return: dir_id, error_msg
         """
         root_dir_info = self.youdaonote_api.get_root_dir_info_id()
@@ -117,13 +119,22 @@ class YoudaoNotePull(object):
         if not ydnote_dir:
             return root_dir_id, ""
 
-        dir_info = self.youdaonote_api.get_dir_info_by_id(root_dir_id)
-        for entry in dir_info["entries"]:
-            file_entry = entry["fileEntry"]
-            if file_entry["name"] == ydnote_dir:
-                return file_entry["id"], ""
+        # 支持多层路径，逐层导航
+        path_parts = [p for p in ydnote_dir.replace("\\", "/").split("/") if p]
+        current_dir_id = root_dir_id
+        for part in path_parts:
+            dir_info = self.youdaonote_api.get_dir_info_by_id(current_dir_id)
+            found = False
+            for entry in dir_info["entries"]:
+                file_entry = entry["fileEntry"]
+                if file_entry["name"] == part and file_entry.get("dir", False):
+                    current_dir_id = file_entry["id"]
+                    found = True
+                    break
+            if not found:
+                return "", "有道云笔记指定目录不存在：「{}」".format(part)
 
-        return "", "有道云笔记指定顶层目录不存在"
+        return current_dir_id, ""
 
     def get_ydnote_dir_id(self) -> Tuple[str, str]:
         """
@@ -325,14 +336,20 @@ class YoudaoNotePull(object):
         # 2、如果文件是 note 类型，将其转换为 MarkDown 类型
         if file_type == FileType.XML:
             try:
-                YoudaoNoteConvert.covert_xml_to_markdown(file_path)
+                # 使用 note2md 还原完整样式（颜色/缩进/加粗/换行）
+                md_content = note2md.convert_note_to_md(file_path)
+                # 把 .note 改名成 .md，写入 md 内容
+                os.rename(file_path, local_file_path)
+                with open(local_file_path, "w", encoding="utf-8") as f:
+                    f.write(md_content)
             except ET.ParseError:
                 logging.info("此 note 笔记应该为 17 年以前新建，格式为 html，将转换为 Markdown ...")
                 YoudaoNoteConvert.covert_html_to_markdown(file_path)
             except Exception as e:
-                logging.info("note 笔记转换 MarkDown 失败，将跳过", repr(e))
+                logging.info("note 笔记转换 MarkDown 失败，将跳过: %s", repr(e))
         elif file_type == FileType.JSON:
             YoudaoNoteConvert.covert_json_to_markdown(file_path)
+
 
         # 3、迁移文本文件里面的有道云笔记图片（链接）
         if file_type != FileType.OTHER or youdao_file_suffix == MARKDOWN_SUFFIX:
